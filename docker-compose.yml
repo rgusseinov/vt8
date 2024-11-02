@@ -11,7 +11,7 @@ services:
         condition: service_healthy
     environment:
       - DB_PORT=3306
-      - DB_HOST=db
+      - DB_HOST=localhost # db
       - DB_DATABASE=vt
       - DB_USERNAME=vt_user
       - DB_PASSWORD=777
@@ -42,5 +42,5 @@ services:
     ports:
       - "8002:80"
     environment:
-      - PMA_HOST=db
+      - PMA_HOST=localhost #db
       - PMA_PORT=3306
