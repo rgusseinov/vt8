@@ -1,0 +1,18 @@
+# For local development
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - MYSQL_DATABASE=vt
+      - MYSQL_USER=vt_user
+      - MYSQL_PASSWORD=777
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+    volumes:
+      - "./app:/var/www/html"
+    ports:
+      - "8080:8080"
+    # command: [ "php", "artisan", "serve", "--host=0.0.0.0", "--port=8080" ] # Run container in port 8080
