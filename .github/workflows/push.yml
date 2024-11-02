@@ -51,7 +51,7 @@ jobs:
           file: Dockerfile.production
           push: true
           tags: |
-            ruslan0688/laravel-app-devops:${{ env.ENV_TAG }}
+            ruslan0688/vt8-app-devops:${{ env.ENV_TAG }}
 
       - name: Install Docker Compose
         run: |
