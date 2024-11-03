@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 4.3.2, created on 2024-11-02 18:56:35
+/* Smarty version 4.3.2, created on 2024-11-03 13:10:45
   from '/var/www/html/layouts/v7/modules/Vtiger/dashboards/DashBoardHeader.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '4.3.2',
-  'unifunc' => 'content_672675e310c459_98326038',
+  'unifunc' => 'content_6727765573f643_72409878',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_672675e310c459_98326038 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6727765573f643_72409878 (Smarty_Internal_Template $_smarty_tpl) {
 $_smarty_tpl->_checkPlugins(array(0=>array('file'=>'/var/www/html/vendor/smarty/smarty/libs/plugins/modifier.count.php','function'=>'smarty_modifier_count',),));
 ?>
 

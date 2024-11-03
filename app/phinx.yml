@@ -1,0 +1,22 @@
+paths:
+  migrations: ./migrations
+
+environments:
+  default_migration_table: phinxlog
+  default_database: development
+  production:
+    adapter: mysql
+    host: 127.0.0.1
+    name: vtiger_database_name  # Replace with your vTiger database name
+    user: vtiger_db_user        # Replace with your MySQL username
+    pass: vtiger_db_password    # Replace with your MySQL password
+    port: 3306
+    charset: utf8
+  development:
+    adapter: mysql
+    host: 172.28.170.183
+    name: vt  # Replace with your vTiger database name
+    user: vt_user        # Replace with your MySQL username
+    pass: 777    # Replace with your MySQL password
+    port: 3306
+    charset: utf8

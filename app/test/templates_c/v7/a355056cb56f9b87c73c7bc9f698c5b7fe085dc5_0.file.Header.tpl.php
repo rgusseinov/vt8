@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 4.3.2, created on 2024-11-02 18:10:26
+/* Smarty version 4.3.2, created on 2024-11-03 13:10:26
   from '/var/www/html/layouts/v7/modules/Vtiger/Header.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '4.3.2',
-  'unifunc' => 'content_67266b12441cd8_28652283',
+  'unifunc' => 'content_672776423b0215_49530598',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_67266b12441cd8_28652283 (Smarty_Internal_Template $_smarty_tpl) {
+function content_672776423b0215_49530598 (Smarty_Internal_Template $_smarty_tpl) {
 ?><!DOCTYPE html><html><head><title><?php echo vtranslate($_smarty_tpl->tpl_vars['PAGETITLE']->value,$_smarty_tpl->tpl_vars['QUALIFIED_MODULE']->value);?>
 </title><link rel="SHORTCUT ICON" href="layouts/v7/skins/images/favicon.ico"><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><link type='text/css' rel='stylesheet' href='<?php echo vresource_url("layouts/v7/lib/todc/css/bootstrap.min.css");?>
 '><link type='text/css' rel='stylesheet' href='<?php echo vresource_url("layouts/v7/lib/todc/css/docs.min.css");?>

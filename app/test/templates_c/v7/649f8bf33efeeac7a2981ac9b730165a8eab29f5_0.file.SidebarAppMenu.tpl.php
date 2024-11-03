@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 4.3.2, created on 2024-11-02 18:56:33
+/* Smarty version 4.3.2, created on 2024-11-03 13:10:44
   from '/var/www/html/layouts/v7/modules/Vtiger/partials/SidebarAppMenu.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '4.3.2',
-  'unifunc' => 'content_672675e1ceeea8_79398450',
+  'unifunc' => 'content_672776542cab93_24269290',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_672675e1ceeea8_79398450 (Smarty_Internal_Template $_smarty_tpl) {
+function content_672776542cab93_24269290 (Smarty_Internal_Template $_smarty_tpl) {
 ?>
 <div class="app-menu hide" id="app-menu">
 	<div class="container-fluid">

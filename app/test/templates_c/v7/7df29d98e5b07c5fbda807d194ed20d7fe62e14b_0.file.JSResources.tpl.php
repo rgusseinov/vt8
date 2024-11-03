@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 4.3.2, created on 2024-11-02 18:10:28
+/* Smarty version 4.3.2, created on 2024-11-03 13:10:28
   from '/var/www/html/layouts/v7/modules/Vtiger/JSResources.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '4.3.2',
-  'unifunc' => 'content_67266b142c79d2_37020863',
+  'unifunc' => 'content_67277644702d64_64374501',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_67266b142c79d2_37020863 (Smarty_Internal_Template $_smarty_tpl) {
+function content_67277644702d64_64374501 (Smarty_Internal_Template $_smarty_tpl) {
 echo '<script'; ?>
  type="text/javascript" src="<?php echo vresource_url('layouts/v7/lib/jquery/purl.js');?>
 "><?php echo '</script'; ?>

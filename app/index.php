@@ -11,6 +11,7 @@
 /* echo phpinfo();
 exit;
  */
+
 if (!file_exists("vendor/autoload.php")) {
     echo "Please install composer dependencies.";
     exit;
