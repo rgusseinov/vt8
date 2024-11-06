@@ -275,7 +275,7 @@ class Users_Record_Model extends Vtiger_Record_Model {
 		if($subordinateRoleUsers) {
 			foreach($subordinateRoleUsers as $role=>$users) {
 				foreach($users as $user) {
-					$subordinateUsers[$user] = $privilegesModel->get('userlabel');
+					$subordinateUsers[$user] = $privilegesModel->get('first_name').' '.$privilegesModel->get('last_name');
 				}
 			}
 		}
@@ -399,16 +399,13 @@ class Users_Record_Model extends Vtiger_Record_Model {
 
 			//decode_html - added to handle UTF-8 characters in file names
 			$imageOriginalName = urlencode(decode_html($imageName));
-            if($url) {
-                $url = $site_URL.$url;
-            }
 
 			$imageDetails[] = array(
 					'id' => $imageId,
 					'orgname' => $imageOriginalName,
 					'path' => $imagePath.$imageId,
 					'name' => $imageName,
-                    'url'  => $url
+                    'url'  => $site_URL.$url
 			);
 		}
 		return $imageDetails;
@@ -458,7 +455,7 @@ class Users_Record_Model extends Vtiger_Record_Model {
 		$currentUserRoleModel = Settings_Roles_Record_Model::getInstanceById($this->getRole());
 		$childernRoles = $currentUserRoleModel->getAllChildren();
 		$users = $this->getAllUsersOnRoles($childernRoles);
-        $currentUserDetail = array($this->getId() => $this->get('userlabel'));
+        $currentUserDetail = array($this->getId() => $this->get('first_name').' '.$this->get('last_name'));
         $users = $currentUserDetail + $users;
         return $users;
 	}
@@ -488,12 +485,14 @@ class Users_Record_Model extends Vtiger_Record_Model {
 			for($i=0; $i<$noOfUsers; ++$i) {
 				$userIds[] = $db->query_result($result, $i, 'userid');
 			}
-			$query = 'SELECT id, userlabel FROM vtiger_users WHERE status = ? AND id IN ('.  generateQuestionMarks($userIds).')';
+			$query = 'SELECT id, first_name, last_name FROM vtiger_users WHERE status = ? AND id IN ('.  generateQuestionMarks($userIds).')';
 			$result = $db->pquery($query, array('ACTIVE', $userIds));
 			$noOfUsers = $db->num_rows($result);
 			for($j=0; $j<$noOfUsers; ++$j) {
 				$userId = $db->query_result($result, $j,'id');
-				$subUsers[$userId] = $db->query_result($result, $j, 'userlabel');
+				$firstName = $db->query_result($result, $j, 'first_name');
+				$lastName = $db->query_result($result, $j, 'last_name');
+				$subUsers[$userId] = $firstName .' '.$lastName;
 			}
 		}
 		return $subUsers;
@@ -504,20 +503,13 @@ class Users_Record_Model extends Vtiger_Record_Model {
 	 * @return <Array>
 	 */
 	public function getAccessibleGroups($private="",$module = false) {
-        global $default_charset;
 		//TODO:Remove dependence on $_REQUEST for the module name in the below API
         $accessibleGroups = Vtiger_Cache::get('vtiger-'.$private, 'accessiblegroups');
         if(!$accessibleGroups){
             $accessibleGroups = get_group_array(false, "ACTIVE", "", $private,$module);
             Vtiger_Cache::set('vtiger-'.$private, 'accessiblegroups',$accessibleGroups);
         }
-        if (!empty($accessibleGroups)) {
-            foreach ($accessibleGroups as $groupId => $groupName) {
-                $accessibleGroups[$groupId] = html_entity_decode($groupName, ENT_QUOTES, $default_charset);
-            }
-        }
-
-        return $accessibleGroups;
+		return $accessibleGroups;
 	}
 
 	/**
@@ -653,7 +645,7 @@ class Users_Record_Model extends Vtiger_Record_Model {
 	 * @return string
 	 */
 	function getCurrentUserActivityReminderInSeconds() {
-		$activityReminder = isset($this->reminder_interval) ? $this->reminder_interval : 0;
+		$activityReminder = $this->reminder_interval;
 		$activityReminderInSeconds = '';
 		if($activityReminder != 'None') {
 			preg_match('/([0-9]+)[\s]([a-zA-Z]+)/', $activityReminder, $matches);
@@ -737,7 +729,7 @@ class Users_Record_Model extends Vtiger_Record_Model {
 		return false;
 	}
 	
-	public static function getActiveAdminUsers() {
+	public function getActiveAdminUsers() {
 		$db = PearDatabase::getInstance();
 
 		$sql = 'SELECT id FROM vtiger_users WHERE status=? AND is_admin=?';
@@ -778,7 +770,7 @@ class Users_Record_Model extends Vtiger_Record_Model {
 	 * @param User Ids of user to be deleted and user
 	 * to whom records should be assigned
 	 */
-	public static function deleteUserPermanently($userId, $newOwnerId) {
+	public function deleteUserPermanently($userId, $newOwnerId) {
 		$db = PearDatabase::getInstance();
 
 		$sql = "UPDATE vtiger_crmentity SET smcreatorid=?,smownerid=?,modifiedtime=? WHERE smcreatorid=? AND setype=?";
@@ -805,12 +797,7 @@ class Users_Record_Model extends Vtiger_Record_Model {
 	 * @return <String> - Entity Display Name for the record
 	 */
 	public function getDisplayName() {
-		$userLabel = $this->get('userlabel');
-
-		if (!$userLabel) {
-			$userLabel = getFullNameFromArray($this->getModuleName(),$this->getData());
-		}
-		return $userLabel;
+		return getFullNameFromArray($this->getModuleName(),$this->getData());
 	}
 
 	/**

@@ -32,14 +32,7 @@
 					<table class="config-table input-table">
 						<tbody>
 							<tr>
-								<td><strong>Your Name</strong> <span class="no">*</span></td>
-								<td><input name="myname" class="text" required="true" style="width: 250px;"></td>
-							</tr>
-							<tr>
-								<td><strong>Your Email</strong> 
-								<td><input name="myemail" class="email" required="true" style="width: 250px;"></td>
-							<tr>
-								<td><strong>Your Industry</strong> <span class="no">*</span></td>
+								<td><strong>Please let us know your Industry</strong> <span class="no">*</span></td>
 								<td>
 									<select name="industry" class="select2" required="true" style="width:250px;" placeholder="Choose one...">
 										<option>Accounting</option>
@@ -87,8 +80,12 @@
 							</tr>
 							<tr>
 								<td colspan="2">
-								This information will not be shared. Vtiger will use the email address for sending a monthly newsletter and any product updates.
-								Industry will be used to understand use cases and further improve the product.
+									We collect anonymous information (Country, OS) 
+									to help us improve future versions of Vtiger. 
+									Data about how CRM is used and where it is being used helps 
+									us identify the areas in the product that need to be enhanced. 
+									We use this data to improve your experience with Vtiger. 
+									None of the data collected here can be linked back to an individual.
 								</td>
 							</tr>
 						</tbody>

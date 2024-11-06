@@ -116,7 +116,7 @@ $unWanted=array(
  "modules/FieldFormulas/functional.js"
 );
 
-for($i=0, $len=php7_count($unWanted);$i<=$len;$i++){
+for($i=0;$i<=count($unWanted);$i++){
     if(file_exists($unWanted[$i])){
         unlink($unWanted[$i]);
     }
@@ -198,7 +198,7 @@ for($i=0; $i<$numOfRows; $i++) {
 
                                             $fieldName = $condition['fieldname'];
                                             $fieldNameContents = explode(' ', $fieldName);
-                                            if (php7_count($fieldNameContents) > 1) {
+                                            if (count($fieldNameContents) > 1) {
                                                     $fieldName = '('. $fieldName .')';
                                             }
 
@@ -208,7 +208,7 @@ for($i=0; $i<$numOfRows; $i++) {
                                             }
 
                                             $groupCondition = 'or';
-                                            if ($groupId === $previousConditionGroupId || php7_count($conditions) === 1) {
+                                            if ($groupId === $previousConditionGroupId || count($conditions) === 1) {
                                                     $groupCondition = 'and';
                                             }
 
@@ -293,7 +293,7 @@ for($i=0; $i<$numOfRows; $i++) {
 
                                             $fieldName = $condition['fieldname'];
                                             $fieldNameContents = explode(' ', $fieldName);
-                                            if (php7_count($fieldNameContents) > 1) {
+                                            if (count($fieldNameContents) > 1) {
                                                     $fieldName = '('. $fieldName .')';
                                             }
 
@@ -303,7 +303,7 @@ for($i=0; $i<$numOfRows; $i++) {
                                             }
 
                                             $groupCondition = 'or';
-                                            if ($groupId === $previousConditionGroupId || php7_count($conditions) === 1) {
+                                            if ($groupId === $previousConditionGroupId || count($conditions) === 1) {
                                                     $groupCondition = 'and';
                                             }
 
@@ -483,7 +483,7 @@ for($i=0; $i<$numOfRows; $i++) {
 
                                             $fieldName = $condition['fieldname'];
                                             $fieldNameContents = explode(' ', $fieldName);
-                                            if (php7_count($fieldNameContents) > 1) {
+                                            if (count($fieldNameContents) > 1) {
                                                     $fieldName = '('. $fieldName .')';
                                             }
 
@@ -493,7 +493,7 @@ for($i=0; $i<$numOfRows; $i++) {
                                             }
 
                                             $groupCondition = 'or';
-                                            if ($groupId === $previousConditionGroupId || php7_count($conditions) === 1) {
+                                            if ($groupId === $previousConditionGroupId || count($conditions) === 1) {
                                                     $groupCondition = 'and';
                                             }
 
@@ -705,7 +705,7 @@ echo "<br>Changed timezone column name for mail scanner";
 $result = $adb->pquery('SELECT task_id FROM com_vtiger_workflowtasks WHERE workflow_id IN
                         (SELECT workflow_id FROM com_vtiger_workflows WHERE module_name IN (?, ?))
                         AND task LIKE ?', array('Calendar', 'Events', '%VTSendNotificationTask%'));
-$numOfRows = $adb->num_rows($result);
+$numOfRowas = $adb->num_rows($result);
 for ($i = 0; $i < $numOfRows; $i++) {
         $tm = new VTTaskManager($adb);
         $task = $tm->retrieveTask($adb->query_result($result, $i, 'task_id'));
@@ -1257,7 +1257,7 @@ if(!defined('INSTALLATION_MODE')) {
         $recordModel->set('gateway', $qualifiedModuleName);
 
         $connector = new PBXManager_PBXManager_Connector;
-        foreach (PBXManager_PBXManager_Connector::getSettingsParameters() as $field => $type) {
+        foreach ($connector->getSettingsParameters() as $field => $type) {
             $fieldValue = "";
             if ($field == "webappurl") {
                 $fieldValue = "http://" . $server . ":";

@@ -157,10 +157,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$allUserTags = Vtiger_Tag_Model::getAllUserTags($currentUserModel->getId());
 		$viewer->assign('TAGS_LIST', $tagsList);
 		$viewer->assign('ALL_USER_TAGS', $allUserTags);
-		$appName = $request->get('app');
-		if(!empty($appName)){
-			$viewer->assign('SELECTED_MENU_CATEGORY',$appName);
-		}
+		$viewer->assign('SELECTED_MENU_CATEGORY', 'MARKETING');
 
 		$selectedTabLabel = $request->get('tab_label');
 		$relationId = $request->get('relationId');
@@ -283,7 +280,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		return $headerScriptInstances;
 	}
 
-	function showDetailViewByMode(Vtiger_Request $request) {
+	function showDetailViewByMode($request) {
 		$requestMode = $request->get('requestMode');
 		if($requestMode == 'full') {
 			return $this->showModuleDetailView($request);
@@ -378,7 +375,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 	 * Function shows basic detail for the record
 	 * @param <type> $request
 	 */
-	function showModuleBasicView(Vtiger_Request $request) {
+	function showModuleBasicView($request) {
 
 		$recordId = $request->get('record');
 		$moduleName = $request->getModule();
@@ -495,7 +492,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 			$rollupsettings = ModComments_Module_Model::getRollupSettingsForUser($currentUserModel, $moduleName);
 		}
 
-		if(isset($rollupsettings['rollup_status']) && $rollupsettings['rollup_status']) {
+		if($rollupsettings['rollup_status']) {
 			$parentRecordModel = Vtiger_Record_Model::getInstanceById($parentId, $moduleName);
 			$recentComments = $parentRecordModel->getRollupCommentsForModule(0, 6);
 		}else {
@@ -503,7 +500,7 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		}
 
 		$pagingModel->calculatePageRange($recentComments);
-		if ($pagingModel->get('limit') < php7_count($recentComments)) {
+		if ($pagingModel->get('limit') < count($recentComments)) {
 			array_pop($recentComments);
 		}
 
@@ -520,10 +517,8 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$viewer->assign('MAX_UPLOAD_LIMIT_MB', Vtiger_Util_Helper::getMaxUploadSize());
 		$viewer->assign('MAX_UPLOAD_LIMIT_BYTES', Vtiger_Util_Helper::getMaxUploadSizeInBytes());
 		$viewer->assign('COMMENTS_MODULE_MODEL', $modCommentsModel);
-		$viewer->assign('ROLLUP_STATUS', isset($rollupsettings['rollup_status']) ? 
-			$rollupsettings['rollup_status'] : false);
-		$viewer->assign('ROLLUPID', isset($rollupsettings['rollupid']) ?
-			$rollupsettings['rollupid'] : 0);
+		$viewer->assign('ROLLUP_STATUS', $rollupsettings['rollup_status']);
+		$viewer->assign('ROLLUPID', $rollupsettings['rollupid']);
 		$viewer->assign('PARENT_RECORD', $parentId);
 
 		return $viewer->view('RecentComments.tpl', $moduleName, 'true');
@@ -576,13 +571,11 @@ class Vtiger_Detail_View extends Vtiger_Index_View {
 		$childComments = $parentCommentModel->getChildComments();
 		$currentUserModel = Users_Record_Model::getCurrentUserModel();
 		$modCommentsModel = Vtiger_Module_Model::getInstance('ModComments');
-		$moduleName = $parentCommentModel->getParentRecordModel()->getModuleName();
 
 		$viewer = $this->getViewer($request);
 		$viewer->assign('PARENT_COMMENTS', $childComments);
 		$viewer->assign('CURRENTUSER', $currentUserModel);
 		$viewer->assign('COMMENTS_MODULE_MODEL', $modCommentsModel);
-		$viewer->assign('MODULE_NAME', $moduleName);
 
 		return $viewer->view('CommentsList.tpl', $moduleName, 'true');
 	}

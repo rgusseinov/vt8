@@ -112,7 +112,7 @@ class Users extends CRMEntity {
 	);
 
 	//Default Fields for Email Templates -- Pavani
-	var $emailTemplate_defaultFields = array('first_name','last_name','userlabel','title','department','phone_home','phone_mobile','signature','email1','email2','address_street','address_city','address_state','address_country','address_postalcode');
+	var $emailTemplate_defaultFields = array('first_name','last_name','title','department','phone_home','phone_mobile','signature','email1','email2','address_street','address_city','address_state','address_country','address_postalcode');
 
 	var $popup_fields = array('last_name');
 
@@ -132,23 +132,21 @@ class Users extends CRMEntity {
 	 instantiates the Logger class and PearDatabase Class
 	 *
 	 */
-        function __construct() {
-            $this->log = Logger::getLogger('user');
-            $this->log->debug("Entering Users() method ...");
-            $this->db = PearDatabase::getInstance();
-            $this->DEFAULT_PASSWORD_CRYPT_TYPE = (version_compare(PHP_VERSION, '5.3.0') >= 0)? 'PHP5.3MD5': 'MD5';
-            if (version_compare(PHP_VERSION, '5.5.0') >= 0) {
-                    $this->DEFAULT_PASSWORD_CRYPT_TYPE = 'PHASH';
-            }
-            $this->column_fields = getColumnFields('Users');
-            $this->column_fields['currency_name'] = '';
-            $this->column_fields['currency_code'] = '';
-            $this->column_fields['currency_symbol'] = '';
-            $this->column_fields['conv_rate'] = '';
-            $this->log->debug("Exiting Users() method ...");
-        }
+
 	function Users() {
-            self::__construct();
+		$this->log = LoggerManager::getLogger('user');
+		$this->log->debug("Entering Users() method ...");
+		$this->db = PearDatabase::getInstance();
+		$this->DEFAULT_PASSWORD_CRYPT_TYPE = (version_compare(PHP_VERSION, '5.3.0') >= 0)? 'PHP5.3MD5': 'MD5';
+		if (version_compare(PHP_VERSION, '5.5.0') >= 0) {
+			$this->DEFAULT_PASSWORD_CRYPT_TYPE = 'PHASH';
+		}
+		$this->column_fields = getColumnFields('Users');
+		$this->column_fields['currency_name'] = '';
+		$this->column_fields['currency_code'] = '';
+		$this->column_fields['currency_symbol'] = '';
+		$this->column_fields['conv_rate'] = '';
+		$this->log->debug("Exiting Users() method ...");
 	}
 
 	/**
@@ -393,7 +391,7 @@ class Users extends CRMEntity {
 
 		// Get the fields for the user
 		$query = "SELECT * from $this->table_name where user_name=?";
-		$result = $this->db->requirePsSingleResult($query, array($usr_name), false);
+		$result = $this->db->requireSingleResult($query, array($usr_name), false);
 
 		$row = $this->db->fetchByAssoc($result);
 		$this->column_fields = $row;
@@ -582,7 +580,7 @@ class Users extends CRMEntity {
 		$result =$this->db->pquery($query, array(), true, "Error selecting possible duplicate vtiger_users: ");
 		$last_admin = $this->db->fetchByAssoc($result);
 
-		$this->log->debug("last admin length: ".php7_count($last_admin));
+		$this->log->debug("last admin length: ".count($last_admin));
 		$this->log->debug($last_admin['user_name']." == ".$usr_name);
 
 		$verified = true;
@@ -591,9 +589,9 @@ class Users extends CRMEntity {
 			$verified = false;
 		}
 		if(!isset($_REQUEST['is_admin']) &&
-				php7_count($last_admin) == 1 &&
+				count($last_admin) == 1 &&
 				$last_admin['user_name'] == $usr_name) {
-			$this->log->debug("last admin length: ".php7_count($last_admin));
+			$this->log->debug("last admin length: ".count($last_admin));
 
 			$this->error_string .= $mod_strings['ERR_LAST_ADMIN_1'].$usr_name.$mod_strings['ERR_LAST_ADMIN_2'];
 			$verified = false;
@@ -621,14 +619,14 @@ class Users extends CRMEntity {
 	}
 
 	function fill_in_additional_detail_fields() {
-		$query = "SELECT u1.first_name, u1.last_name, u1.userlabel from vtiger_users u1, vtiger_users u2 where u1.id = u2.reports_to_id AND u2.id = ? and u1.deleted=0";
+		$query = "SELECT u1.first_name, u1.last_name from vtiger_users u1, vtiger_users u2 where u1.id = u2.reports_to_id AND u2.id = ? and u1.deleted=0";
 		$result =$this->db->pquery($query, array($this->id), true, "Error filling in additional detail vtiger_fields") ;
 
 		$row = $this->db->fetchByAssoc($result);
 		$this->log->debug("additional detail query results: $row");
 
 		if($row != null) {
-			$this->reports_to_name = stripslashes($row['userlabel']);
+			$this->reports_to_name = stripslashes(getFullNameFromArray('Users', $row));
 		}
 		else {
 			$this->reports_to_name = '';
@@ -751,7 +749,7 @@ class Users extends CRMEntity {
 	function insertIntoEntityTable($table_name, $module, $fileid='') {
 		global $log;
 		$log->info("function insertIntoEntityTable ".$module.' vtiger_table name ' .$table_name);
-		global $adb, $current_user, $app_strings;
+		global $adb, $current_user;
 		$insertion_mode = $this->mode;
 		//Checkin whether an entry is already is present in the vtiger_table to update
 		if($insertion_mode == 'edit') {
@@ -767,20 +765,6 @@ class Users extends CRMEntity {
 
 		// We will set the crypt_type based on the insertion_mode
 		$crypt_type = '';
-
-		// userlabel is a field. So, setting to column_fields will take care for update and insert as well
-        if($table_name == 'vtiger_users') {
-			$entityFields = Vtiger_Functions::getEntityModuleInfo($module);
-			$entityFieldNames  = explode(',', $entityFields['fieldname']);
-
-			$userlabel = '';
-			foreach($entityFieldNames as $entityFieldName) {
-				$userlabel .= $this->column_fields[$entityFieldName]." ";
-			}
-			$userlabel = trim(decode_html($userlabel));
-			
-			$this->column_fields['userlabel'] = strip_tags($userlabel);
-		}
 
 		if($insertion_mode == 'edit') {
 			$update = '';
@@ -824,7 +808,7 @@ class Users extends CRMEntity {
 					}
 
 				}elseif($uitype == 15) {
-					if($app_strings && $this->column_fields[$fieldname] == $app_strings['LBL_NOT_ACCESSIBLE']) {
+					if($this->column_fields[$fieldname] == $app_strings['LBL_NOT_ACCESSIBLE']) {
 						//If the value in the request is Not Accessible for a picklist, the existing value will be replaced instead of Not Accessible value.
 						$sql="select $columname from  $table_name where ".$this->tab_name_index[$table_name]."=?";
 						$res = $adb->pquery($sql,array($this->id));
@@ -873,10 +857,10 @@ class Users extends CRMEntity {
 						$fldvalue = $themeList[0];
 					}
 				}
-				if($current_user && $current_user->id == $this->id) {
+				if($current_user->id == $this->id) {
 					$_SESSION['vtiger_authenticated_user_theme'] = $fldvalue;
 				}
-			} elseif($uitype == 32 && $fieldname == 'language') {
+			} elseif($uitype == 32) {
 				$languageList = Vtiger_Language::getAll();
 				$languageList = array_keys($languageList);
 				if(!in_array($fldvalue, $languageList) || $fldvalue == '') {
@@ -887,7 +871,7 @@ class Users extends CRMEntity {
 						$fldvalue = $languageList[0];
 					}
 				}
-				if($current_user && $current_user->id == $this->id) {
+				if($current_user->id == $this->id) {
 					$_SESSION['authenticated_user_language'] = $fldvalue;
 				}
 			}
@@ -994,8 +978,7 @@ class Users extends CRMEntity {
 			$currency_result = $adb->pquery($currency_query, array());
 		}
 		$currency_array = array("$"=>"&#36;","&euro;"=>"&#8364;","&pound;"=>"&#163;","&yen;"=>"&#165;");
-		$currency_symbol = $adb->query_result($currency_result,0,"currency_symbol");
-		$ui_curr = isset($currency_array[$currency_symbol])? $currency_array[$currency_symbol] : "";
+		$ui_curr = $currency_array[$adb->query_result($currency_result,0,"currency_symbol")];
 		if($ui_curr == "")
 			$ui_curr = $adb->query_result($currency_result,0,"currency_symbol");
 		$this->column_fields["currency_name"]= $this->currency_name = $adb->query_result($currency_result,0,"currency_name");
@@ -1004,6 +987,17 @@ class Users extends CRMEntity {
 		$this->column_fields["conv_rate"]= $this->conv_rate = $adb->query_result($currency_result,0,"conversion_rate");
 		if($this->column_fields['no_of_currency_decimals'] == '')
 			$this->column_fields['no_of_currency_decimals'] = $this->no_of_currency_decimals = getCurrencyDecimalPlaces();
+
+		// TODO - This needs to be cleaned up once default values for fields are picked up in a cleaner way.
+		// This is just a quick fix to ensure things doesn't start breaking when the user currency configuration is missing
+		if($this->column_fields['currency_grouping_pattern'] == ''
+				&& $this->column_fields['currency_symbol_placement'] == '') {
+
+			$this->column_fields['currency_grouping_pattern'] = $this->currency_grouping_pattern = '123,456,789';
+			$this->column_fields['currency_decimal_separator'] = $this->currency_decimal_separator = '.';
+			$this->column_fields['currency_grouping_separator'] = $this->currency_grouping_separator = ',';
+			$this->column_fields['currency_symbol_placement'] = $this->currency_symbol_placement = '$1.0';
+		}
 
 		// TODO - This needs to be cleaned up once default values for fields are picked up in a cleaner way.
 		// This is just a quick fix to ensure things doesn't start breaking when the user currency configuration is missing
@@ -1118,7 +1112,7 @@ class Users extends CRMEntity {
 		// Added for Reminder Popup support
 		$this->resetReminderInterval($prev_reminder_interval);
 		//Creating the Privileges Flat File
-		if(isset($this->column_fields['roleid']) && !empty($this->column_fields['roleid'])) {
+		if(isset($this->column_fields['roleid'])) {
 			updateUser2RoleMapping($this->column_fields['roleid'],$this->id);
 		}
 
@@ -1151,7 +1145,7 @@ class Users extends CRMEntity {
 			for($q=0;$q<$adb->num_rows($res);$q++) {
 				$homeorder[]=$adb->query_result($res,$q,"hometype");
 			}
-			for($i = 0;$i < php7_count($this->homeorder_array);$i++) {
+			for($i = 0;$i < count($this->homeorder_array);$i++) {
 				if(in_array($this->homeorder_array[$i],$homeorder)) {
 					$return_array[$this->homeorder_array[$i]] = $this->homeorder_array[$i];
 				}else {
@@ -1159,7 +1153,7 @@ class Users extends CRMEntity {
 				}
 			}
 		}else {
-			for($i = 0;$i < php7_count($this->homeorder_array);$i++) {
+			for($i = 0;$i < count($this->homeorder_array);$i++) {
 			  if(in_array($this->homeorder_array[$i], $this->default_widgets)){
 				$return_array[$this->homeorder_array[$i]] = $this->homeorder_array[$i];
 			  }else{
@@ -1173,7 +1167,7 @@ class Users extends CRMEntity {
 	function getDefaultHomeModuleVisibility($home_string,$inVal) {
 		$homeModComptVisibility= 1;
 		if($inVal == 'postinstall') {
-			if(isset($_REQUEST[$home_string]) && $_REQUEST[$home_string] != '') {
+			if($_REQUEST[$home_string] != '') {
 				$homeModComptVisibility = 0;
 			} else if(in_array($home_string, $this->default_widgets)){
 				$homeModComptVisibility = 0;
@@ -1315,12 +1309,11 @@ class Users extends CRMEntity {
 		global $log,$adb;
 		$log->debug("Entering in function saveHomeOrder($id)");
 
-		$save_array = array();
 		 if($this->mode == 'edit')
 		 {
-			 for($i = 0;$i < php7_count($this->homeorder_array);$i++)
+			 for($i = 0;$i < count($this->homeorder_array);$i++)
 			 {
-				 if(isset($_REQUEST[$this->homeorder_array[$i]]) && $_REQUEST[$this->homeorder_array[$i]] != '')
+				 if($_REQUEST[$this->homeorder_array[$i]] != '')
 				 {
 					$save_array[] = $this->homeorder_array[$i];
 					$qry=" update vtiger_homestuff,vtiger_homedefault set vtiger_homestuff.visible=0 where vtiger_homestuff.stuffid=vtiger_homedefault.stuffid and vtiger_homestuff.userid=? and vtiger_homedefault.hometype=?";//To show the default Homestuff on the the Home Page
@@ -1332,7 +1325,7 @@ class Users extends CRMEntity {
 					$result=$adb->pquery($qry, array($id, $this->homeorder_array[$i]));
 				}
 			}
-			if($save_array)
+			if($save_array !="")
 				$homeorder = implode(',',$save_array);
 		}
 		 else
@@ -1572,6 +1565,24 @@ class Users extends CRMEntity {
 		}
 	}
 
+	/**
+	* Function to update Config file
+	* @param- $_REQUEST array
+	*/
+	public function updateConfigFile($requestArray) {
+	   if (isset ($requestArray['currency_name'])) {
+		   $currency_name = vtlib_purify($requestArray['currency_name']);
+		   $currency_name = '$currency_name = \''.$currency_name.'\'';
+
+		   //Updating in config inc file
+		   $filename = 'config.inc.php';
+		   if (file_exists($filename)) {
+			   $contents = file_get_contents($filename);
+			   $contents = str_replace('$currency_name = \'USA, Dollars\'', $currency_name, $contents);
+			   file_put_contents($filename, $contents);
+		   }
+	   }
+   }
 
    public function triggerAfterSaveEventHandlers() {
 	   global $adb;
@@ -1782,7 +1793,7 @@ class Users extends CRMEntity {
 						$reportsTo = null;
 						foreach($allUsers as $user) {
 							$userName = strtolower($user->get('user_name'));
-							$firstLastName = strtolower($user->get('userlabel'));
+							$firstLastName = strtolower($user->get('first_name')." ".$user->get('last_name'));
 							if(strtolower($fieldValue) == $userName || strtolower($fieldValue) == $firstLastName) {
 								$reportsTo = $user->getId();
 								break;

@@ -14,10 +14,11 @@
  ********************************************************************************/
 
 require_once 'include/logging.php';
-require_once 'libraries/adodb_vtigerfix/adodb.inc.php';
+include_once 'libraries/adodb/adodb.inc.php';
+require_once 'libraries/adodb/adodb-xmlschema.inc.php';
 
-$log = Logger::getLogger('VT');
-$logsqltm = Logger::getLogger('SQLTIME');
+$log = LoggerManager::getLogger('VT');
+$logsqltm = LoggerManager::getLogger('SQLTIME');
 
 // Callback class useful to convert PreparedStatement Question Marks to SQL value
 // See function convertPS2Sql in PearDatabase below
@@ -114,7 +115,7 @@ class PearDatabase{
     function println($msg)
     {
 		require_once('include/logging.php');
-		$log1 = Logger::getLogger('VT');
+		$log1 = LoggerManager::getLogger('VT');
 		if(is_array($msg)) {
 		    $log1->info("PearDatabse ->".print_r($msg,true));
 		} else {
@@ -140,23 +141,14 @@ class PearDatabase{
 		return 	$this->dbType. "://".$this->userName.":".$this->userPassword."@". $this->dbHostName . "/". $this->dbName;
     }
 
-	function startTransaction() {
-		/* Restore php_mysql based behavior */
-		if (true) { 
-			if ($this->database) $this->database->Execute('SET AUTOCOMMIT=1'); 
-			return; 
-		}
-
+    function startTransaction() {
 	    if($this->isPostgres()) return;
 		$this->checkConnection();
 		$this->println("TRANS Started");
 		$this->database->StartTrans();
     }
 
-	function completeTransaction() {
-		/* Restore php_mysql based behaviour */	
-		if (true) return;
-
+    function completeTransaction() {
 	    if($this->isPostgres()) return;
 		if($this->database->HasFailedTrans()) $this->println("TRANS  Rolled Back");
 		else $this->println("TRANS  Commited");
@@ -268,9 +260,6 @@ class PearDatabase{
 			$this->database->Execute($setnameSql);
 			$this->logSqlTiming($sql_start_time, microtime(true), $setnameSql);
 		}
-
-		// Ensure sql_mode is friendly
-		$this->database->Execute("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
 	}
 
 	/**
@@ -401,7 +390,7 @@ class PearDatabase{
     {
 	//if(dbType=="oci8") return 'empty_blob()';
 	//else return 'null';
-	if ($is_string) return 'null';
+	if (is_string) return 'null';
 	return null;
     }
 
@@ -536,7 +525,7 @@ class PearDatabase{
 
     /* ADODB newly added. replacement for mysql_fetch_array() */
     function fetch_array(&$result) {
-		if(!$result || $result->EOF) {
+		if($result->EOF) {
 		    //$this->println("ADODB fetch_array return null");
 		    return NULL;
 		}
@@ -559,15 +548,15 @@ class PearDatabase{
 
     function sql_quote($data) {
 		if (is_array($data)) {
-			switch($cur = $data['type']) {
+			switch($data{'type'}) {
 			case 'text':
 			case 'numeric':
 			case 'integer':
 			case 'oid':
-				return $this->quote($data['value']);
+				return $this->quote($data{'value'});
 				break;
 			case 'timestamp':
-				return $this->formatDate($data['value']);
+				return $this->formatDate($data{'value'});
 				break;
 			default:
 				throw new Exception("unhandled type: ".serialize($cur));
@@ -622,7 +611,7 @@ class PearDatabase{
     function run_query_field($query,$field='') {
 	    $rowdata = $this->run_query_record($query);
 	    if(isset($field) && $field != '')
-	    	return $rowdata[$field];
+	    	return $rowdata{$field};
 	    else
 	    	return array_shift($rowdata);
     }
@@ -630,7 +619,7 @@ class PearDatabase{
     function run_query_list($query,$field){
 	    $records = $this->run_query_allrecords($query);
 	    foreach($records as $walk => $cur)
-			$list[] = $cur[$field];
+			$list[] = $cur{$field};
     }
 
     function run_query_field_html($query,$field){
@@ -663,7 +652,7 @@ class PearDatabase{
 	    	throw new Exception("empty arrays not allowed");
 
 	    foreach($a as $walk => $cur)
-	    	$l .= ($l?',':'').$this->quote($cur[$field]);
+	    	$l .= ($l?',':'').$this->quote($cur{$field});
 
 	    return ' ( '.$l.' ) ';
     }
@@ -688,11 +677,10 @@ class PearDatabase{
 	                throw new Exception("result is not an object");
 		$result->Move($row);
 		$rowdata = $this->change_key_case($result->FetchRow());
-		if (!$rowdata) return null;
 		//$this->println($rowdata);
 		//Commented strip_selected_tags and added to_html function for HTML tags vulnerability
 		if($col == 'fieldlabel') $coldata = $rowdata[$col];
-		else $coldata = isset($rowdata[$col]) ? to_html($rowdata[$col]) : null;
+		else $coldata = to_html($rowdata[$col]);
 		return $coldata;
     }
 
@@ -816,12 +804,6 @@ class PearDatabase{
 		    $this->println("ADODB Connect : DBType not specified");
 		    return;
 		}
-
-		// Backward compatible mode for adodb library.
-		if ($this->dbType == 'mysqli') {
-			mysqli_report(MYSQLI_REPORT_ALL ^ MYSQLI_REPORT_STRICT);
-		}
-
 		$this->database = ADONewConnection($this->dbType);
 	
 		// Setting client flag for Import csv to database(LOAD DATA LOCAL INFILE.....)
@@ -858,7 +840,7 @@ class PearDatabase{
 	 */
     function __construct($dbtype='',$host='',$dbname='',$username='',$passwd='') {
 		global $currentModule;
-		$this->log = Logger::getLogger('PearDatabase_'. $currentModule);
+		$this->log = LoggerManager::getLogger('PearDatabase_'. $currentModule);
 		$this->resetSettings($dbtype,$host,$dbname,$username,$passwd);
 
 		// Initialize performance parameters
@@ -876,11 +858,7 @@ class PearDatabase{
     function resetSettings($dbtype,$host,$dbname,$username,$passwd){
 		global $dbconfig, $dbconfigoption;
 
-		if (!$host && !$dbconfig) {
-			return;
-		}
-
-		if($host == '' && $dbconfig) {
+		if($host == '') {
 		    $this->disconnect();
 		    $this->setDatabaseType($dbconfig['db_type']);
 	    	$this->setUserName($dbconfig['db_username']);
@@ -934,10 +912,7 @@ class PearDatabase{
 
 		$this->checkConnection();
 		$db = $this->database;
-
-		require_once 'libraries/adodb_vtigerfix/adodb-xmlschema.inc.php';
 		$schema = new adoSchema( $db );
-		
 		//Debug Adodb XML Schema
 		$schema->XMLS_DEBUG = TRUE;
 		//Debug Adodb

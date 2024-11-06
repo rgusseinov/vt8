@@ -17,7 +17,7 @@ class EmailTemplates_PopupAjax_View extends EmailTemplates_Popup_View {
 		$this->exposeMethod('getPageCount');
 	}
 
-	function preProcess(Vtiger_Request $request,$display=true) {
+	function preProcess(Vtiger_Request $request) {
 		return true;
 	}
 

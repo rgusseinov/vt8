@@ -24,13 +24,10 @@ class Vtiger_PackageExport {
 	/**
 	 * Constructor
 	 */
-        function __construct() {
-            if(is_dir($this->_export_tmpdir) === FALSE) {
-			mkdir($this->_export_tmpdir);
-            }
-        }
 	function Vtiger_PackageExport() {
-            self::__construct();
+		if(is_dir($this->_export_tmpdir) === FALSE) {
+			mkdir($this->_export_tmpdir);
+		}
 	}
 
 	/** Output Handlers */
@@ -108,7 +105,7 @@ class Vtiger_PackageExport {
 	 * @param String Zipfilename to use
 	 * @param Boolean True for sending the output as download
 	 */
-	function export($moduleInstance, $todir='', $zipfilename='', $directDownload=false, $extra=false) {
+	function export($moduleInstance, $todir='', $zipfilename='', $directDownload=false) {
 
 		$module = $moduleInstance->name;
 

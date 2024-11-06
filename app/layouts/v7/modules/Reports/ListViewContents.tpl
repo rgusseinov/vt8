@@ -73,16 +73,12 @@
 						</tr>
 
 						{if $MODULE_MODEL->isQuickSearchEnabled() && !$SEARCH_MODE_RESULTS}
-							<tr class="searchRow listViewSearchContainer">
-                                                            <th class="inline-search-btn">
-                                                                <div class="table-actions">
-                                                                    <button class="btn-sm btn btn-success {if php7_count($SEARCH_DETAILS) gt 0}hide{/if}" data-trigger="listSearch">
-                                                                        <i class="fa fa-search"></i>&nbsp;
-                                                                        <span class="s2-btn-text">{vtranslate("LBL_SEARCH",$MODULE)}</span>
-                                                                    </button>
-                                                                    <button class="searchAndClearButton btn-sm  btn btn-danger {if php7_count($SEARCH_DETAILS) eq 0}hide{/if}" data-trigger="clearListSearch"><i class="fa fa-close"></i>&nbsp;{vtranslate("LBL_CLEAR",$MODULE)}</button>
-                                                                </div>
-                                                            </th>
+							<tr class="searchRow">
+								<th class="inline-search-btn">
+									<div class="table-actions">
+										<button class="btn btn-success btn-sm" data-trigger="listSearch">{vtranslate("LBL_SEARCH",$MODULE)}</button>
+									</div>
+								</th>
 								{foreach item=LISTVIEW_HEADER key=LISTVIEW_HEADER_KEY from=$LISTVIEW_HEADERS}
 									<th>
 										{assign var="DATA_TYPE" value=$LISTVIEW_HEADER['type']}
@@ -147,7 +143,7 @@
 						{/foreach}
 						{if $LISTVIEW_ENTRIES_COUNT eq '0'}
 							<tr class="emptyRecordsDiv">
-								{assign var=COLSPAN_WIDTH value={php7_count($LISTVIEW_HEADERS)}+1}
+								{assign var=COLSPAN_WIDTH value={count($LISTVIEW_HEADERS)}+1}
 								<td colspan="{$COLSPAN_WIDTH}">
 									<div class="emptyRecordsDiv">
 										<div class="emptyRecordsContent">

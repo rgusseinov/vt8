@@ -19,7 +19,7 @@ class Vtiger_PDF_Model {
 	}
 	
 	function count() {
-		return php7_count($this->values);
+		return count($this->values);
 	}
 	
 	function keys() {

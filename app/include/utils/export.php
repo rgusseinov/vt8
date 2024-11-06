@@ -107,7 +107,7 @@ function export($type){
 		// Refer to the logic in setting $currentModule in index.php
 		$focus = CRMEntity::getInstance($type);
     }
-    $log = Logger::getLogger('export_'.$type);
+    $log = LoggerManager::getLogger('export_'.$type);
     $db = PearDatabase::getInstance();
 
 	$oCustomView = new CustomView("$type");
@@ -139,44 +139,44 @@ function export($type){
 	
 	if(($search_type == 'withoutsearch' || $search_type == 'includesearch') && $export_data == 'selecteddata'){
 		$idstring = getSelectedRecords($_REQUEST, $type, $idstring, vtlib_purify($_REQUEST['excludedRecords']));
-		if($type == 'Accounts' && php7_count($idstring) > 0) {
+		if($type == 'Accounts' && count($idstring) > 0) {
 			$query .= ' and vtiger_account.accountid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Contacts' && php7_count($idstring) > 0) {
+		} elseif($type == 'Contacts' && count($idstring) > 0) {
 			$query .= ' and vtiger_contactdetails.contactid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Potentials' && php7_count($idstring) > 0) {
+		} elseif($type == 'Potentials' && count($idstring) > 0) {
 			$query .= ' and vtiger_potential.potentialid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Leads' && php7_count($idstring) > 0) {
+		} elseif($type == 'Leads' && count($idstring) > 0) {
 			$query .= ' and vtiger_leaddetails.leadid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Products' && php7_count($idstring) > 0) {
+		} elseif($type == 'Products' && count($idstring) > 0) {
 			$query .= ' and vtiger_products.productid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Documents' && php7_count($idstring) > 0) {
+		} elseif($type == 'Documents' && count($idstring) > 0) {
 			$query .= ' and vtiger_notes.notesid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'HelpDesk' && php7_count($idstring) > 0) {
+		} elseif($type == 'HelpDesk' && count($idstring) > 0) {
 			$query .= ' and vtiger_troubletickets.ticketid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Vendors' && php7_count($idstring) > 0) {
+		} elseif($type == 'Vendors' && count($idstring) > 0) {
 			$query .= ' and vtiger_vendor.vendorid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Invoice' && php7_count($idstring) > 0) {
+		} elseif($type == 'Invoice' && count($idstring) > 0) {
 			$query .= ' and vtiger_invoice.invoiceid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'Quotes' && php7_count($idstring) > 0) {
+		} elseif($type == 'Quotes' && count($idstring) > 0) {
 			$query .= ' and vtiger_quotes.quoteid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'SalesOrder' && php7_count($idstring) > 0) {
+		} elseif($type == 'SalesOrder' && count($idstring) > 0) {
 			$query .= ' and vtiger_salesorder.salesorderid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
-		} elseif($type == 'PurchaseOrder' && php7_count($idstring) > 0) {
+		} elseif($type == 'PurchaseOrder' && count($idstring) > 0) {
 			$query .= ' and vtiger_purchaseorder.purchaseorderid in ('. generateQuestionMarks($idstring) .')';
 			array_push($params, $idstring);
 		}
-		else if(php7_count($idstring) > 0) {
+		else if(count($idstring) > 0) {
 			// vtlib customization: Hook to make the export feature available for custom modules.
 			$query .= " and $focus->table_name.$focus->table_index in (" . generateQuestionMarks($idstring) . ')';
 			array_push($params, $idstring);
@@ -216,7 +216,7 @@ function export($type){
 	
 	// Translated the field names based on the language used.
 	$translated_fields_array = array();
-	for($i=0; $i<php7_count($fields_array); $i++) {
+	for($i=0; $i<count($fields_array); $i++) {
 		$translated_fields_array[$i] = getTranslatedString($fields_array[$i],$type);
 	}
 	$header = implode("\",\"",array_values($translated_fields_array));
@@ -276,15 +276,8 @@ class ExportUtils{
 	var $fieldsArr = array();
 	var $picklistValues = array();
 	
-	function __construct($module, $fields_array)
-	{
-		self::__init($module, $fields_array);
-	}
 	function ExportUtils($module, $fields_array){
-		// PHP4-style constructor.
-		// This will NOT be invoked, unless a sub-class that extends calls it.
-		// In that case, call the new-style constructor to keep compatibility.
-		self::__construct($module, $fields_array);
+		self::__init($module, $fields_array);
 	}
 	
 	
@@ -351,7 +344,7 @@ class ExportUtils{
 	/**
 	 * this function takes in a module name and returns the field information for it
 	 */
-	static function getInformationArray($module){
+	function getInformationArray($module){
 		require_once 'include/utils/utils.php';
 		global $adb;
 		$tabid = getTabid($module);

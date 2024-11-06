@@ -54,15 +54,12 @@ class PriceBooks extends CRMEntity {
 
 	/**	Constructor which will set the column_fields in this object
 	 */
-        function __construct() {
-            $this->log =Logger::getLogger('pricebook');
-            $this->log->debug("Entering PriceBooks() method ...");
-            $this->db = PearDatabase::getInstance();
-            $this->column_fields = getColumnFields('PriceBooks');
-            $this->log->debug("Exiting PriceBook method ...");
-        }
 	function PriceBooks() {
-            self::__construct();
+		$this->log =LoggerManager::getLogger('pricebook');
+		$this->log->debug("Entering PriceBooks() method ...");
+		$this->db = PearDatabase::getInstance();
+		$this->column_fields = getColumnFields('PriceBooks');
+		$this->log->debug("Exiting PriceBook method ...");
 	}
 
 	function save_module($module)
@@ -462,7 +459,7 @@ class PriceBooks extends CRMEntity {
 	}
 
 	function relatePriceBookWithProduct($entityinfo, $productList) {
-		if(php7_count($productList) > 0){
+		if(count($productList) > 0){
 			foreach($productList as $product){
 				if(!$product['relatedto'])
 					continue;

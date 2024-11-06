@@ -46,8 +46,7 @@ class Vtiger_ShowWidget_View extends Vtiger_IndexAjax_View {
 					if ($request->has('data')) {
 						$widget->set('data', $request->get('data'));
 					}
-		    		$widget->add();
-		    		$request->set('widgetid', $widget->get('id'));
+					$widget->add();
 				}
 				
 				//Date conversion from user format to database format
@@ -68,7 +67,7 @@ class Vtiger_ShowWidget_View extends Vtiger_IndexAjax_View {
 				$currentUserPrivilegeModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 				if($currentUserPrivilegeModel->hasModulePermission(getTabid($moduleName)) && !Vtiger_Runtime::isRestricted('modules', $moduleName)){
 					$classInstance = new $className();
-					$classInstance->process($request);
+					$classInstance->process($request, $widget);
 				}else{
 					throw new AppException(vtranslate('LBL_PERMISSION_DENIED'));
 				}

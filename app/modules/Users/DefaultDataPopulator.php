@@ -17,12 +17,9 @@ require_once('include/utils/utils.php');
  */
 class DefaultDataPopulator extends CRMEntity {
 
-        function __construct() {
-            $this->log = Logger::getLogger('DefaultDataPopulator');
-            $this->db = PearDatabase::getInstance();
-        }
 	function DefaultDataPopulator() {
-            self::__construct();
+		$this->log = LoggerManager::getLogger('DefaultDataPopulator');
+		$this->db = PearDatabase::getInstance();
 	}
 
 	var $new_schema = true;
@@ -2319,7 +2316,7 @@ Should any need arise,please do give us a call.';
 
 		$fieldCreateCount = 0;
 
-		for ($index = 0; $index < php7_count($paramArray); ++$index) {
+		for ($index = 0; $index < count($paramArray); ++$index) {
 			$criteria = $paramArray[$index];
 
 			$semodule = $criteria['semodule'];
@@ -2490,12 +2487,12 @@ Should any need arise,please do give us a call.';
 			);
 
 		//insert settings blocks
-		$count = php7_count($blocks);
+		$count = count($blocks);
 		for ($i = 0; $i < $count; $i++) {
 			$adb->query("insert into vtiger_settings_blocks values (" . $adb->getUniqueID('vtiger_settings_blocks') . ", '$blocks[$i]', $i+1)");
 		}
 
-		$count = php7_count($icons);
+		$count = count($icons);
 		//insert settings fields
 		for ($i = 0, $seq = 1; $i < $count; $i++, $seq++) {
 			if ($i == 8 || $i == 12 || $i == 18) {

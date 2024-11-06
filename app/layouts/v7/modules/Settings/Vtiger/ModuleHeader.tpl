@@ -19,7 +19,7 @@
 					</a>
 					&nbsp;<span class="fa fa-angle-right pull-left {if $VIEW eq 'Index' && $MODULE eq 'Vtiger'} hide {/if}" aria-hidden="true" style="padding-top: 12px;padding-left: 5px; padding-right: 5px;"></span>
 				{/if}
-				{if $MODULE neq 'Vtiger' or $REQ.view neq 'Index'}
+				{if $MODULE neq 'Vtiger' or $smarty.request.view neq 'Index'}
 					{if $ACTIVE_BLOCK['block']}
 						<span class="current-filter-name filter-name pull-left">
 							{vtranslate($ACTIVE_BLOCK['block'], $QUALIFIED_MODULE)}&nbsp;
@@ -35,75 +35,67 @@
 								{assign var=URL value=$MODULE_MODEL->getDefaultUrl()}
 							{/if}
 							{if $URL|strpos:'parent' eq ''}
-								{assign var=URL value=$URL|cat:'&parent='|cat:$REQ.parent}
+								{assign var=URL value=$URL|cat:'&parent='|cat:$smarty.request.parent}
 							{/if}
 						{/if}
 						<span class="current-filter-name settingModuleName filter-name pull-left">
-							{if $REQ.view eq 'Calendar'}
-								{if $REQ.mode eq 'Edit'}
-									<a href="{"index.php?module="|cat:$REQ.module|cat:'&parent='|cat:$REQ.parent|cat:'&view='|cat:$REQ.view}">
+							{if $smarty.request.view eq 'Calendar'}
+								{if $smarty.request.mode eq 'Edit'}
+									<a href="{"index.php?module="|cat:$smarty.request.module|cat:'&parent='|cat:$smarty.request.parent|cat:'&view='|cat:$smarty.request.view}">
 										{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}
 									</a>&nbsp;
-                                                                        <a href="">
-                                                                            <span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
-                                                                            {vtranslate('LBL_EDITING', $MODULE)} :&nbsp;{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}&nbsp;{vtranslate('LBL_OF',$QUALIFIED_MODULE)}&nbsp;{$USER_MODEL->getName()}
-                                                                        </a>
+									<span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
+									{vtranslate('LBL_EDITING', $MODULE)} :&nbsp;{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}&nbsp;{vtranslate('LBL_OF',$QUALIFIED_MODULE)}&nbsp;{$USER_MODEL->getName()}
 								{else}
-                                                                    <a href="">{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}&nbsp;<span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;{$USER_MODEL->getName()}</a>
+									{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}&nbsp;<span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;{$USER_MODEL->getName()}
 								{/if}
-							{else if $REQ.view neq 'List' and $REQ.module eq 'Users'}
-								{if $REQ.view eq 'PreferenceEdit'}
-									<a href="{"index.php?module="|cat:$REQ.module|cat:'&parent='|cat:$REQ.parent|cat:'&view=PreferenceDetail&record='|cat:$REQ.record}">
+							{else if $smarty.request.view neq 'List' and $smarty.request.module eq 'Users'}
+								{if $smarty.request.view eq 'PreferenceEdit'}
+									<a href="{"index.php?module="|cat:$smarty.request.module|cat:'&parent='|cat:$smarty.request.parent|cat:'&view=PreferenceDetail&record='|cat:$smarty.request.record}">
 										{vtranslate($ACTIVE_BLOCK['block'], $QUALIFIED_MODULE)}&nbsp;
 									</a>
-                                                                        <a href="">
-                                                                            <span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
-                                                                            {vtranslate('LBL_EDITING', $MODULE)} :&nbsp;{$USER_MODEL->getName()}
-                                                                        </a>
-								{else if $REQ.view eq 'Edit' or $REQ.view eq 'Detail'}
+									<span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
+									{vtranslate('LBL_EDITING', $MODULE)} :&nbsp;{$USER_MODEL->getName()}
+								{else if $smarty.request.view eq 'Edit' or $smarty.request.view eq 'Detail'}
 									<a href="{$URL}">
-									{if $REQ.extensionModule}{$REQ.extensionModule}{else}{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}{/if}&nbsp;
+									{if $smarty.request.extensionModule}{$smarty.request.extensionModule}{else}{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}{/if}&nbsp;
 									</a>
-                                                                        <a href="">
-                                                                            <span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
-                                                                            {if $REQ.view eq 'Edit'}
-                                                                                    {if $RECORD}
-                                                                                            {vtranslate('LBL_EDITING', $MODULE)} :&nbsp;{$RECORD->getName()}
-                                                                                    {else}
-                                                                                            {vtranslate('LBL_ADDING_NEW', $MODULE)}
-                                                                                    {/if}
-                                                                            {else}
-                                                                                    {$RECORD->getName()}
-                                                                            {/if}
-                                                                        </a>
+									<span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
+									{if $smarty.request.view eq 'Edit'}
+										{if $RECORD}
+											{vtranslate('LBL_EDITING', $MODULE)} :&nbsp;{$RECORD->getName()}
+										{else}
+											{vtranslate('LBL_ADDING_NEW', $MODULE)}
+										{/if}
+									{else}
+										{$RECORD->getName()}
+									{/if}
 								{else}
-                                                                    <a href="">{$USER_MODEL->getName()}</a>
+									{$USER_MODEL->getName()}
 								{/if}
-							{else if $URL and $URL|strpos:$REQ.view eq ''}
+							{else if $URL and $URL|strpos:$smarty.request.view eq ''}
 								<a href="{$URL}">
-								{if $REQ.extensionModule}
-									{$REQ.extensionModule}
+								{if $smarty.request.extensionModule}
+									{$smarty.request.extensionModule}
 								{else}
 									{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}
 								{/if}
 								</a>&nbsp;
-                                                                <a href="">
-                                                                    <span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
-                                                                    {if $RECORD}
-                                                                            {if $REQ.view eq 'Edit'}
-                                                                                    {vtranslate('LBL_EDITING', $MODULE)} :&nbsp;
-                                                                            {/if}
-                                                                            {$RECORD->getName()}
-                                                                    {/if}
-                                                                </a>
+								<span class="fa fa-angle-right" aria-hidden="true"></span>&nbsp;
+								{if $RECORD}
+									{if $smarty.request.view eq 'Edit'}
+										{vtranslate('LBL_EDITING', $MODULE)} :&nbsp;
+									{/if}
+									{$RECORD->getName()}
+								{/if}
 							{else}
-								&nbsp;{if $REQ.extensionModule}{$REQ.extensionModule}{else}{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}{/if}
+								&nbsp;{if $smarty.request.extensionModule}{$smarty.request.extensionModule}{else}{vtranslate({$PAGETITLE}, $QUALIFIED_MODULE)}{/if}
 							{/if}
 						</span>
 					{else}
-						{if $REQ.view eq 'TaxIndex'}
+						{if $smarty.request.view eq 'TaxIndex'}
 							{assign var=SELECTED_MODULE value='LBL_TAX_MANAGEMENT'}
-						{elseif $REQ.view eq 'TermsAndConditionsEdit'}
+						{elseif $smarty.request.view eq 'TermsAndConditionsEdit'}
 							{assign var=SELECTED_MODULE value='LBL_TERMS_AND_CONDITIONS'}
 						{else}
 							{assign var=SELECTED_MODULE value=$ACTIVE_BLOCK['menu']}
@@ -141,7 +133,7 @@
 								{/if}
 							</li>
 						{/foreach}
-						{if !empty($LISTVIEW_LINKS['LISTVIEWSETTING']) && ($LISTVIEW_LINKS['LISTVIEWSETTING']|@count gt 0)}
+						{if $LISTVIEW_LINKS['LISTVIEWSETTING']|@count gt 0}
 							{if empty($QUALIFIEDMODULE)} 
 								{assign var=QUALIFIEDMODULE value=$MODULE}
 							{/if}
@@ -167,7 +159,7 @@
 						{/if}
 
 						{assign var=RESTRICTED_MODULE_LIST value=['Users', 'EmailTemplates']}
-						{if !empty($LISTVIEW_LINKS['LISTVIEWBASIC']) and ($LISTVIEW_LINKS['LISTVIEWBASIC']|@count gt 0) and (!in_array($MODULE, $RESTRICTED_MODULE_LIST))}
+						{if $LISTVIEW_LINKS['LISTVIEWBASIC']|@count gt 0 and !in_array($MODULE, $RESTRICTED_MODULE_LIST)}
 							{if empty($QUALIFIED_MODULE)} 
 								{assign var=QUALIFIED_MODULE value='Settings:'|cat:$MODULE}
 							{/if}

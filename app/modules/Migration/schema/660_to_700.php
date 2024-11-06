@@ -108,10 +108,8 @@ if(defined('VTIGER_UPGRADE')) {
 	$result = $db->pquery('SELECT relation_id FROM vtiger_relatedlists ORDER BY relation_id DESC LIMIT 1', array());
 	$db->pquery('UPDATE vtiger_relatedlists_seq SET id=?', array($db->query_result($result, 0, 'relation_id')));
 
-        $accountsTabId = getTabId('Accounts');
-        $query = "UPDATE vtiger_relatedlists INNER JOIN vtiger_tab ON vtiger_tab.tabid = vtiger_relatedlists.related_tabid  SET vtiger_relatedlists.name = ? 
-          WHERE vtiger_relatedlists.name = ? AND vtiger_relatedlists.tabid = ? AND customized = 0";
-        $db->pquery($query, array('get_merged_list', 'get_dependents_list', $accountsTabId));
+	$accountsTabId = getTabId('Accounts');
+	$db->pquery('UPDATE vtiger_relatedlists SET name=? WHERE name=? and tabid=?', array('get_merged_list', 'get_dependents_list', $accountsTabId));
 
 	$invoiceModuleInstance = Vtiger_Module::getInstance('Invoice');
 	$blockInstance = Vtiger_Block::getInstance('LBL_INVOICE_INFORMATION', $invoiceModuleInstance);
@@ -221,7 +219,7 @@ if(defined('VTIGER_UPGRADE')) {
 		$moduleInstance = Vtiger_Module::getInstance($moduleName);
 		$blockInstance = Vtiger_Block::getInstance('LBL_ITEM_DETAILS', $moduleInstance);
 
-		for($i=0; $i<php7_count($itemFieldsName); $i++) {
+		for($i=0; $i<count($itemFieldsName); $i++) {
 			$fieldName = $itemFieldsName[$i];
 
 			if ($moduleName === 'PurchaseOrder' && $fieldName !== 'image') {
@@ -344,7 +342,7 @@ if(defined('VTIGER_UPGRADE')) {
 		$primaryModuleName = $primaryModuleInstance->getName();
 		$relatedModuleName = $relatedModuleInstance->getName();
 
-		//$relatedModulesIgnored = $ignoreRelationFieldMapping[$primaryModuleName];
+		$relatedModulesIgnored = $ignoreRelationFieldMapping[$primaryModuleName];
 		if (in_array($relatedModuleName, $ignoreRelationFieldMapping)) {
 			continue;
 		}
@@ -434,6 +432,8 @@ if(defined('VTIGER_UPGRADE')) {
 	if (!in_array('module', $columns)) {
 		$db->pquery('ALTER TABLE vtiger_emailtemplates ADD COLUMN module VARCHAR(100)', array());
 	}
+	$db->pquery('UPDATE vtiger_emailtemplates SET module=? WHERE templatename IN (?,?,?) AND module IS NULL', array('Events', 'ToDo Reminder', 'Activity Reminder', 'Invite Users'));
+	$db->pquery('UPDATE vtiger_emailtemplates SET module=? WHERE module IS NULL', array('Contacts'));
 
 	$moduleName = 'Calendar';
 	$reminderTemplateResult = $db->pquery('SELECT 1 FROM vtiger_emailtemplates WHERE subject=? AND systemtemplate=?', array('Reminder', '1'));
@@ -634,7 +634,7 @@ if(defined('VTIGER_UPGRADE')) {
 			$commentIds[] = $row['modcommentsid'];
 		}
 
-		if (php7_count($commentIds) > 0) {
+		if (count($commentIds) > 0) {
 			$db->pquery('UPDATE vtiger_modcomments SET is_private = 0 WHERE modcommentsid IN ('.generateQuestionMarks($commentIds).')', $commentIds);
 		}
 
@@ -735,22 +735,24 @@ if(defined('VTIGER_UPGRADE')) {
 	//To change the convert lead webserice operation parameters which was wrong earliear 
 	require_once 'include/Webservices/Utils.php';
 	$convertLeadOperationQueryRes = $db->pquery('SELECT operationid FROM vtiger_ws_operation WHERE name=?', array('convertlead'));
-	if ($db->num_rows($convertLeadOperationQueryRes)) {
+	if (!$db->num_rows($convertLeadOperationQueryRes)) {
 		$operationId = $db->query_result($convertLeadOperationQueryRes, '0', 'operationid');
 		$deleteParameterQuery = $db->pquery('DELETE FROM vtiger_ws_operation_parameters WHERE operationid=?', array($operationId));
 		vtws_addWebserviceOperationParam($operationId, 'element', 'encoded', 1);
 	}
 
 	//Start : Change fieldLabel of description field to Description - Project module.
-
-	$fieldModel = Vtiger_Field_Model::getInstance('description', Vtiger_Module_Model::getInstance('Project'));
+	$fieldId = getFieldid(getTabid('Project'), 'description');
+	$fieldModel = Vtiger_Field_Model::getInstance($fieldId);
 	$fieldModel->set('label', 'Description');
 	$fieldModel->__update();
 
 	$db->pquery('ALTER TABLE vtiger_mail_accounts MODIFY mail_password TEXT', array());
 
 	//making priority as mandatory field in Tickets.
-	$fieldInstance = Vtiger_Field_Model::getInstance('ticketpriorities', Vtiger_Module_Model::getInstance('HelpDesk'));
+	$module = 'HelpDesk';
+	$fieldModel = Vtiger_Functions::getModuleFieldInfo(getTabid($module), 'ticketpriorities');
+	$fieldInstance = Settings_LayoutEditor_Field_Model::getInstance($fieldModel['fieldid']);
 	$fieldInstance->set('typeofdata', 'V~M');
 	$fieldInstance->save();
 
@@ -856,7 +858,10 @@ if(defined('VTIGER_UPGRADE')) {
 	$db->pquery($query, array());
 
 	//Enable mass edit for portal field under Contacts
-	$contactsFieldInstance = Vtiger_Field_Model::getInstance('portal', Vtiger_Module_Model::getInstance('Contacts'));
+	$moduleContacts = 'Contacts';
+	$contactsFieldModel = Vtiger_Functions::getModuleFieldInfo(getTabid($moduleContacts), 'portal');
+	$contactsFieldId = $contactsFieldModel['fieldid'];
+	$contactsFieldInstance = Settings_LayoutEditor_Field_Model::getInstance($contactsFieldId);
 	$contactsFieldInstance->set('masseditable', '1');
 	$contactsFieldInstance->save();
 	//Customer portal changes end
@@ -1023,7 +1028,8 @@ if(defined('VTIGER_UPGRADE')) {
 	}
 
 	//Start : Inactivate update_log field from ticket module
-	$fieldModel = Vtiger_Field_Model::getInstance('update_log', Vtiger_Module_Model::getInstance('HelpDesk'));
+	$fieldId = getFieldid(getTabid('HelpDesk'), 'update_log');
+	$fieldModel = Vtiger_Field_Model::getInstance($fieldId);
 	if ($fieldModel) {
 		$fieldModel->set('presence', 1);
 		$fieldModel->__update();
@@ -1043,7 +1049,8 @@ if(defined('VTIGER_UPGRADE')) {
 	//End
 
 	//Start : Change fieldLabel of description field to Description - ProjectMilestone module.
-	$fieldModel = Vtiger_Field_Model::getInstance('description', Vtiger_Module_Model::getInstance('ProjectMilestone'));
+	$fieldId = getFieldid(getTabid('ProjectMilestone'), 'description');
+	$fieldModel = Vtiger_Field_Model::getInstance($fieldId);
 	if ($fieldModel) {
 		$fieldModel->set('label', 'Description');
 		$fieldModel->__update();
@@ -1095,7 +1102,8 @@ if(defined('VTIGER_UPGRADE')) {
 	$db->pquery($updateCreateEditStatusQuery, array(1, 0, getTabid('Documents')));
 	$db->pquery($updateCreateEditStatusQuery, array(0, 1, getTabid('Assets')));
 
-	$accessCountFieldModel = Vtiger_Field_Model::getInstance('access_count', Vtiger_Module_Model::getInstance('Emails'));
+	$accessCountFieldId = getFieldid(getTabid('Emails'), 'access_count');
+	$accessCountFieldModel = Vtiger_Field_Model::getInstance($accessCountFieldId);
 	if ($accessCountFieldModel) {
 		$accessCountFieldModel->set('typeofdata', 'I~O');
 		$accessCountFieldModel->__update();
@@ -1461,7 +1469,7 @@ if(defined('VTIGER_UPGRADE')) {
 	for ($i=0; $i<$rows; $i++) {
 		$deletablePicklists[] = $db->query_result($deletedPicklistResult, $i, 'picklistid');
 	}
-	if (php7_count($deletablePicklists)) {
+	if (count($deletablePicklists)) {
 		$db->pquery('DELETE FROM vtiger_role2picklist WHERE picklistid IN ('.generateQuestionMarks($deletablePicklists).')', array($deletablePicklists));
 	}
 
@@ -1672,7 +1680,7 @@ if(defined('VTIGER_UPGRADE')) {
 	$menuGroupedByParent = $menuStructure->regroupMenuByParent($menuGroupedByParent);
 	foreach ($menuGroupedByParent as $app => $appModules) {
 		$modules = array();
-		if (isset($appsList[$app]) && $appsList[$app]) {
+		if ($appsList[$app]) {
 			$modules = $appsList[$app];
 		}
 		foreach ($appModules as $moduleName => $moduleModel) {
@@ -1805,7 +1813,7 @@ if(defined('VTIGER_UPGRADE')) {
 		foreach ($fieldMap as $values) {
 			$potentialfid = getFieldid($potentialTab, $values[0]);
 			$projectfid = getFieldid($projectTab, $values[1]);
-			$editable = isset($values[4])? $values[4] : 1;
+			$editable = $values[4];
 			$db->pquery($mapSql, array($potentialfid, $projectfid, $editable));
 		}
 	}
@@ -2183,7 +2191,7 @@ if(defined('VTIGER_UPGRADE')) {
 			unset($relatedTables['vtiger_crmentity']);
 
 			if (is_array($relatedTables)) {
-				if (isset($skippedTables[$moduleName]) && $skippedTables[$moduleName]) {
+				if ($skippedTables[$moduleName]) {
 					$relatedTables = array_diff_key($relatedTables, array_flip($skippedTables[$moduleName]));
 				}
 				if ($skippedTablesForAll) {
@@ -2207,17 +2215,16 @@ if(defined('VTIGER_UPGRADE')) {
 					}
 				}
 			}
-            $deleteQueryParams = array($moduleName);
-            if($baseTableName == 'vtiger_activity'){
-                array_push($deleteQueryParams, "Emails");
-            }
-			$db->pquery("DELETE FROM $baseTableName WHERE $baseTableIndex NOT IN (SELECT crmid FROM vtiger_crmentity WHERE setype in (". generateQuestionMarks($deleteQueryParams)."))", $deleteQueryParams);
+			$db->pquery("DELETE FROM $baseTableName WHERE $baseTableIndex NOT IN (SELECT crmid FROM vtiger_crmentity WHERE setype=?)", array($moduleName));
 		}
 	}
 
 	if (is_dir('modules/Vtiger/resources')) {
 		rename('modules/Vtiger/resources', 'modules/Vtiger/resources_650');
 	}
+
+	//Update existing package modules
+	Install_Utils_Model::installModules();
 
 	//recalculate user files to finish
 	RecalculateSharingRules();

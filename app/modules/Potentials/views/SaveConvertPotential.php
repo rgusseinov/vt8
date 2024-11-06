@@ -58,7 +58,7 @@ class Potentials_SaveConvertPotential_View extends Vtiger_View_Controller {
 						$fieldValue = DateTimeField::convertToDBFormat($fieldValue);
 					} elseif ($fieldModel->getFieldDataType() === 'reference' && $fieldValue) {
 						$ids = vtws_getIdComponents($fieldValue);
-						if (php7_count($ids) === 1) {
+						if (count($ids) === 1) {
 							$fieldValue = vtws_getWebserviceEntityId(getSalesEntityType($fieldValue), $fieldValue);
 						}
 					}

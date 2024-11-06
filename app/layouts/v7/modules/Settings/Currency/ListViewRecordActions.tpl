@@ -25,6 +25,9 @@
                     <i class="fa fa-trash" ></i>
                     </a>
                 {/if}
+                {if !$RECORD_LINK@lastui-sortable}
+                    &nbsp;&nbsp;
+                {/if}
                 </span>
             {/foreach}
     </div>

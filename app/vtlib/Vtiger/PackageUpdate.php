@@ -20,11 +20,8 @@ class Vtiger_PackageUpdate extends Vtiger_PackageImport {
 	/**
 	 * Constructor
 	 */
-        function __construct() {
-            parent::__construct();
-        }
 	function Vtiger_PackageUpdate() {
-            self::__construct();
+		parent::__construct();
 	}
 
 	/**
@@ -196,7 +193,7 @@ class Vtiger_PackageUpdate extends Vtiger_PackageImport {
 				}
 			}
 			// Sort the migration details based on version
-			if(php7_count($this->_migrations) > 1) {
+			if(count($this->_migrations) > 1) {
 				uksort($this->_migrations, 'version_compare');
 			}
 		}

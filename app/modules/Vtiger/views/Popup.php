@@ -170,7 +170,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 			$this->listViewHeaders = $listViewModel->getHeaders();
 
 			$models = $listViewModel->getEntries($pagingModel);
-			$noOfEntries = php7_count($models);
+			$noOfEntries = count($models);
 			foreach ($models as $recordId => $recordModel) {
 				foreach ($this->listViewHeaders as $fieldName => $fieldModel) {
 					$recordModel->set($fieldName, $recordModel->getDisplayValue($fieldName));
@@ -178,7 +178,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 				$models[$recordId] = $recordModel;
 			}
 			$this->listViewEntries = $models;
-			if(php7_count($this->listViewEntries) > 0 ){
+			if(count($this->listViewEntries) > 0 ){
 				$parent_related_records = true;
 			}
 		}else{
@@ -187,8 +187,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 		}
 
 		// If there are no related records with parent module then, we should show all the records
-		if((!isset($parent_related_records) || !$parent_related_records) && 
-			!empty($relatedParentModule) && !empty($relatedParentId)){
+		if(!$parent_related_records && !empty($relatedParentModule) && !empty($relatedParentId)){
 			$relatedParentModule = null;
 			$relatedParentId = null;
 			$listViewModel = Vtiger_ListView_Model::getInstanceForPopup($moduleName);
@@ -228,7 +227,7 @@ class Vtiger_Popup_View extends Vtiger_Footer_View {
 					}
 		}
 
-		$noOfEntries = php7_count($this->listViewEntries);
+		$noOfEntries = count($this->listViewEntries);
 
 		if(empty($sortOrder)){
 			$sortOrder = "ASC";

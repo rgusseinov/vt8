@@ -144,13 +144,11 @@ class Contacts extends CRMEntity {
 		'Emails' => array('table_name' => 'vtiger_seactivityrel', 'table_index' => 'crmid', 'rel_index' => 'activityid'),
         'Vendors' => array('table_name' => 'vtiger_vendorcontactrel', 'table_index' => 'vendorid', 'rel_index' => 'contactid'),
 	);
-        function __construct() {
-            $this->log = Logger::getLogger('contact');
-            $this->db = PearDatabase::getInstance();
-            $this->column_fields = getColumnFields('Contacts');
-        }       
+
 	function Contacts() {
-            self::__construct();
+		$this->log = LoggerManager::getLogger('contact');
+		$this->db = PearDatabase::getInstance();
+		$this->column_fields = getColumnFields('Contacts');
 	}
 
 	// Mike Crowe Mod --------------------------------------------------------Default ordering for us
@@ -257,7 +255,7 @@ class Contacts extends CRMEntity {
               $profileList = getCurrentUserProfileList();
               $sql1 = "select columnname from vtiger_field inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid where vtiger_field.tabid=4 and vtiger_field.block <> 6 and vtiger_field.block <> 75 and vtiger_field.displaytype in (1,2,4,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
 			  $params1 = array();
-			  if (php7_count($profileList) > 0) {
+			  if (count($profileList) > 0) {
 			  	 $sql1 .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 			  	 array_push($params1, $profileList);
 			  }
@@ -277,21 +275,21 @@ class Contacts extends CRMEntity {
               {
                   $contact = Array();
 
-		  $contact["lastname"] = in_array("lastname",$permitted_field_lists) ? $row["lastname"] : "";
-		  $contact["firstname"] = in_array("firstname",$permitted_field_lists)? $row["firstname"] : "";
-		  $contact["email"] = in_array("email",$permitted_field_lists) ? $row["email"] : "";
+		  $contact[lastname] = in_array("lastname",$permitted_field_lists) ? $row[lastname] : "";
+		  $contact[firstname] = in_array("firstname",$permitted_field_lists)? $row[firstname] : "";
+		  $contact[email] = in_array("email",$permitted_field_lists) ? $row[email] : "";
 
 
                   if(in_array("accountid",$permitted_field_lists))
                   {
-                      $contact["accountname"] = $row["accountname"];
-                      $contact["account_id"] = $row["accountid"];
+                      $contact[accountname] = $row[accountname];
+                      $contact[account_id] = $row[accountid];
                   }else
 		  {
-                      $contact["accountname"] = "";
-                      $contact["account_id"] = "";
+                      $contact[accountname] = "";
+                      $contact[account_id] = "";
 		  }
-                  $contact["contactid"] =  $row["contactid"];
+                  $contact[contactid] =  $row[contactid];
                   $list[] = $contact;
               }
           }
@@ -630,7 +628,7 @@ class Contacts extends CRMEntity {
 
 		$userNameSql = getSqlForNameInDisplayFormat(array('first_name'=>
 							'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
-		$query = "select case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name,vtiger_crmentity.*, vtiger_salesorder.*, vtiger_quotes.subject as quotename, vtiger_account.accountname, vtiger_contactdetails.lastname from vtiger_salesorder inner join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_salesorder.salesorderid LEFT JOIN vtiger_salesordercf ON vtiger_salesordercf.salesorderid = vtiger_salesorder.salesorderid LEFT JOIN vtiger_sobillads ON vtiger_sobillads.sobilladdressid = vtiger_salesorder.salesorderid LEFT JOIN vtiger_soshipads ON vtiger_soshipads.soshipaddressid = vtiger_salesorder.salesorderid left join vtiger_users on vtiger_users.id=vtiger_crmentity.smownerid left outer join vtiger_quotes on vtiger_quotes.quoteid=vtiger_salesorder.quoteid left outer join vtiger_account on vtiger_account.accountid=vtiger_salesorder.accountid LEFT JOIN vtiger_invoice_recurring_info ON vtiger_invoice_recurring_info.salesorderid = vtiger_salesorder.salesorderid left outer join vtiger_contactdetails on vtiger_contactdetails.contactid=vtiger_salesorder.contactid left join vtiger_groups on vtiger_groups.groupid=vtiger_crmentity.smownerid where vtiger_crmentity.deleted=0  and  vtiger_salesorder.contactid = ".$id;
+		$query = "select case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name,vtiger_crmentity.*, vtiger_salesorder.*, vtiger_quotes.subject as quotename, vtiger_account.accountname, vtiger_contactdetails.lastname from vtiger_salesorder inner join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_salesorder.salesorderid LEFT JOIN vtiger_salesordercf ON vtiger_salesordercf.salesorderid = vtiger_salesorder.salesorderid LEFT JOIN vtiger_sobillads ON vtiger_sobillads.sobilladdressid = vtiger_salesorder.salesorderid LEFT JOIN vtiger_soshipads ON vtiger_soshipads.soshipaddressid = vtiger_salesorder.salesorderid left join vtiger_users on vtiger_users.id=vtiger_crmentity.smownerid left outer join vtiger_quotes on vtiger_quotes.quoteid=vtiger_salesorder.quoteid left outer join vtiger_account on vtiger_account.accountid=vtiger_salesorder.accountid LEFT JOIN vtiger_invoice_recurring_info ON vtiger_invoice_recurring_info.start_period = vtiger_salesorder.salesorderid left outer join vtiger_contactdetails on vtiger_contactdetails.contactid=vtiger_salesorder.contactid left join vtiger_groups on vtiger_groups.groupid=vtiger_crmentity.smownerid where vtiger_crmentity.deleted=0  and  vtiger_salesorder.contactid = ".$id;
 
 		$return_value = GetRelatedList($this_module, $related_module, $other, $query, $button, $returnset);
 
@@ -1062,7 +1060,7 @@ function getColumnNames()
 	 $profileList = getCurrentUserProfileList();
 	 $sql1 = "select vtiger_field.fieldid,fieldlabel from vtiger_field inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid where vtiger_field.tabid=4 and vtiger_field.block <> 75 and vtiger_field.displaytype in (1,2,4,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
 	 $params1 = array();
-	 if (php7_count($profileList) > 0) {
+	 if (count($profileList) > 0) {
 	 	$sql1 .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .") group by fieldid";
   	 	array_push($params1, $profileList);
 	 }
@@ -1150,7 +1148,7 @@ function get_contactsforol($user_name)
     $profileList = getCurrentUserProfileList();
     $sql1 = "select tablename,columnname from vtiger_field inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid where vtiger_field.tabid=4 and vtiger_field.displaytype in (1,2,4,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
 	$params1 = array();
-	if (php7_count($profileList) > 0) {
+	if (count($profileList) > 0) {
 		$sql1 .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 		array_push($params1, $profileList);
 	}
@@ -1168,7 +1166,7 @@ function get_contactsforol($user_name)
   }
 	$permitted_lists = array_chunk($permitted_lists,2);
 	$column_table_lists = array();
-	for($i=0;$i < php7_count($permitted_lists);$i++)
+	for($i=0;$i < count($permitted_lists);$i++)
 	{
 	   $column_table_lists[] = implode(".",$permitted_lists[$i]);
   }
@@ -1537,6 +1535,13 @@ function get_contactsforol($user_name)
 		$contents = str_replace('$support_team$',getTranslatedString('Support Team', $moduleName),$contents);
 		$contents = str_replace('$logo$','<img src="cid:logo" />',$contents);
 
+		//Company Details
+		$contents = str_replace('$address$',$companyDetails['address'],$contents);
+		$contents = str_replace('$companyname$',$companyDetails['companyname'],$contents);
+		$contents = str_replace('$phone$',$companyDetails['phone'],$contents);
+		$contents = str_replace('$companywebsite$',$companyDetails['website'],$contents);
+		$contents = str_replace('$supportemail$',$HELPDESK_SUPPORT_EMAIL_ID,$contents);
+
 		if($type == "LoginDetails") {
 			$temp=$contents;
 			$value["subject"]=decode_html($adb->query_result($result,0,'subject'));
@@ -1573,14 +1578,14 @@ function get_contactsforol($user_name)
 		$list_buttons = Array();
 
 		if(isPermitted('Contacts','Delete','') == 'yes') {
-			$list_buttons['del'] = $app_strings["LBL_MASS_DELETE"];
+			$list_buttons['del'] = $app_strings[LBL_MASS_DELETE];
 		}
 		if(isPermitted('Contacts','EditView','') == 'yes') {
-			$list_buttons['mass_edit'] = $app_strings["LBL_MASS_EDIT"];
-			$list_buttons['c_owner'] = $app_strings["LBL_CHANGE_OWNER"];
+			$list_buttons['mass_edit'] = $app_strings[LBL_MASS_EDIT];
+			$list_buttons['c_owner'] = $app_strings[LBL_CHANGE_OWNER];
 		}
 		if(isPermitted('Emails','EditView','') == 'yes'){
-			$list_buttons['s_mail'] = $app_strings["LBL_SEND_MAIL_BUTTON"];
+			$list_buttons['s_mail'] = $app_strings[LBL_SEND_MAIL_BUTTON];
 		}
 		return $list_buttons;
 	}

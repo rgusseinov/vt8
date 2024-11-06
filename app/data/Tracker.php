@@ -44,20 +44,13 @@ class Tracker {
         "item_id",
         "item_summary"
     );
-	function __construct()
-    {
-        $this->log = Logger::getLogger('Tracker');
-		// $this->db = PearDatabase::getInstance();
-		global $adb;
-        $this->db = $adb;
-    }
+
     function Tracker()
     {
-		
-		// PHP4-style constructor.
-        // This will NOT be invoked, unless a sub-class that extends `foo` calls it.
-        // In that case, call the new-style constructor to keep compatibility.
-        self::__construct();
+        $this->log = LoggerManager::getLogger('Tracker');
+	// $this->db = PearDatabase::getInstance();
+	global $adb;
+        $this->db = $adb;
     }
 
     /**
@@ -91,7 +84,7 @@ $log->info("in  track view method ".$current_module);
 			 $fl = array();
 			 foreach($fieldlists as $w => $c)
 			 {
-				 if (php7_count($fl))
+				 if (count($fl))
 				 	$fl[] = "' '";
 				 $fl[] = $c;
 			 }
@@ -144,7 +137,7 @@ $log->info("in  track view method ".$current_module);
 
 
             // If the module was not specified or the module matches the module of the row, add the row to the list
-            if($module_name == "" || $row["module_name"] == $module_name)
+            if($module_name == "" || $row[module_name] == $module_name)
             {
 		//Adding Security check
 		require_once('include/utils/utils.php');

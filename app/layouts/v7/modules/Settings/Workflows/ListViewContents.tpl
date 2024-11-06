@@ -41,7 +41,7 @@
 			<div class="col-md-4">
 				<div class="search-link hidden-xs" style="margin-top: 0px;">
 					<span aria-hidden="true" class="fa fa-search"></span>
-					<input class="searchWorkflows" type="text" value="{decode_html($SEARCH_VALUE)|htmlentities}" placeholder="{vtranslate('LBL_WORKFLOW_SEARCH', $QUALIFIED_MODULE)}">
+					<input class="searchWorkflows" type="text" type="text" value="{$SEARCH_VALUE}" placeholder="{vtranslate('LBL_WORKFLOW_SEARCH', $QUALIFIED_MODULE)}">
 				</div> 
 			</div>
 			<div class="col-md-3">
@@ -144,7 +144,7 @@
 							{/foreach}
 							{if $LISTVIEW_ENTRIES_COUNT eq '0'}
 								<tr class="emptyRecordsDiv">
-									{assign var=COLSPAN_WIDTH value={php7_count($LISTVIEW_HEADERS)+1}}
+									{assign var=COLSPAN_WIDTH value={count($LISTVIEW_HEADERS)+1}}
 									<td colspan="{$COLSPAN_WIDTH}" style="vertical-align:inherit !important;">
 										<center>{vtranslate('LBL_NO')} {vtranslate($MODULE, $QUALIFIED_MODULE)} {vtranslate('LBL_FOUND')}</center>
 									</td>

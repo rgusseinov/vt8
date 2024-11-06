@@ -27,7 +27,7 @@
 								<h6>{vtranslate('ONE_ONE_AND_MANY_ONE_RELATIONSHIP',$QUALIFIED_MODULE)}</h6>
 							</div>
 							<div style="list-style: none;">
-								{if php7_count($RELATION_FIELDS) eq 0}
+								{if count($RELATION_FIELDS) eq 0}
 									<div class="well" style="height:72px;opacity:0.6;text-align:center;padding-top: 30px;"> 
 										<div>{vtranslate('LBL_NO_RELATION_TYPE',$QUALIFIED_MODULE)}.</div>
 									</div>
@@ -69,7 +69,7 @@
 								</span>
 							</div>
 							<div class="row">
-								{if php7_count($RELATED_MODULES) eq 0}
+								{if count($RELATED_MODULES) eq 0}
 									<div class="well" style="height:72px;opacity:0.6;text-align:center;padding-top: 30px;"> 
 										<div> {vtranslate('LBL_NO_RELATION_TYPE',$QUALIFIED_MODULE)}.</div>
 									</div>
@@ -129,7 +129,7 @@
 										</div>
 										<div class="relationListInfoWrapper">
 											<div class="col-sm-10 relationListInfo" style="margin-left: 40px;">
-												{if php7_count($RELATED_MODULES) neq 0}
+												{if count($RELATED_MODULES) neq 0}
 													<div style="margin: 5px 0px;">
 														<div class="relatedListInfoHeader"><i class="fa fa-info-circle"></i>&nbsp;{vtranslate('LBL_INFO', $QUALIFIED_MODULE)}</div><br>
 														<div>{vtranslate('LBL_RELATED_LIST_INFO', $QUALIFIED_MODULE)}.</div><br>
@@ -178,7 +178,11 @@
 							</div>
 							<div class="col-sm-4" style="margin-top: 4px;">
 								<div class="pull-right">
-									<img src="{vimage_path('N-N.png')}" width="100" height="50" />
+									{if $MODULE_MODEL->get('relationtype') eq '1:N' and $MODULE_MODEL->getRelationModuleName() neq 'Calendar'}
+										<img src="{vimage_path('1-N.png')}" width="100" height="50" />
+									{else}
+										<img src="{vimage_path('N-N.png')}" width="100" height="50" />
+									{/if}
 								</div>
 							</div>
 							<div class="col-sm-1 deleteButton" style="padding-right: 0px;" data-relation="1">

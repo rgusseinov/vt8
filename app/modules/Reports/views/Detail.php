@@ -41,7 +41,7 @@ class Reports_Detail_View extends Vtiger_Index_View {
 
 	const REPORT_LIMIT = 500;
 
-	function preProcess(Vtiger_Request $request, $display=true) {
+	function preProcess(Vtiger_Request $request) {
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
 		$recordId = $request->get('record');
@@ -68,7 +68,7 @@ class Reports_Detail_View extends Vtiger_Index_View {
         $modulesList = array($primaryModule);
         if(!empty($secondaryModules)){
             if(stripos($secondaryModules, ':') >= 0){
-                $secmodules = explode(':', $secondaryModules);
+                $secmodules = split(':', $secondaryModules);
                 $modulesList = array_merge($modulesList, $secmodules);
             }else{
                 array_push($modulesList, $secondaryModules);
@@ -194,7 +194,7 @@ class Reports_Detail_View extends Vtiger_Index_View {
 		$viewer->assign('COUNT', $this->count);
 		$viewer->assign('MODULE', $moduleName);
 		$viewer->assign('REPORT_RUN_INSTANCE', ReportRun::getInstance($record));
-		if (php7_count($data) > self::REPORT_LIMIT) {
+		if (count($data) > self::REPORT_LIMIT) {
 			$viewer->assign('LIMIT_EXCEEDED', true);
 		}
 

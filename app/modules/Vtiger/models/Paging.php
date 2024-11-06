@@ -67,7 +67,7 @@ class Vtiger_Paging_Model extends Vtiger_Base_Model {
 	 */
 	function getRecordStartRange() {
 		$rangeInfo = $this->getRecordRange();
-		return isset($rangeInfo) ? $rangeInfo['start'] : 0;
+		return $rangeInfo['start'];
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Vtiger_Paging_Model extends Vtiger_Base_Model {
 	 */
 	function getRecordEndRange() {
 		$rangeInfo = $this->getRecordRange();
-		return isset($rangeInfo) ? $rangeInfo['end'] : 0;
+		return $rangeInfo['end'];
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Vtiger_Paging_Model extends Vtiger_Base_Model {
 	 */
 	function calculatePageRange($recordList) {
 		$rangeInfo = array();
-		$recordCount = php7_count($recordList);
+		$recordCount = count($recordList);
 		$pageLimit = $this->getPageLimit();
 		$prevPageExists = $nextPageExists = false;
 

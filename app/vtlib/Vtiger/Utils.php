@@ -16,7 +16,6 @@ include_once('include/utils/utils.php');
  */
 class Vtiger_Utils {
     protected static $logFileName = 'vtigermodule.log';
-    protected static $logFolder = 'logs';
     
 	/**
 	 * Check if given value is a number or not
@@ -72,17 +71,10 @@ class Vtiger_Utils {
 		$filePathParts = explode('/', $relativeFilePath);
 
 		if(stripos($realfilepath, $rootdirpath) !== 0 || in_array($filePathParts[0], $unsafeDirectories)) {
-                    if($dieOnFail) {
-                        $a = debug_backtrace();
-                        $backtrace = 'Traced on '.date('Y-m-d H:i:s')."\n";
-                        $backtrace .= "FileAccessForInclusion - \n";
-                        foreach ($a as $b) {
-                             $backtrace .=  $b['file'] . '::' . $b['function'] . '::' . $b['line'] . '<br>'.PHP_EOL;
-                        }
-                        Vtiger_Utils::writeLogFile('fileMissing.log', $backtrace);
-                        die('Sorry! Attempt to access restricted file.');
-                    }
-                    return false;
+			if($dieOnFail) {
+				die('Sorry! Attempt to access restricted file. - '.$filepath);
+			}
+			return false;
 		}
 		return true;
 	}
@@ -112,16 +104,9 @@ class Vtiger_Utils {
 		$rootdirpath  = str_replace('\\', '/', $rootdirpath);
 
 		if(stripos($realfilepath, $rootdirpath) !== 0) {
-                    if($dieOnFail) {
-                        $a = debug_backtrace();
-                        $backtrace = 'Traced on '.date('Y-m-d H:i:s')."\n";
-                        $backtrace .= "FileAccess - \n";
-                        foreach ($a as $b) {
-                              $backtrace .=  $b['file'] . '::' . $b['function'] . '::' . $b['line'] . '<br>'.PHP_EOL;
-                        }
-                        Vtiger_Utils::writeLogFile('fileMissing.log', $backtrace);
-                        die('Sorry! Attempt to access restricted file.');
-                    }
+			if($dieOnFail) {
+				die('Sorry! Attempt to access restricted file. - '.$filepath);
+			}
 			return false;
 		}
 		return true;
@@ -303,7 +288,7 @@ class Vtiger_Utils {
      * @param <boolean> $request flag to enable or disable request in log
      */
     static function ModuleLog($module, $mixed, $extra = array()) {
-        if (defined('ALLOW_MODULE_LOGGING')) { 
+        if (ALLOW_MODULE_LOGGING) { 
             global $site_URL;
             $date = date('Y-m-d H:i:s');
             $log = array($site_URL,$module, $date);
@@ -331,18 +316,6 @@ class Vtiger_Utils {
             $fp = fopen("logs/$fileName", 'a+');
             fputcsv($fp, $log);
             fclose($fp);
-        }
-    }
-    
-    /**
-     * We should always create and log file inside logs folder as its protected from web-access.
-     * @param type $logFileName
-     * @param type $log
-     */
-    public static function writeLogFile($logFileName, $log) {
-        if ($logFileName && $log) {
-            $logFilePath = self::$logFolder . '/' . $logFileName;
-            file_put_contents($logFilePath, print_r($log, true), FILE_APPEND);
         }
     }
 }

@@ -186,7 +186,7 @@ class EmailTemplates_List_View extends Vtiger_Index_View {
 			$this->pagingModel = $pagingModel;
 		}
 
-		$noOfEntries = php7_count($this->listViewEntries);
+		$noOfEntries = count($this->listViewEntries);
 		$viewer->assign('VIEWID', $cvId);
 		$viewer->assign('MODULE', $moduleName);
 

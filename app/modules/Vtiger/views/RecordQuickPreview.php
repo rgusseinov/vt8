@@ -41,10 +41,7 @@ class Vtiger_RecordQuickPreview_View extends Vtiger_Index_View {
 		$viewer->assign('SUMMARY_RECORD_STRUCTURE', $recordStrucure->getStructure());
 		$viewer->assign('$SOCIAL_ENABLED', false);
 		$viewer->assign('LIST_PREVIEW', true);
-		$appName = $request->get('app');
-		if(!empty($appName)){
-			$viewer->assign('SELECTED_MENU_CATEGORY',$appName);
-		}
+		$viewer->assign('SELECTED_MENU_CATEGORY', 'MARKETING');
 		$pageNumber = 1;
 		$limit = 5;
 
@@ -65,7 +62,7 @@ class Vtiger_RecordQuickPreview_View extends Vtiger_Index_View {
 		$viewer->assign('SHOW_ENGAGEMENTS', 'false');
 		$recentActivities = ModTracker_Record_Model::getUpdates($recordId, $pagingModel, $moduleName);
 		//To show more button for updates if there are more than 5 records
-		if (php7_count($recentActivities) >= 5) {
+		if (count($recentActivities) >= 5) {
 			$pagingModel->set('nextPageExists', true);
 		} else {
 			$pagingModel->set('nextPageExists', false);

@@ -58,10 +58,7 @@ class Settings_LayoutEditor_Field_Action extends Settings_Vtiger_Index_Action {
     public function save(Vtiger_Request $request) {
 		$currentUser = Users_Record_Model::getCurrentUserModel();
         $fieldId = $request->get('fieldid');
-        $sourceModule = $request->get('sourceModule');
-
-        $moduleInstance = Vtiger_Module_Model::getInstance($sourceModule);
-        $fieldInstance = Settings_LayoutEditor_Field_Model::getInstance($fieldId, $moduleInstance);
+        $fieldInstance = Settings_LayoutEditor_Field_Model::getInstance($fieldId);
         
         $fieldLabel = $fieldInstance->get('label');
         $mandatory = $request->get('mandatory',null);
@@ -152,7 +149,7 @@ class Settings_LayoutEditor_Field_Action extends Settings_Vtiger_Index_Action {
         $sourceModule = $fieldInstance->get('block')->module->name;
         $fieldLabel = $fieldInstance->get('label');
         if($fieldInstance->uitype == 16 || $fieldInstance->uitype == 33){
-            $pickListValues = $fieldInstance->getEditablePicklistValues ($fieldInstance->name);
+            $pickListValues = Settings_Picklist_Field_Model::getEditablePicklistValues ($fieldInstance->name);
             $fieldLabel = array_merge(array($fieldLabel),$pickListValues);
         }
         $fieldInstance->delete();

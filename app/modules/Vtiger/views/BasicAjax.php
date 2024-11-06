@@ -23,7 +23,7 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 		return $permissions;
 	}
 
-	function preProcess(Vtiger_Request $request, $display=true) {
+	function preProcess(Vtiger_Request $request) {
 		return true;
 	}
 
@@ -114,7 +114,7 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 		//used to show the save modify filter option
 		$isAdvanceSearch = false;
 		$matchingRecords = array();
-		if(is_array($advFilterList) && php7_count($advFilterList) > 0) {
+		if(is_array($advFilterList) && count($advFilterList) > 0) {
 			$isAdvanceSearch = true;
 			$user = Users_Record_Model::getCurrentUserModel();
 			$queryGenerator = new EnhancedQueryGenerator($moduleName, $user);
@@ -126,7 +126,7 @@ class Vtiger_BasicAjax_View extends Vtiger_Basic_View {
 
 			foreach ($advFilterList as $groupindex=>$groupcolumns) {
 				$filtercolumns = $groupcolumns['columns'];
-				if(php7_count($filtercolumns) > 0) {
+				if(count($filtercolumns) > 0) {
 					$queryGenerator->startGroup('');
 					foreach ($filtercolumns as $index=>$filter) {
                         $specialDateTimeConditions = Vtiger_Functions::getSpecialDateTimeCondtions();

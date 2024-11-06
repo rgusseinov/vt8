@@ -7,7 +7,7 @@
 * All Rights Reserved.
 *************************************************************************************}
 
-{if $REQ.view eq 'Detail'}
+{if $smarty.request.view eq 'Detail'}
 <div id="modules-menu" class="modules-menu">    
     <ul>
         <li class="active">

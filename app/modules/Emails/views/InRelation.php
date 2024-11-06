@@ -47,14 +47,12 @@ class Emails_InRelation_View extends Vtiger_RelatedList_View {
 		foreach ($models as $model) {
 			$modelIds[] = $model->getId();
 		}
-
-		$trackingInfo = null;
 		if(!empty($modelIds)){
 			$trackingInfo = Emails_Record_Model::getTrackingInfo($modelIds, $parentId);
 		}
 		$links = $relationListView->getLinks();
 		$header = $relationListView->getHeaders();
-		$noOfEntries = php7_count($models);
+		$noOfEntries = count($models);
 
 		$relationModel = $relationListView->getRelationModel();
 		$relatedModuleModel = $relationModel->getRelationModuleModel();

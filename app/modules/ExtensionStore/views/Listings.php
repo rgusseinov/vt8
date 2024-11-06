@@ -15,10 +15,6 @@ class ExtensionStore_Listings_View extends Vtiger_Index_View {
 		$this->exposeMethod('getPromotions');
 	}
 
-    public function requiresPermission(\Vtiger_Request $request) {
-		return array();
-	}
-    
 	public function getHeaderScripts(Vtiger_Request $request) {
 		$jsFileNames = array(
 			"libraries.jquery.boxslider.jqueryBxslider",

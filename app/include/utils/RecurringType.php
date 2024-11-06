@@ -31,9 +31,8 @@ class RecurringType {
 	 * Constructor for class RecurringType
 	 * @param array  $repeat_arr     - array contains recurring info
 	 */
-	function __construct($repeat_arr)
-	{
-		
+	function RecurringType($repeat_arr) {
+
 		$st_date = explode("-", $repeat_arr["startdate"]);
 		$st_time = explode(":", $repeat_arr["starttime"]);
 		$end_date = explode("-", $repeat_arr["enddate"]);
@@ -75,12 +74,6 @@ class RecurringType {
 		$this->rptmonth_daytype = $repeat_arr['repeatmonth_daytype'];
 		
 		$this->recurringdates = $this->_getRecurringDates();
-	}
-	function RecurringType($repeat_arr) {
-		// PHP4-style constructor.
-		// This will NOT be invoked, unless a sub-class that extends `foo` calls it.
-		// In that case, call the new-style constructor to keep compatibility.
-		self::__construct($repeat_arr);
 	}
 
 	public static function fromUserRequest($requestArray) {
@@ -124,7 +117,7 @@ class RecurringType {
 				$userStartDateTime = DateTimeField::convertToUserTimeZone($startDate . ' ' . $startTime);
 				$dayOfWeek = $requestArray['dayofweek_to_repeat'];
 				$dbDaysOfWeek = array();
-				for ($i = 0; $i < php7_count($dayOfWeek); ++$i) {
+				for ($i = 0; $i < count($dayOfWeek); ++$i) {
 					$selectedDayOfWeek = $dayOfWeek[$i];
 					$currentDayOfWeek = $userStartDateTime->format('w');
 					$newDate = $userStartDateTime->format('d') + ($selectedDayOfWeek - $currentDayOfWeek);
@@ -188,7 +181,7 @@ class RecurringType {
 
 		if ($repeatInfo['type'] == 'Weekly') {
 			$startIndex = 1; // 0 is for Recurring Type
-			$length = php7_count($recurringInfo);
+			$length = count($recurringInfo);
 			$j = 0;
 			for ($i = $startIndex; $i < $length; ++$i) {
 				$repeatInfo['dayofweek_to_repeat'][$j++] = $recurringInfo[$i];
@@ -297,7 +290,7 @@ class RecurringType {
 		$displayRecurringData['recurringtype'] = $this->getRecurringType();
 
 		if ($this->getRecurringType() == 'Weekly') {
-			$noOfDays = php7_count($recurringInfo['dayofweek_to_repeat']);
+			$noOfDays = count($recurringInfo['dayofweek_to_repeat']);
 			$translatedRepeatDays = array();
 			for ($i = 0; $i < $noOfDays; ++$i) {
 				$translatedRepeatDays[] = getTranslatedString('LBL_DAY' . $recurringInfo['dayofweek_to_repeat'][$i], $currentModule);
@@ -365,11 +358,11 @@ class RecurringType {
 					$recurringDates[] = $tempdate;
 				}
 			} elseif ($this->recur_type == 'Weekly') {
-				if (php7_count($this->dayofweek_to_rpt) == 0) {
+				if (count($this->dayofweek_to_rpt) == 0) {
 					$this->dayofweek_to_rpt[] = $this->startdate->dayofweek;
 				}
 
-				for ($i = 0; $i < php7_count($this->dayofweek_to_rpt); $i++) {
+				for ($i = 0; $i < count($this->dayofweek_to_rpt); $i++) {
 					$repeat = $this->dayofweek_to_rpt[$i];
 					if ($repeat == 0) {
 						$repeat = $repeat+1;

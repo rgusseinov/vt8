@@ -10,7 +10,7 @@
  ********************************************************************************/
 -->*}
 <div style='padding:5px'>
-{if php7_count($MODELS) > 0}
+{if count($MODELS) > 0}
 	<div>
         <div class='row'>
             <div class='col-lg-4'>

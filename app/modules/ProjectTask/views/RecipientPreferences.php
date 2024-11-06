@@ -20,7 +20,7 @@ class ProjectTask_RecipientPreferences_View extends Project_RecipientPreferences
 		echo $viewer->view('RecipientPreferences.tpl', 'Project', true);
 	}
 
-	protected function getEmailFieldsInfo($moduleName = 'ProjectTask') {
+	protected function getEmailFieldsInfo() {
 		$emailFieldsInfo = array();
 		$emailFieldsList = array();
 		$recipientPrefModel = Vtiger_RecipientPreference_Model::getInstance('ProjectTask');

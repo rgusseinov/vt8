@@ -10,7 +10,7 @@
 
 	require_once("include/Webservices/QueryParser.php");
 	
-	function vtws_query($query,$user){
+	function vtws_query($q,$user){
 		
 		static $vtws_query_cache = array();	
 		
@@ -19,10 +19,10 @@
 		// Cache the instance for re-use		
 		$moduleRegex = "/[fF][rR][Oo][Mm]\s+([^\s;]+)/";
 		$moduleName = '';
-		if(preg_match($moduleRegex, $query, $m)) $moduleName = trim($m[1]);
+		if(preg_match($moduleRegex, $q, $m)) $moduleName = trim($m[1]);
 		
 		if(!isset($vtws_create_cache[$moduleName]['webserviceobject'])) {
-			$webserviceObject = VtigerWebserviceObject::fromQuery($adb,$query);
+			$webserviceObject = VtigerWebserviceObject::fromQuery($adb,$q);
 			$vtws_query_cache[$moduleName]['webserviceobject'] = $webserviceObject;
 		} else {
 			$webserviceObject = $vtws_query_cache[$moduleName]['webserviceobject'];
@@ -61,7 +61,7 @@
 			throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,"Permission to read is denied");
 		}
 		
-		$result = $handler->query($query);
+		$result = $handler->query($q);
 		VTWS_PreserveGlobal::flush();
 		return $result;
 	}

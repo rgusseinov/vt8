@@ -552,13 +552,13 @@ class Net_Socket extends PEAR {
         }
 
         $result = 0;
-        if (php7_count($read)) {
+        if (count($read)) {
             $result |= NET_SOCKET_READ;
         }
-        if (php7_count($write)) {
+        if (count($write)) {
             $result |= NET_SOCKET_WRITE;
         }
-        if (php7_count($except)) {
+        if (count($except)) {
             $result |= NET_SOCKET_ERROR;
         }
         return $result;

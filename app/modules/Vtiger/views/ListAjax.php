@@ -30,7 +30,7 @@ class Vtiger_ListAjax_View extends Vtiger_List_View {
 		$this->exposeMethod('searchAll');
 	}
 
-	function preProcess(Vtiger_Request $request, $display=true) {
+	function preProcess(Vtiger_Request $request) {
 		return true;
 	}
 
@@ -121,11 +121,17 @@ class Vtiger_ListAjax_View extends Vtiger_List_View {
 		$pagingModel->set('limit', $pageLimit-1);
 
 		$searchableModules = Vtiger_Module_Model::getSearchableModules();
-		$matchingRecords = Vtiger_Record_Model::getSearchResult($searchValue, array_keys($searchableModules));
+		$matchingRecords = array();
+		foreach ($searchableModules as $searchModule => $searchModuleModel) {
+			$searchedRecords = Vtiger_Record_Model::getSearchResult($searchValue, $searchModule);
+			if ($searchedRecords[$searchModule]) {
+				$matchingRecords[$searchModule] = $searchedRecords[$searchModule];
+			}
+		}
 
 		$matchingRecordsList = array();
 		foreach ($matchingRecords as $module => $recordModelsList) {
-			$recordsCount = php7_count($recordModelsList);
+			$recordsCount = count($recordModelsList);
 			$recordModelsList = array_keys($recordModelsList);
 			$recordModelsList = array_slice($recordModelsList, 0, $pageLimit);
 
@@ -141,7 +147,7 @@ class Vtiger_ListAjax_View extends Vtiger_List_View {
 			$listViewModel->pagingModel = $listviewPagingModel;
 			$listViewModel->recordsCount = $recordsCount;
 
-			if (php7_count($recordModelsList) == $pageLimit) {
+			if (count($recordModelsList) == $pageLimit) {
 				array_pop($recordModelsList);
 			}
 

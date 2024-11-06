@@ -35,7 +35,7 @@ class Settings_MailConverter_BodyRule_Model extends Settings_MailConverter_RuleR
 		return $delimiter;
 	}
 
-	public static function getModuleFields($action) {
+	public function getModuleFields($action) {
 		$module = Settings_MailConverter_BodyRule_Model::getModuleNameByAction($action);
 		if(!$module)
 			return array();
@@ -61,7 +61,7 @@ class Settings_MailConverter_BodyRule_Model extends Settings_MailConverter_RuleR
 		return $fields;
 	}
 
-	public static function parseBody($bodyText, $delimeter) {
+	public function parseBody($bodyText, $delimeter) {
 		$bodyFields = array('Subject', 'From Email', 'From Name', 'Email Content');
 		$rows = explode("\n", $bodyText);
 		foreach($rows as $row) {
@@ -73,7 +73,7 @@ class Settings_MailConverter_BodyRule_Model extends Settings_MailConverter_RuleR
 		return array_unique($bodyFields);
 	}
 
-	public static function getModuleNameByAction($action) {
+	public function getModuleNameByAction($action) {
 		if($action == 'CREATE_HelpDesk_FROM' || $action == 'CREATE_HelpDeskNoContact_FROM') {
 			$module = 'HelpDesk';
 		} else if($action == 'CREATE_Leads_SUBJECT') {

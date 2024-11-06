@@ -15,8 +15,6 @@ class Vtiger_Language_Handler {
 
 	//Contains module language translations
 	protected static $languageContainer;
-	protected static $fileExists = array();
-	protected static $userLanguage;
 
 	/**
 	 * Functions that gets translated string
@@ -26,7 +24,7 @@ class Vtiger_Language_Handler {
 	 */
 	public static function getTranslatedString($key, $module = '', $currentLanguage = '') {
 		if (empty($currentLanguage)) {
-			$currentLanguage = self::$userLanguage ? self::$userLanguage : self::getLanguage();
+			$currentLanguage = self::getLanguage();
 		}
 		//decoding for Start Date & Time and End Date & Time 
 		if (!is_array($key))
@@ -125,37 +123,16 @@ class Vtiger_Language_Handler {
 	 */
 	public static function getModuleStringsFromFile($language, $module='Vtiger'){
 		$module = str_replace(':', '.', $module);
-		if (!empty(self::$languageContainer[$language][$module])) {
-		    return self::$languageContainer[$language][$module];
-		}
 		if(empty(self::$languageContainer[$language][$module])){
 			$qualifiedName = 'languages.'.$language.'.'.$module;
 			$file = Vtiger_Loader::resolveNameToPath($qualifiedName);
 			$languageStrings = $jsLanguageStrings = array();
-			if (!self::$fileExists[$file]) {
-				self::$fileExists[$file] = file_exists($file) ? 'yes' : 'no';
-			}
-			if (self::$fileExists[$file] == 'yes') {
-				checkFileAccessForInclusion($file);
+			if(file_exists($file)){
 				require $file;
 				self::$languageContainer[$language][$module]['languageStrings'] = $languageStrings;
 				self::$languageContainer[$language][$module]['jsLanguageStrings'] = $jsLanguageStrings;
 			}
 		}
-		// add custom translation for module from language/custom/$language/$module.php file
-		$qualifiedCustomName = 'languages.custom.'.$language.'.'.$module;
-        $file = Vtiger_Loader::resolveNameToPath($qualifiedCustomName);
-
-        $languageStrings = $jsLanguageStrings = array();
-		if (!self::$fileExists[$file]) {
-			self::$fileExists[$file] = file_exists($file) ? 'yes' : 'no';
-		}
-		if (self::$fileExists[$file] == 'yes') {            
-			checkFileAccessForInclusion($file);	
-			require $file;
-			self::$languageContainer[$language][$module]['languageStrings'] = array_merge(self::$languageContainer[$language][$module]['languageStrings'],$languageStrings);
-			self::$languageContainer[$language][$module]['jsLanguageStrings'] = array_merge(self::$languageContainer[$language][$module]['jsLanguageStrings'],$jsLanguageStrings);
-		} 
 		$return = array();
 		if(isset(self::$languageContainer[$language][$module])){
 			$return = self::$languageContainer[$language][$module];
@@ -168,17 +145,12 @@ class Vtiger_Language_Handler {
 	 * @return <String> -
 	 */
 	public static function getLanguage() {
-		if (self::$userLanguage) {
-			return self::$userLanguage;
-		}
 		$userModel = Users_Record_Model::getCurrentUserModel();
 		$language = '';
 		if (!empty($userModel) && $userModel->has('language')) {
 			$language = $userModel->get('language');
 		}
-		$userLang = empty($language) ? vglobal('default_language') : $language;
-		self::$userLanguage = $userLang;
-		return $userLang;
+		return empty($language) ? vglobal('default_language') : $language;
 	}
 
 	/**
@@ -261,30 +233,11 @@ class Vtiger_Language_Handler {
 }
 
 function vtranslate($key, $moduleName = '') {
-	$unformattedArgs = func_get_args();
-	if(php7_count($unformattedArgs) > 2){ 
-		// slice an array by taking first 2 values into another array.
-		$formattedArgs = array_slice($unformattedArgs,0,2);
-		// Make third value as empty
-		$formattedArgs['2'] = '';
-		$sliced_part = array_slice($unformattedArgs,2);
-		foreach ($sliced_part as $key => $value) {
-			array_push($formattedArgs,$value);
-		}
-		$args = $formattedArgs;
-	} else {
-		$args = $unformattedArgs;
-	}
+	$args = func_get_args();
 	$formattedString = call_user_func_array(array('Vtiger_Language_Handler', 'getTranslatedString'), $args);
-
-    if(php7_count($unformattedArgs) > 2){
-		// Remove first three values from an array (key,modulename,languagecode)
-		array_shift($args); array_shift($args);array_shift($args);
-	} else {
-		// Remove first two values from an array (key,modulename)
-		array_shift($args); array_shift($args);
-	}
-	if(is_array($args) && !empty($args)) {
+	array_shift($args);
+	array_shift($args);
+	if (is_array($args) && !empty($args)) {
 		$formattedString = call_user_func_array('vsprintf', array($formattedString, $args));
 	}
 	return $formattedString;

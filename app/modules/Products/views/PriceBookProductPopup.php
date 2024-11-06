@@ -115,7 +115,7 @@ class Products_PriceBookProductPopup_View extends Vtiger_Popup_View {
 			}
 		}
 
-		$noOfEntries = php7_count($this->listViewEntries);
+		$noOfEntries = count($this->listViewEntries);
 
 		if(empty($sortOrder)){
 			$sortOrder = "ASC";

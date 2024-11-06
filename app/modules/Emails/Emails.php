@@ -42,9 +42,9 @@ class Emails extends CRMEntity {
 		'Related to' => Array('seactivityrel' => 'parent_id'),
 		'Date Sent' => Array('activity' => 'date_start'),
 		'Time Sent' => Array('activity' => 'time_start'),
-		'Assigned To' => Array('crmentity' => 'smownerid'),
-		'Access Count' => Array('email_track' => 'access_count'),
-		'Click Count' => Array('email_track' => 'click_count'),
+		'Assigned To' => Array('crmentity', 'smownerid'),
+		'Access Count' => Array('email_track', 'access_count'),
+		'Click Count' => Array('email_track','click_count'),
 	);
 	var $list_fields_name = Array(
 		'Subject' => 'subject',
@@ -67,16 +67,13 @@ class Emails extends CRMEntity {
 
 	/** This function will set the columnfields for Email module
 	 */
-        function __construct() {
-            $this->log = Logger::getLogger('email');
-            $this->log->debug("Entering Emails() method ...");
-            $this->log = Logger::getLogger('email');
-            $this->db = PearDatabase::getInstance();
-            $this->column_fields = getColumnFields('Emails');
-            $this->log->debug("Exiting Email method ...");
-        }   
 	function Emails() {
-            self::__construct();
+		$this->log = LoggerManager::getLogger('email');
+		$this->log->debug("Entering Emails() method ...");
+		$this->log = LoggerManager::getLogger('email');
+		$this->db = PearDatabase::getInstance();
+		$this->column_fields = getColumnFields('Emails');
+		$this->log->debug("Exiting Email method ...");
 	}
 
 	function save_module($module) {
@@ -98,7 +95,7 @@ class Emails extends CRMEntity {
 				$adb->pquery($mysql, array($parentid, $actid));
 			} else {
 				$myids = explode("|", $parentid);  //2@71|
-				for ($i = 0; $i < (php7_count($myids) - 1); $i++) {
+				for ($i = 0; $i < (count($myids) - 1); $i++) {
 					$realid = explode("@", $myids[$i]);
 					$mycrmid = $realid[0];
 					//added to handle the relationship of emails with vtiger_users
@@ -152,7 +149,7 @@ class Emails extends CRMEntity {
 		$recordIds = array();
 		if(strpos($recordIdsStr, '@') !== false && strpos($recordIdsStr, '|') !== false) {
 			$recordIdsParts = explode('|', $recordIdsStr);
-			for ($i = 0; $i < (php7_count($recordIdsParts) - 1); $i++) {
+			for ($i = 0; $i < (count($recordIdsParts) - 1); $i++) {
 				$recordIdParts = explode('@', $recordIdsParts[$i]);
 				//filter user records 
 				if($recordIdParts[1] !== -1) {
@@ -188,7 +185,7 @@ class Emails extends CRMEntity {
 
 		if ($module == 'Emails' && isset($_REQUEST['att_id_list']) && $_REQUEST['att_id_list'] != '') {
 			$att_lists = explode(";", $_REQUEST['att_id_list'], -1);
-			$id_cnt = php7_count($att_lists);
+			$id_cnt = count($att_lists);
 			if ($id_cnt != 0) {
 				for ($i = 0; $i < $id_cnt; $i++) {
 					$sql_rel = 'insert into vtiger_seattachmentsrel values(?,?)';
@@ -380,7 +377,7 @@ class Emails extends CRMEntity {
 				onclick=\"return window.open("index.php?module=Users&return_module=Emails&action=Popup&popuptype=detailview&select=enable&form=EditView&form_submit=true&return_id=' . $id . '&recordid=' . $id . '","test","width=640,height=520,resizable=0,scrollbars=0");\"
 				type="button">';
 
-		$query = 'SELECT vtiger_users.id, vtiger_users.first_name,vtiger_users.last_name, vtiger_users.user_name, vtiger_users.email1, vtiger_users.email2, vtiger_users.secondaryemail , vtiger_users.phone_home, vtiger_users.phone_work, vtiger_users.phone_mobile, vtiger_users.phone_other, vtiger_users.phone_fax,vtiger_users.userlabel from vtiger_users inner join vtiger_salesmanactivityrel on vtiger_salesmanactivityrel.smid=vtiger_users.id and vtiger_salesmanactivityrel.activityid=?';
+		$query = 'SELECT vtiger_users.id, vtiger_users.first_name,vtiger_users.last_name, vtiger_users.user_name, vtiger_users.email1, vtiger_users.email2, vtiger_users.secondaryemail , vtiger_users.phone_home, vtiger_users.phone_work, vtiger_users.phone_mobile, vtiger_users.phone_other, vtiger_users.phone_fax from vtiger_users inner join vtiger_salesmanactivityrel on vtiger_salesmanactivityrel.smid=vtiger_users.id and vtiger_salesmanactivityrel.activityid=?';
 		$result = $adb->pquery($query, array($id));
 
 		$noofrows = $adb->num_rows($result);
@@ -397,7 +394,12 @@ class Emails extends CRMEntity {
 
 			$entries = Array();
 
-			$entries[] = $row['userlabel'];
+			if (is_admin($current_user)) {
+				$entries[] = getFullNameFromArray('Users', $row);
+			} else {
+				$entries[] = getFullNameFromArray('Users', $row);
+			}
+
 			$entries[] = $row['user_name'];
 			$entries[] = $row['email1'];
 			if ($email == '')
@@ -530,8 +532,8 @@ class Emails extends CRMEntity {
 			$sharingRuleInfoVariable = $module . '_share_read_permission';
 			$sharingRuleInfo = $sharingRuleInfoVariable;
 			$sharedTabId = null;
-			if (!empty($sharingRuleInfo) && (php7_count($sharingRuleInfo['ROLE']) > 0 ||
-					php7_count($sharingRuleInfo['GROUP']) > 0)) {
+			if (!empty($sharingRuleInfo) && (count($sharingRuleInfo['ROLE']) > 0 ||
+					count($sharingRuleInfo['GROUP']) > 0)) {
 				$tableName = $tableName . '_t' . $tabId;
 				$sharedTabId = $tabId;
 			}
@@ -627,13 +629,13 @@ class Emails extends CRMEntity {
 		$idlists = $adb->query_result($result,0,'idlists');
 		$idlistsArray = explode('|', $idlists);
 
-		for ($i=0; $i<(php7_count($idlistsArray)-1); $i++) {
+		for ($i=0; $i<(count($idlistsArray)-1); $i++) {
 			$crmid = explode("@",$idlistsArray[$i]);
 			array_push($successIds, $crmid[0]);
 		}
 		$successIds = array_unique($successIds);
 		sort($successIds);
-		for ($i=0; $i<php7_count($successIds); $i++) {
+		for ($i=0; $i<count($successIds); $i++) {
 			$adb->pquery("INSERT INTO vtiger_email_track(crmid, mailid,  access_count) VALUES(?,?,?)", array($successIds[$i], $mailid, 0));
 		}
 	}

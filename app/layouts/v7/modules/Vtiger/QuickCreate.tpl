@@ -12,7 +12,7 @@
     {foreach key=index item=jsModel from=$SCRIPTS}
         <script type="{$jsModel->getType()}" src="{$jsModel->getSrc()}"></script>
     {/foreach}
-
+    
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form class="form-horizontal recordEditView" id="QuickCreate" name="QuickCreate" method="post" action="index.php">
@@ -42,7 +42,7 @@
                                 {foreach key=FIELD_NAME item=FIELD_MODEL from=$RECORD_STRUCTURE name=blockfields}
                                     {assign var="isReferenceField" value=$FIELD_MODEL->getFieldDataType()}
                                     {assign var="referenceList" value=$FIELD_MODEL->getReferenceList()}
-                                    {assign var="referenceListCount" value=php7_count($referenceList)}
+                                    {assign var="referenceListCount" value=count($referenceList)}
                                     {if $FIELD_MODEL->get('uitype') eq "19"}
                                         {if $COUNTER eq '1'}
                                             <td></td><td></td></tr><tr>
@@ -56,7 +56,7 @@
                                         {assign var=COUNTER value=$COUNTER+1}
                                     {/if}
                                     <td class='fieldLabel col-lg-2'>
-                                        {if $isReferenceField neq "reference"}<label class="muted">{/if}
+                                        {if $isReferenceField neq "reference"}<label class="muted pull-right">{/if}
                                             {if $isReferenceField eq "reference"}
                                                 {if $referenceListCount > 1}
                                                     {assign var="DISPLAYID" value=$FIELD_MODEL->get('fieldvalue')}
@@ -72,12 +72,12 @@
                                                         </select>
                                                     </span>
                                                 {else}
-                                                    <label class="muted">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}&nbsp;{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}</label>
+                                                    <label class="muted pull-right">{vtranslate($FIELD_MODEL->get('label'), $MODULE)}&nbsp;{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}</label>
                                                 {/if}
                                             {else if $FIELD_MODEL->get('uitype') eq '83'}
 												{include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) COUNTER=$COUNTER MODULE=$MODULE PULL_RIGHT=true}
 												{if $TAXCLASS_DETAILS}
-                                                    {assign var='taxCount' value=php7_count($TAXCLASS_DETAILS)%2}
+                                                    {assign 'taxCount' count($TAXCLASS_DETAILS)%2}
 													{if $taxCount eq 0}
                                                         {if $COUNTER eq 2}
                                                             {assign var=COUNTER value=1}

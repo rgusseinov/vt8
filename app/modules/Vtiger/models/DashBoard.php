@@ -311,8 +311,8 @@ class Vtiger_DashBoard_Model extends Vtiger_Base_Model {
 		$currentUserPrivilegeModel = Users_Privileges_Model::getCurrentUserPrivilegesModel();
 		$linkUrl = $resultData['linkurl'];
 		$linkLabel = $resultData['linklabel'];
-		$filterId = isset($resultData['filterid'])? $resultData['filterid'] : null;
-		$data = decode_html(isset($resultData['data'])? $resultData['data'] : null);
+		$filterId = $resultData['filterid'];
+		$data = decode_html($resultData['data']);
 		$module = $this->getModuleNameFromLink($linkUrl, $linkLabel);
 
 		if($module == 'Home' && !empty($filterId) && !empty($data)) {

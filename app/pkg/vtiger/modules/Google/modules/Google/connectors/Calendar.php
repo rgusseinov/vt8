@@ -87,9 +87,9 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
                 }
                 $attendees = $googleRecord->getAttendees();
                 $entity['contactidlist'] = '';
-                if(php7_count($attendees)) {
+                if(count($attendees)) {
                     $contactIds = $this->emailLookUp($attendees);
-                    if(php7_count($contactIds)) {
+                    if(count($contactIds)) {
                         $entity['contactidlist'] = implode(';', $contactIds);
                     }
                 }
@@ -144,6 +144,7 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
         }
         $query = array(
             'maxResults' => $this->maxResults,
+            'orderBy' => 'updated',
             'singleEvents' => true,
         );
         
@@ -151,12 +152,7 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
             $query['updatedMin'] = $this->googleFormat(Google_Utils_Helper::getSyncTime('Calendar', $user));
             //shows deleted by default
         }
-             $query['updatedMin'] =  date('Y-m-d\TH:i:s\Z', strtotime("-7 days"));
-
-        $query['orderBy'] = 'startTime';
-        $query['timeMin'] = date('c',strtotime("-30 days"));
-        $query['showDeleted'] = false;
-
+        
         $calendarId = Google_Utils_Helper::getSelectedCalendarForUser($user);
         if(!isset($this->calendars)) {
             $this->calendars = $this->pullCalendars(true);
@@ -180,7 +176,7 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
             if($feed->getNextPageToken()) $this->totalRecords = $this->maxResults + 1;
         }
         
-        if (php7_count($calendarRecords) > 0) {
+        if (count($calendarRecords) > 0) {
             $maxModifiedTime = date('Y-m-d H:i:s', strtotime(Google_Contacts_Model::vtigerFormat(end($calendarRecords)->getUpdated())) + 1);
         }
 
@@ -200,20 +196,20 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
             $googleRecords[$calendar->getId()] = $recordModel;
             $googleEventIds[] = $calendar->getId();
         }
-        $this->createdRecords = php7_count($googleRecords);
+        $this->createdRecords = count($googleRecords);
         if (isset($maxModifiedTime)) {
             Google_Utils_Helper::updateSyncTime('Calendar', $maxModifiedTime, $user);
         } else {
             Google_Utils_Helper::updateSyncTime('Calendar', false, $user);
         }
-        if(php7_count($googleEventIds)) {
+        if(count($googleEventIds)) {
             $this->putGoogleEventCalendarMap($googleEventIds, $calendarId, $user);
         }
         return $googleRecords;
     }
 
     protected function putGoogleEventCalendarMap($event_ids, $calendar_id, $user) {
-        if(is_array($event_ids) && php7_count($event_ids)) {
+        if(is_array($event_ids) && count($event_ids)) {
             $db = PearDatabase::getInstance();
             $user_id = $user->getId();
             $sql = 'INSERT INTO vtiger_google_event_calendar_mapping (event_id, calendar_id, user_id) VALUES ';
@@ -296,7 +292,7 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
                 continue;
             }
         }
-        if(php7_count($newEventIds)) {
+        if(count($newEventIds)) {
             $this->putGoogleEventCalendarMap($newEventIds, $calendarId, $user);
         }
         return $records;
@@ -307,7 +303,7 @@ Class Google_Calendar_Connector extends WSAPP_TargetConnector {
      * @param <array> $vtEvents 
      * @return <array> tranformed vtiger Records
      */
-    public function transformToTargetRecord($vtEvents, $user = false) {
+    public function transformToTargetRecord($vtEvents, $user) {
         $records = array();
         foreach ($vtEvents as $vtEvent) {
             $newEvent = new Google_Service_Calendar_Event();

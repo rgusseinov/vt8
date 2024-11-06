@@ -25,31 +25,25 @@ class ListViewSession {
  * Portions created by vtigerCRM are Copyright (C) vtigerCRM.
  * All Rights Reserved.
 */
-	function __construct()
-    {
-        global $log,$currentModule;
+
+	function ListViewSession()
+	{
+		global $log,$currentModule;
 		$log->debug("Entering ListViewSession() method ...");
 
 		$this->module = $currentModule;
 		$this->sortby = 'ASC';
 		$this->start =1;
-    }
-	function ListViewSession()
-	{
-		// PHP4-style constructor.
-        // This will NOT be invoked, unless a sub-class that extends `foo` calls it.
-        // In that case, call the new-style constructor to keep compatibility.
-        self::__construct();
 	}
 
-	public static function getCurrentPage($currentModule,$viewId){
+	function getCurrentPage($currentModule,$viewId){
 		if(!empty($_SESSION['lvs'][$currentModule][$viewId]['start'])){
 			return $_SESSION['lvs'][$currentModule][$viewId]['start'];
 		}
 		return 1;
 	}
 
-	public static function getRequestStartPage(){
+	function getRequestStartPage(){
 		$start = $_REQUEST['start'];
 		if(!is_numeric($start)){
 			$start = 1;
@@ -61,7 +55,7 @@ class ListViewSession {
 		return $start;
 	}
 
-	public static function getListViewNavigation($currentRecordId){
+	function getListViewNavigation($currentRecordId){
 		global $currentModule,$current_user,$adb,$log,$list_max_entries_per_page;
 		Zend_Json::$useBuiltinEncoderDecoder = true;
 		$reUseData = false;
@@ -78,7 +72,7 @@ class ListViewSession {
 		if(!empty($_SESSION[$currentModule.'_DetailView_Navigation'.$viewId])){
 			$recordNavigationInfo = Zend_Json::decode($_SESSION[$currentModule.'_DetailView_Navigation'.$viewId]);
 			$pageNumber =0;
-			if(php7_count($recordNavigationInfo) == 1){
+			if(count($recordNavigationInfo) == 1){
 				foreach ($recordNavigationInfo as $recordIdList) {
 					if(in_array($currentRecordId,$recordIdList)){
 						$reUseData = true;
@@ -92,12 +86,12 @@ class ListViewSession {
 						$recordList[] = $recordId;
 						$recordPageMapping[$recordId] = $start;
 						if($recordId == $currentRecordId){
-							$searchKey = php7_count($recordList)-1;
+							$searchKey = count($recordList)-1;
 							$_REQUEST['start'] = $start;
 						}
 					}
 				}
-				if($searchKey > $displayBufferRecordCount -1 && $searchKey < php7_count($recordList)-$displayBufferRecordCount){
+				if($searchKey > $displayBufferRecordCount -1 && $searchKey < count($recordList)-$displayBufferRecordCount){
 					$reUseData= true;
 				}
 			}
@@ -182,7 +176,7 @@ class ListViewSession {
 		return $recordNavigationInfo;
 	}
 
-	static function getRequestCurrentPage($currentModule, $query, $viewid, $queryMode = false) {
+	function getRequestCurrentPage($currentModule, $query, $viewid, $queryMode = false) {
 		global $list_max_entries_per_page, $adb;
 		$start = 1;
 		if(isset($_REQUEST['query']) && $_REQUEST['query'] == 'true'&& $_REQUEST['start']!="last"){
@@ -212,7 +206,7 @@ class ListViewSession {
 		return $start;
 	}
 
-	public static function setSessionQuery($currentModule,$query,$viewid){
+	function setSessionQuery($currentModule,$query,$viewid){
 		if(isset($_SESSION[$currentModule.'_listquery'])){
 			if($_SESSION[$currentModule.'_listquery'] != $query){
 				unset($_SESSION[$currentModule.'_DetailView_Navigation'.$viewid]);
@@ -221,7 +215,7 @@ class ListViewSession {
 		$_SESSION[$currentModule.'_listquery'] = $query;
 	}
 
-	static function hasViewChanged($currentModule) {
+	function hasViewChanged($currentModule) {
 		if(empty($_SESSION['lvs'][$currentModule]['viewname'])) return true;
 		if(empty($_REQUEST['viewname'])) return false;
 		if($_REQUEST['viewname'] != $_SESSION['lvs'][$currentModule]['viewname']) return true;

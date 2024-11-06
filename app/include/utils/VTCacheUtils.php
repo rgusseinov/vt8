@@ -110,7 +110,6 @@ class VTCacheUtils {
         }
 		$modulefields = false;
 		$fieldInfo = Vtiger_Cache::get('fieldInfo', $tabid);
-		$fldcache = null;
         if($fieldInfo){
             $fldcache =$fieldInfo;
         }else if(isset(self::$_fieldinfo_cache[$tabid])) {

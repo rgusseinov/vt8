@@ -29,8 +29,8 @@ class Install_Index_view extends Vtiger_View_Controller {
 
 	protected function applyInstallFriendlyEnv() {
 		// config.inc.php - will not be ready to control this yet.
-		version_compare(PHP_VERSION, '5.5.0') <= 0 ? error_reporting(E_ERROR & ~E_NOTICE & ~E_DEPRECATED) : error_reporting(E_ERROR & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);  // Production
-		//version_compare(PHP_VERSION, '7.0.0') >= 0 ? error_reporting(E_WARNING & ~E_NOTICE) : error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED  & E_ERROR & ~E_STRICT); // Debug
+		version_compare(PHP_VERSION, '5.5.0') <= 0 ? error_reporting(E_ERROR & ~E_NOTICE & ~E_DEPRECATED) : error_reporting(E_ERROR & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
+		version_compare(PHP_VERSION, '7.0.0') >= 0 ? error_reporting(E_WARNING & ~E_NOTICE) : error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED  & E_ERROR & ~E_STRICT);
 		set_time_limit(0); // override limits on execution time to allow install to finish
 	}
 
@@ -38,6 +38,15 @@ class Install_Index_view extends Vtiger_View_Controller {
 		$this->applyInstallFriendlyEnv();
 
 		date_default_timezone_set('Europe/London'); // to overcome the pre configuration settings
+		// Added to redirect to default module if already installed
+		$configFileName = 'config.inc.php';
+		if(is_file($configFileName) && filesize($configFileName) > 0) {
+			$defaultModule = vglobal('default_module');
+			$defaultModuleInstance = Vtiger_Module_Model::getInstance($defaultModule);
+			$defaultView = $defaultModuleInstance->getDefaultViewName();
+			header('Location:index.php?module='.$defaultModule.'&view='.$defaultView);
+			exit;
+		}
 
 		parent::preProcess($request);
 		$viewer = $this->getViewer($request);
@@ -111,10 +120,6 @@ class Install_Index_view extends Vtiger_View_Controller {
 		$viewer->assign('ADMIN_LASTNAME', $defaultParameters['admin_lastname']);
 		$viewer->assign('ADMIN_PASSWORD', $defaultParameters['admin_password']);
 		$viewer->assign('ADMIN_EMAIL', $defaultParameters['admin_email']);
-                
-                $runtime_configs = Vtiger_Runtime_Configs::getInstance();
-                $password_regex = $runtime_configs->getValidationRegex('password_regex');
-                $viewer->assign('PWD_REGEX', $password_regex);
 
 		$viewer->view('Step4.tpl', $moduleName);
 	}
@@ -128,9 +133,6 @@ class Install_Index_view extends Vtiger_View_Controller {
 		foreach($requestData as $name => $value) {
 			$_SESSION['config_file_info'][$name] = $value;
 		}
-
-		$rootUser = '';
-		$rootPassword = '';
 
 		$createDataBase = false;
 		$createDB = $request->get('create_db');
@@ -202,8 +204,6 @@ class Install_Index_view extends Vtiger_View_Controller {
 			Install_Utils_Model::installModules();
 
 			Install_InitSchema_Model::upgrade();
-
-			Install_Utils_Model::registerUser($request->get("myname"), $request->get("myemail"), $request->get("industry"));
 
 			$viewer = $this->getViewer($request);
 			$viewer->assign('PASSWORD', $_SESSION['config_file_info']['password']);

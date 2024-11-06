@@ -42,15 +42,12 @@ class Appointment
 	var $shared = false;
 	var $recurring;
 	var $dur_hour;
-        function __construct()
-        {
-            $this->participant = Array();
-            $this->participant_state = Array();
-            $this->description = "";
-        }
+
 	function Appointment()
 	{
-            self::__construct();
+		$this->participant = Array();
+		$this->participant_state = Array();
+		$this->description = "";
 	}
 	
 	/** To get the events of the specified user and shared events
@@ -61,7 +58,7 @@ class Appointment
 	  * @returns $list :: Type Array
 	 */
 	
-	static function readAppointment($userid, &$from_datetime, &$to_datetime, $view)
+	function readAppointment($userid, &$from_datetime, &$to_datetime, $view)
 	{
 		global $current_user,$adb;
 		require('user_privileges/user_privileges_'.$current_user->id.'.php');
@@ -312,7 +309,7 @@ function getRoleBasesdPickList($fldname,$exist_val)
 				$roleid=$current_user->roleid;
 				$roleids = Array();
 				$subrole = getRoleSubordinates($roleid);
-				if(php7_count($subrole)> 0)
+				if(count($subrole)> 0)
 				$roleids = $subrole;
 				array_push($roleids, $roleid);
 

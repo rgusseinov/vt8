@@ -56,7 +56,7 @@ function wsapp_getRecordEntityNameIds($entityNames,$modules,$user){
         }
         $meta = $entityMetaList[$moduleName];
         $nameFieldsArray = explode(",",$meta->getNameFields());
-        if(php7_count($nameFieldsArray)>1){
+        if(count($nameFieldsArray)>1){
             $nameFields = "concat(".implode(",' ',",$nameFieldsArray).")";
         }
         else
@@ -95,7 +95,7 @@ function wsapp_checkIfRecordsAssignToUser($recordsIds,$userIds){
     $assignedRecordIds = array();
     if(!is_array($recordsIds))
         $recordsIds = array($recordsIds);
-    if(php7_count($recordsIds)<=0)
+    if(count($recordsIds)<=0)
         return $assignedRecordIds;
     if(!is_array($userIds))
         $userIds = array($userIds);

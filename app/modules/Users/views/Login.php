@@ -20,8 +20,6 @@ class Users_Login_View extends Vtiger_View_Controller {
 	}
 	
 	function preProcess(Vtiger_Request $request, $display = true) {
-		global $current_user;
-
 		$viewer = $this->getViewer($request);
 		$viewer->assign('PAGETITLE', $this->getPageTitle($request));
 		$viewer->assign('SCRIPTS', $this->getHeaderScripts($request));
@@ -29,16 +27,6 @@ class Users_Login_View extends Vtiger_View_Controller {
 		$viewer->assign('MODULE', $request->getModule());
 		$viewer->assign('VIEW', $request->get('view'));
 		$viewer->assign('LANGUAGE_STRINGS', array());
-
-		$viewer->assign('INVENTORY_MODULES', array());
-		$viewer->assign('SELECTED_MENU_CATEGORY', '');
-		$viewer->assign('QUALIFIED_MODULE', '');
-		$viewer->assign('PARENT_MODULE', '');
-		$viewer->assign('NOTIFIER_URL', '');
-		$viewer->assign('EXTENSION_MODULE', '');
-		$viewer->assign('CURRENT_USER_MODEL', $current_user);
-		$viewer->assign('LANGUAGE', '');
-
 		if ($display) {
 			$this->preProcessDisplay($request);
 		}
@@ -49,9 +37,8 @@ class Users_Login_View extends Vtiger_View_Controller {
 
 		$modelInstance = Settings_ExtensionStore_Extension_Model::getInstance();
 		$news = $modelInstance->getNews();
-		$jsonData = array();
 
-		if ($news && isset($news['result'])) {
+		if ($news && $news['result']) {
 			$jsonData = $news['result'];
 			$oldTextLength = vglobal('listview_max_textlength');
 			foreach ($jsonData as $blockData) {
@@ -73,7 +60,7 @@ class Users_Login_View extends Vtiger_View_Controller {
 		}
 
 		$viewer = $this->getViewer($request);
-		$viewer->assign('DATA_COUNT', php7_count($jsonData));
+		$viewer->assign('DATA_COUNT', count($jsonData));
 		$viewer->assign('JSON_DATA', $finalJsonData);
 
 		$mailStatus = $request->get('mailStatus');

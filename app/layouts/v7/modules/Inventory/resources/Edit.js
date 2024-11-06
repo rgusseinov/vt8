@@ -2576,10 +2576,6 @@ Vtiger_Edit_Js("Inventory_Edit_Js", {
 			var objectToMapAddress;
 			if(elementClass == "accountAddress"){
 				var recordRelativeAccountId = jQuery('[name="account_id"]').val();
-                                if(typeof recordRelativeAccountId == 'undefined'){
-                                    app.helper.showErrorNotification({'message':app.vtranslate('JS_RELATED_ACCOUNT_IS_NOT_AVAILABLE')});
-                                    return;
-                                }
 				if(recordRelativeAccountId == "" || recordRelativeAccountId == "0"){
 					app.helper.showErrorNotification({'message':app.vtranslate('JS_PLEASE_SELECT_AN_ACCOUNT_TO_COPY_ADDRESS')});
 				} else {
@@ -2599,12 +2595,8 @@ Vtiger_Edit_Js("Inventory_Edit_Js", {
 				}
 			}else if(elementClass == "contactAddress"){
 				var recordRelativeContactId = jQuery('[name="contact_id"]').val();
-                                if(typeof recordRelativeContactId == 'undefined'){
-                                    app.helper.showErrorNotification({'message':app.vtranslate('JS_RELATED_CONTACT_IS_NOT_AVAILABLE')});
-                                    return;
-                                }
 				if(recordRelativeContactId == "" || recordRelativeContactId == "0"){
-                                    app.helper.showErrorNotification({'message':app.vtranslate('JS_PLEASE_SELECT_AN_RELATED_TO_COPY_ADDRESS')});
+					app.helper.showErrorNotification({'message':app.vtranslate('JS_PLEASE_SELECT_AN_RELATED_TO_COPY_ADDRESS')});
 				} else {
 					var recordRelativeContactName = jQuery('#contact_id_display').val();
 					var editViewLabel = jQuery('#contact_id_display').closest('td');
@@ -2793,12 +2785,9 @@ Vtiger_Edit_Js("Inventory_Edit_Js", {
             e.preventDefault();
             var element = jQuery(e.currentTarget);
             var popOverEle = element.closest('.popover');
-			var popOverInput = popOverEle.find('input');
-			if (popOverInput.length) {
-				var validate = popOverInput.valid();
-				if (!validate) {
-					popOverEle.find('.input-error').val(0).valid();
-				}
+			var validate = popOverEle.find('input').valid();
+			if (!validate) {
+				popOverEle.find('.input-error').val(0).valid();
 			}
 			popOverEle.css('opacity',0).css('z-index','-1');
 

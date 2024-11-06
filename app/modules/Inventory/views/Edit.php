@@ -20,8 +20,6 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			$sourceRecord = $request->get('returnrecord');
 			$sourceModule = $request->get('returnmodule');
 		}
-		$relatedProducts = null;
-		$currencyInfo = null;
 
 		$viewer->assign('MODE', '');
 		$viewer->assign('IS_DUPLICATE', false);
@@ -120,12 +118,12 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 			}
 		}
 
-		$deductTaxes = $relatedProducts ? $relatedProducts[1]['final_details']['deductTaxes'] : null;
+		$deductTaxes = $relatedProducts[1]['final_details']['deductTaxes'];
 		if (!$deductTaxes) {
 			$deductTaxes = Inventory_TaxRecord_Model::getDeductTaxesList();
 		}
 
-		$taxType = $relatedProducts ? $relatedProducts[1]['final_details']['taxtype'] : null;
+		$taxType = $relatedProducts[1]['final_details']['taxtype'];
 		$moduleModel = $recordModel->getModule();
 		$fieldList = $moduleModel->getFields();
 		$requestFieldList = array_intersect_key($request->getAllPurified(), $fieldList);
@@ -198,9 +196,9 @@ Class Inventory_Edit_View extends Vtiger_Edit_View {
 
 		if ($request->get('displayMode') == 'overlay') {
 			$viewer->assign('SCRIPTS', $this->getOverlayHeaderScripts($request));
-			echo @$viewer->view('OverlayEditView.tpl', $moduleName);
+			echo $viewer->view('OverlayEditView.tpl', $moduleName);
 		} else {
-			@$viewer->view('EditView.tpl', 'Inventory');
+			$viewer->view('EditView.tpl', 'Inventory');
 		}
 	}
 

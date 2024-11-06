@@ -11,49 +11,46 @@
 
 {strip}
 	{assign var=LINEITEM_FIELDS value=$RECORD_STRUCTURE['LBL_ITEM_DETAILS']}
-	{assign var=COL_SPAN1 value=1}
-	{assign var=COL_SPAN2 value=2}
-	{assign var=COL_SPAN3 value=3}
-	{if isset($LINEITEM_FIELDS['image'])}
+	{if $LINEITEM_FIELDS['image']}
 		{assign var=IMAGE_EDITABLE value=$LINEITEM_FIELDS['image']->isEditable()}
 	{if $IMAGE_EDITABLE}{assign var=COL_SPAN1 value=($COL_SPAN1)+1}{/if}
 {/if}
-{if isset($LINEITEM_FIELDS['productid'])}
+{if $LINEITEM_FIELDS['productid']}
 	{assign var=PRODUCT_EDITABLE value=$LINEITEM_FIELDS['productid']->isEditable()}
 {if $PRODUCT_EDITABLE}{assign var=COL_SPAN1 value=($COL_SPAN1)+1}{/if}
 {/if}
-{if isset($LINEITEM_FIELDS['quantity'])}
+{if $LINEITEM_FIELDS['quantity']}
 	{assign var=QUANTITY_EDITABLE value=$LINEITEM_FIELDS['quantity']->isEditable()}
 {if $QUANTITY_EDITABLE}{assign var=COL_SPAN1 value=($COL_SPAN1)+1}{/if}
 {/if}
-{if isset($LINEITEM_FIELDS['purchase_cost'])}
+{if $LINEITEM_FIELDS['purchase_cost']}
 	{assign var=PURCHASE_COST_EDITABLE value=$LINEITEM_FIELDS['purchase_cost']->isEditable()}
 {if $PURCHASE_COST_EDITABLE}{assign var=COL_SPAN2 value=($COL_SPAN2)+1}{/if}
 {/if}
-{if isset($LINEITEM_FIELDS['listprice'])}
+{if $LINEITEM_FIELDS['listprice']}
 	{assign var=LIST_PRICE_EDITABLE value=$LINEITEM_FIELDS['listprice']->isEditable()}
 {if $LIST_PRICE_EDITABLE}{assign var=COL_SPAN2 value=($COL_SPAN2)+1}{/if}
 {/if}
-{if isset($LINEITEM_FIELDS['margin'])}
+{if $LINEITEM_FIELDS['margin']}
 	{assign var=MARGIN_EDITABLE value=$LINEITEM_FIELDS['margin']->isEditable()}
 {if $MARGIN_EDITABLE}{assign var=COL_SPAN3 value=($COL_SPAN3)+1}{/if}
 {/if}
-{if isset($LINEITEM_FIELDS['comment'])}
+{if $LINEITEM_FIELDS['comment']}
 	{assign var=COMMENT_EDITABLE value=$LINEITEM_FIELDS['comment']->isEditable()}
 {/if}
-{if isset($LINEITEM_FIELDS['discount_amount'])}
+{if $LINEITEM_FIELDS['discount_amount']}
 	{assign var=ITEM_DISCOUNT_AMOUNT_EDITABLE value=$LINEITEM_FIELDS['discount_amount']->isEditable()}
 {/if}
-{if isset($LINEITEM_FIELDS['discount_percent'])}
+{if $LINEITEM_FIELDS['discount_percent']}
 	{assign var=ITEM_DISCOUNT_PERCENT_EDITABLE value=$LINEITEM_FIELDS['discount_percent']->isEditable()}
 {/if}
-{if isset($LINEITEM_FIELDS['hdnS_H_Percent'])}
+{if $LINEITEM_FIELDS['hdnS_H_Percent']}
 	{assign var=SH_PERCENT_EDITABLE value=$LINEITEM_FIELDS['hdnS_H_Percent']->isEditable()}
 {/if}
-{if isset($LINEITEM_FIELDS['hdnDiscountAmount'])}
+{if $LINEITEM_FIELDS['hdnDiscountAmount']}
 	{assign var=DISCOUNT_AMOUNT_EDITABLE value=$LINEITEM_FIELDS['hdnDiscountAmount']->isEditable()}
 {/if}
-{if isset($LINEITEM_FIELDS['hdnDiscountPercent'])}
+{if $LINEITEM_FIELDS['hdnDiscountPercent']}
 	{assign var=DISCOUNT_PERCENT_EDITABLE value=$LINEITEM_FIELDS['hdnDiscountPercent']->isEditable()}
 {/if}
 
@@ -78,12 +75,12 @@
 	{if $BLOCK_FIELDS|@count gt 0}
 		<div class='fieldBlockContainer'>
 			<div class="row">
-				<div class="col-sm-3">
-					<h4 class='fieldBlockHeader' style="margin-top:5px;">{vtranslate($BLOCK_LABEL, $MODULE)}</h4>
-				</div>
-				<div class="col-sm-9 well">
+				<div class="col-lg-5 col-md-5 col-sm-5">
 					<div class="row">
-						<div class="col-sm-4">
+						<div class="col-lg-4 col-md-4 col-sm-4">
+							<h4 class='fieldBlockHeader' style="margin-top:5px;">{vtranslate($BLOCK_LABEL, $MODULE)}</h4>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8" style="top: 3px;">
 							{if $LINEITEM_FIELDS['region_id'] && $LINEITEM_FIELDS['region_id']->isEditable()}
 								<span class="pull-right">
 									<i class="fa fa-info-circle"></i>&nbsp;
@@ -95,54 +92,54 @@
 										{/foreach}
 									</select>
 									<input type="hidden" id="prevRegionId" value="{$RECORD->get('region_id')}" />
-									<a class="fa fa-wrench hidden-xs" href="index.php?module=Vtiger&parent=Settings&view=TaxIndex" target="_blank" style="vertical-align:middle;"></a>
-										</span>
+									&nbsp;&nbsp;<a class="fa fa-wrench" href="index.php?module=Vtiger&parent=Settings&view=TaxIndex" target="_blank" style="vertical-align:middle;"></a>
+								</span>
 							{/if}
 						</div>
-						<div class="col-sm-4">
-							<div class="pull-right">
-								<i class="fa fa-info-circle"></i>&nbsp;
-								<label>{vtranslate('LBL_CURRENCY',$MODULE)}</label>&nbsp;
-								{assign var=SELECTED_CURRENCY value=$CURRENCINFO}
-								{* Lookup the currency information if not yet set - create mode *}
-								{if $SELECTED_CURRENCY eq ''}
-									{assign var=USER_CURRENCY_ID value=$USER_MODEL->get('currency_id')}
-									{foreach item=currency_details from=$CURRENCIES}
-										{if $currency_details.curid eq $USER_CURRENCY_ID}
-											{assign var=SELECTED_CURRENCY value=$currency_details}
-										{/if}
-									{/foreach}
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-3 col-sm-3" style="top: 3px;">
+					<center>
+						<i class="fa fa-info-circle"></i>&nbsp;
+						<label>{vtranslate('LBL_CURRENCY',$MODULE)}</label>&nbsp;
+						{assign var=SELECTED_CURRENCY value=$CURRENCINFO}
+						{* Lookup the currency information if not yet set - create mode *}
+						{if $SELECTED_CURRENCY eq ''}
+							{assign var=USER_CURRENCY_ID value=$USER_MODEL->get('currency_id')}
+							{foreach item=currency_details from=$CURRENCIES}
+								{if $currency_details.curid eq $USER_CURRENCY_ID}
+									{assign var=SELECTED_CURRENCY value=$currency_details}
 								{/if}
+							{/foreach}
+						{/if}
 
-								<select class="select2" id="currency_id" name="currency_id" style="width: 150px;">
-									{foreach item=currency_details key=count from=$CURRENCIES}
-										<option value="{$currency_details.curid}" class="textShadowNone" data-conversion-rate="{$currency_details.conversionrate}" {if $SELECTED_CURRENCY.currency_id eq $currency_details.curid} selected {/if}>
-											{$currency_details.currencylabel|@getTranslatedCurrencyString} ({$currency_details.currencysymbol})
-										</option>
-									{/foreach}
-								</select>
+						<select class="select2" id="currency_id" name="currency_id" style="width: 150px;">
+							{foreach item=currency_details key=count from=$CURRENCIES}
+								<option value="{$currency_details.curid}" class="textShadowNone" data-conversion-rate="{$currency_details.conversionrate}" {if $SELECTED_CURRENCY.currency_id eq $currency_details.curid} selected {/if}>
+									{$currency_details.currencylabel|@getTranslatedCurrencyString} ({$currency_details.currencysymbol})
+								</option>
+							{/foreach}
+						</select>
 
-								{assign var="RECORD_CURRENCY_RATE" value=$RECORD_STRUCTURE_MODEL->getRecord()->get('conversion_rate')}
-								{if $RECORD_CURRENCY_RATE eq ''}
-									{assign var="RECORD_CURRENCY_RATE" value=$SELECTED_CURRENCY.conversionrate}
-								{/if}
-								<input type="hidden" name="conversion_rate" id="conversion_rate" value="{$RECORD_CURRENCY_RATE}" />
-								<input type="hidden" value="{$SELECTED_CURRENCY.currency_id}" id="prev_selected_currency_id" />
-								<!-- TODO : To get default currency in even better way than depending on first element -->
-								<input type="hidden" id="default_currency_id" value="{$CURRENCIES.0.curid}" />
-								<input type="hidden" value="{$SELECTED_CURRENCY.currency_id}" id="selectedCurrencyId" />
-							</div>
-						</div>
-						<div class="col-sm-4">
-							<div class="pull-right">
-								<i class="fa fa-info-circle"></i>&nbsp;
-								<label>{vtranslate('LBL_TAX_MODE',$MODULE)}</label>&nbsp;
-								<select class="select2 lineItemTax" id="taxtype" name="taxtype" style="width: 150px;">
-									<option value="individual" {if $IS_INDIVIDUAL_TAX_TYPE}selected{/if}>{vtranslate('LBL_INDIVIDUAL', $MODULE)}</option>
-									<option value="group" {if $IS_GROUP_TAX_TYPE}selected{/if}>{vtranslate('LBL_GROUP', $MODULE)}</option>
-								</select>
-							</div>
-						</div>
+						{assign var="RECORD_CURRENCY_RATE" value=$RECORD_STRUCTURE_MODEL->getRecord()->get('conversion_rate')}
+						{if $RECORD_CURRENCY_RATE eq ''}
+							{assign var="RECORD_CURRENCY_RATE" value=$SELECTED_CURRENCY.conversionrate}
+						{/if}
+						<input type="hidden" name="conversion_rate" id="conversion_rate" value="{$RECORD_CURRENCY_RATE}" />
+						<input type="hidden" value="{$SELECTED_CURRENCY.currency_id}" id="prev_selected_currency_id" />
+						<!-- TODO : To get default currency in even better way than depending on first element -->
+						<input type="hidden" id="default_currency_id" value="{$CURRENCIES.0.curid}" />
+						<input type="hidden" value="{$SELECTED_CURRENCY.currency_id}" id="selectedCurrencyId" />
+					</center>
+				</div>
+				<div class="col-lg-4 col-md-4 col-sm-4" style="top: 3px;">
+					<div style="float: right;">
+						<i class="fa fa-info-circle"></i>&nbsp;
+						<label>{vtranslate('LBL_TAX_MODE',$MODULE)}</label>&nbsp;
+						<select class="select2 lineItemTax" id="taxtype" name="taxtype" style="width: 150px;">
+							<option value="individual" {if $IS_INDIVIDUAL_TAX_TYPE}selected{/if}>{vtranslate('LBL_INDIVIDUAL', $MODULE)}</option>
+							<option value="group" {if $IS_GROUP_TAX_TYPE}selected{/if}>{vtranslate('LBL_GROUP', $MODULE)}</option>
+						</select>
 					</div>
 				</div>
 			</div>
@@ -150,12 +147,12 @@
 				<table class="table table-bordered" id="lineItemTab">
 					<tr>
 						<td><strong>{vtranslate('LBL_TOOLS',$MODULE)}</strong></td>
-						{if isset($IMAGE_EDITABLE)}
+						{if $IMAGE_EDITABLE}
 							<td>
 								<strong>{vtranslate({$LINEITEM_FIELDS['image']->get('label')},$MODULE)}</strong>
 							</td>
 						{/if}
-						{if isset($PRODUCT_EDITABLE)}
+						{if $PRODUCT_EDITABLE}
 							<td>
 								<span class="redColor">*</span><strong>{vtranslate({$LINEITEM_FIELDS['productid']->get('label')},$MODULE)}</strong>
 							</td>
@@ -163,18 +160,18 @@
 						<td>
 							<strong>{vtranslate('LBL_QTY',$MODULE)}</strong>
 						</td>
-						{if isset($PURCHASE_COST_EDITABLE)}
+						{if $PURCHASE_COST_EDITABLE}
 							<td>
 								<strong class="pull-right">{vtranslate({$LINEITEM_FIELDS['purchase_cost']->get('label')},$MODULE)}</strong>
 							</td>
 						{/if}
-						{if isset($LIST_PRICE_EDITABLE)}
+						{if $LIST_PRICE_EDITABLE}
 							<td>
 								<strong>{vtranslate({$LINEITEM_FIELDS['listprice']->get('label')},$MODULE)}</strong>
 							</td>
 						{/if}
 						<td><strong class="pull-right">{vtranslate('LBL_TOTAL',$MODULE)}</strong></td>
-							{if isset($MARGIN_EDITABLE) && isset($PURCHASE_COST_EDITABLE)}
+							{if $MARGIN_EDITABLE && $PURCHASE_COST_EDITABLE}
 							<td>
 								<strong class="pull-right">{vtranslate({$LINEITEM_FIELDS['margin']->get('label')},$MODULE)}</strong>
 							</td>
@@ -189,7 +186,7 @@
 							{include file="partials/LineItemsContent.tpl"|@vtemplate_path:'Inventory' row_no=$row_no data=$data}
 						</tr>
 					{/foreach}
-					{if $RELATED_PRODUCTS && php7_count($RELATED_PRODUCTS) eq 0 and ($PRODUCT_ACTIVE eq 'true' || $SERVICE_ACTIVE eq 'true')}
+					{if count($RELATED_PRODUCTS) eq 0 and ($PRODUCT_ACTIVE eq 'true' || $SERVICE_ACTIVE eq 'true')}
 						<tr id="row1" class="lineItemRow" data-row-num="1">
 							{include file="partials/LineItemsContent.tpl"|@vtemplate_path:'Inventory' row_no=1 data=[] IGNORE_UI_REGISTRATION=false}
 						</tr>

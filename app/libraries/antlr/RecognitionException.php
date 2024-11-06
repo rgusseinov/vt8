@@ -59,6 +59,8 @@
  */
 class RecognitionException extends Exception {
 
+	public $line=0;
+
 
 	public function __construct($input) {
 		/** What input stream did the error occur in? */

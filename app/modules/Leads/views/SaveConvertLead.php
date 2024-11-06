@@ -61,7 +61,7 @@ class Leads_SaveConvertLead_View extends Vtiger_View_Controller {
                             $fieldValue = vtws_getWebserviceEntityId(vtws_getOwnerType($fieldValue), $fieldValue);
                         } else {
                             $ids = vtws_getIdComponents($fieldValue);
-                            if (php7_count($ids) === 1) {
+                            if (count($ids) === 1) {
                                 $fieldValue = vtws_getWebserviceEntityId(getSalesEntityType($fieldValue), $fieldValue);
                             }
                         }

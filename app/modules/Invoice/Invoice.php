@@ -104,15 +104,12 @@ class Invoice extends CRMEntity {
 
 	/**	Constructor which will set the column_fields in this object
 	 */
-        function __construct() {
-            $this->log =Logger::getLogger('Invoice');
-            $this->log->debug("Entering Invoice() method ...");
-            $this->db = PearDatabase::getInstance();
-            $this->column_fields = getColumnFields('Invoice');
-            $this->log->debug("Exiting Invoice method ...");
-        }   
 	function Invoice() {
-            self::__construct();
+		$this->log =LoggerManager::getLogger('Invoice');
+		$this->log->debug("Entering Invoice() method ...");
+		$this->db = PearDatabase::getInstance();
+		$this->column_fields = getColumnFields('Invoice');
+		$this->log->debug("Exiting Invoice method ...");
 	}
 
 
@@ -475,12 +472,12 @@ class Invoice extends CRMEntity {
 		for($j=0; $j<$no_of_products; $j++) {
 			$row = $adb->query_result_rowdata($res, $j);
 			$col_value = array();
-			for($k=0; $k<php7_count($fieldsList); $k++) {
+			for($k=0; $k<count($fieldsList); $k++) {
 				if($fieldsList[$k]!='lineitem_id'){
 					$col_value[$fieldsList[$k]] = $row[$fieldsList[$k]];
 				}
 			}
-			if(php7_count($col_value) > 0) {
+			if(count($col_value) > 0) {
 				$col_value['id'] = $this->id;
 				$columns = array_keys($col_value);
 				$values = array_values($col_value);
@@ -500,10 +497,10 @@ class Invoice extends CRMEntity {
 		for($j=0; $j<$no_of_products; $j++) {
 			$row = $adb->query_result_rowdata($res, $j);
 			$col_value = array();
-			for($k=0; $k<php7_count($fieldsList); $k++) {
+			for($k=0; $k<count($fieldsList); $k++) {
 					$col_value[$fieldsList[$k]] = $row[$fieldsList[$k]];
 			}
-			if(php7_count($col_value) > 0) {
+			if(count($col_value) > 0) {
 				$col_value['id'] = $this->id;
 				$columns = array_keys($col_value);
 				$values = array_values($col_value);
@@ -540,7 +537,7 @@ class Invoice extends CRMEntity {
 			$updatecols[] = "$col=?";
 			$updateparams[] = $this->column_fields[$field];
 		}
-		if (php7_count($updatecols) > 0) {
+		if (count($updatecols) > 0) {
 			$updatequery .= implode(",", $updatecols);
 
 			$updatequery .= " WHERE invoiceid=?";

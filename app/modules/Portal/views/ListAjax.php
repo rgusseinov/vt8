@@ -17,7 +17,7 @@ class Portal_ListAjax_View extends Vtiger_List_View {
 		$this->exposeMethod('getListViewCount');
 	}
 
-	function preProcess(Vtiger_Request $request, $display=true) {
+	function preProcess(Vtiger_Request $request) {
 		return true;
 	}
 

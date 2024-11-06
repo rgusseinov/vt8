@@ -119,6 +119,9 @@ $list_max_entries_per_page = '20';
 // history_max_viewed default value = 5
 $history_max_viewed = '5';
 
+// default_module default value = Home
+$default_module = 'Home';
+
 // default_action default value = index
 $default_action = 'index';
 
@@ -174,9 +177,6 @@ if(isset($default_timezone) && function_exists('date_default_timezone_set')) {
 
 //Set the default layout 
 $default_layout = 'v7';
-
-//Maximum Listview Fields Selection Size
-$maxListFieldsSelectionSize = 15;
 
 include_once 'config.security.php';
 ?>

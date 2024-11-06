@@ -45,7 +45,7 @@ class PBXManager_Record_Model extends Vtiger_Record_Model{
             //END
         }    
         
-        if(php7_count($recordIds)) $this->updateCallStatus($recordIds);
+        if(count($recordIds)) $this->updateCallStatus($recordIds);
         
         return $recordModels;
     }
@@ -218,7 +218,7 @@ class PBXManager_Record_Model extends Vtiger_Record_Model{
     }    
     
     // Because, User is not related to crmentity 
-    public static function buildSearchQueryWithUIType($uitype, $value, $module){
+    public function buildSearchQueryWithUIType($uitype, $value, $module){
         if (empty($value)) {
             return false;
         }
@@ -249,7 +249,7 @@ class PBXManager_Record_Model extends Vtiger_Record_Model{
         if (!empty($lookupcolumns)) {
             $query .=" WHERE deleted=0 AND ";
             $i = 0;
-            $columnCount = php7_count($lookupcolumns);
+            $columnCount = count($lookupcolumns);
             foreach ($lookupcolumns as $columnname) {
                 if (!empty($columnname)) {
                     if ($i == 0 || $i == ($columnCount))

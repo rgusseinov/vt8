@@ -16,23 +16,22 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 	 * @param <Number> $viewId - Custom View Id
 	 * @return Vtiger_ListView_Model instance
 	 */
-	public static function getInstance($moduleName, $viewId='0', $listHeaders = array()) {
-            list($moduleName, $sourceModule) = func_get_args();
-            $db = PearDatabase::getInstance();
-            $currentUser = vglobal('current_user');
+	public static function getInstance($moduleName, $sourceModule) {
+		$db = PearDatabase::getInstance();
+		$currentUser = vglobal('current_user');
 
-            $modelClassName = Vtiger_Loader::getComponentClassName('Model', 'ListView', $moduleName);
-            $instance = new $modelClassName();
+		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'ListView', $moduleName);
+		$instance = new $modelClassName();
 
-            $sourceModuleModel = Vtiger_Module_Model::getInstance($sourceModule);
-            $queryGenerator = new EnhancedQueryGenerator($sourceModuleModel->get('name'), $currentUser);
-            $cvidObj = CustomView_Record_Model::getAllFilterByModule($sourceModuleModel->get('name')); 
-            $cvid = $cvidObj->getId('cvid'); 
-            $queryGenerator->initForCustomViewById($cvid);
+		$sourceModuleModel = Vtiger_Module_Model::getInstance($sourceModule);
+		$queryGenerator = new EnhancedQueryGenerator($sourceModuleModel->get('name'), $currentUser);
+		$cvidObj = CustomView_Record_Model::getAllFilterByModule($sourceModuleModel->get('name')); 
+        $cvid = $cvidObj->getId('cvid'); 
+        $queryGenerator->initForCustomViewById($cvid);
 
-            $controller = new ListViewController($db, $currentUser, $queryGenerator);
+		$controller = new ListViewController($db, $currentUser, $queryGenerator);
 
-            return $instance->set('module', $sourceModuleModel)->set('query_generator', $queryGenerator)->set('listview_controller', $controller);
+		return $instance->set('module', $sourceModuleModel)->set('query_generator', $queryGenerator)->set('listview_controller', $controller);
 	}
 
 	/**
@@ -49,15 +48,15 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 		$queryGenerator = $this->get('query_generator');
 		$listViewContoller = $this->get('listview_controller');
 
-		$orderBy = $this->getForSql('orderby');
-		$sortOrder = $this->getForSql('sortorder');
+		$orderBy = $this->get('orderby');
+		$sortOrder = $this->get('sortorder');
 
 		$searchParams = $this->get('search_params');
 		if(empty($searchParams)) {
 			$searchParams = array();
 		}
 		$glue = "";
-		if(php7_count($queryGenerator->getWhereFields()) > 0 && (php7_count($searchParams)) > 0) {
+		if(count($queryGenerator->getWhereFields()) > 0 && (count($searchParams)) > 0) {
 			$glue = QueryGenerator::$AND;
 		}
 		$queryGenerator->parseAdvFilterList($searchParams, $glue);
@@ -131,7 +130,7 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 		}
 
 		$glue = "";
-		if(php7_count($queryGenerator->getWhereFields()) > 0 && (php7_count($searchParams)) > 0) {
+		if(count($queryGenerator->getWhereFields()) > 0 && (count($searchParams)) > 0) {
 			$glue = QueryGenerator::$AND;
 		}
 		$queryGenerator->parseAdvFilterList($searchParams, $glue);
@@ -142,7 +141,7 @@ class RecycleBin_ListView_Model extends Vtiger_ListView_Model {
 		$position = stripos($listQuery, ' from ');
 		if ($position) {
 			$split = preg_split('/ from /i', $listQuery);
-			$splitCount = php7_count($split);
+			$splitCount = count($split);
 			$listQuery = 'SELECT count(*) AS count ';
 			for ($i=1; $i<$splitCount; $i++) {
 				$listQuery = $listQuery. ' FROM ' .$split[$i];

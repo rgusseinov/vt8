@@ -8,7 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 
-include_once 'vendor/autoload.php';
+include_once 'includes/Loader.php';
 include_once 'includes/runtime/Viewer.php';
 
 class Mobile_HTML_Viewer extends Vtiger_Viewer{
@@ -16,7 +16,7 @@ class Mobile_HTML_Viewer extends Vtiger_Viewer{
 	private $parameters = array();
 	private $_smarty = null;
 	
-	function assign($key, $value = null, $nocache = false) {
+	function assign($key, $value) {
 		$this->parameters[$key] = $value;
 	}
 

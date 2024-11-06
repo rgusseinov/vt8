@@ -48,19 +48,23 @@ class ModComments_FilePreview_View extends Vtiger_IndexAjax_View {
 			}
 		}
 
+		$path = $fileDetails['path'].$fileDetails['attachmentsid'].'_'.$fileDetails['name'];
 		$type = $fileDetails['type'];
 		$contents = $fileContent;
 		$filename = $fileDetails['name'];
 		$parts = explode('.', $filename);
 		if ($recordModel->get('filename')) {
-                    $fileDetails = $recordModel->getFileNameAndDownloadURL($recordId, $attachmentId);
-                    $downloadUrl =  $recordModel->getDownloadFileURL($attachmentId);
-                    $trimmedFileName = $fileDetails[0]['trimmedFileName'];
-                }
+			$fileDetails = $recordModel->getFileNameAndDownloadURL($recordId, $attachmentId);
+		}
+
+		if (is_array($fileDetails[0])) {
+			$downloadUrl = $fileDetails[0]['url'];
+			$trimmedFileName = $fileDetails[0]['trimmedFileName'];
+		}
 
 		//support for plain/text document
 		$extn = 'txt';
-		if (php7_count($parts) > 1) {
+		if (count($parts) > 1) {
 			$extn = end($parts);
 		}
 		$viewer = $this->getViewer($request);
@@ -82,6 +86,7 @@ class ModComments_FilePreview_View extends Vtiger_IndexAjax_View {
 			$viewer->assign('FILE_PREVIEW_NOT_SUPPORTED', 'yes');
 
 		$viewer->assign('DOWNLOAD_URL', $downloadUrl);
+		$viewer->assign('FILE_PATH', $path);
 		$viewer->assign('TRIMMED_FILE_NAME', $trimmedFileName);
 		$viewer->assign('FILE_NAME', $filename);
 		$viewer->assign('FILE_EXTN', $extn);

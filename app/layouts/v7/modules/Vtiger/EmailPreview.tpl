@@ -61,7 +61,7 @@
 									<button type="button" name="previewReply" class="btn btn-sm btn-default" data-mode="emailReply">
 										{vtranslate('LBL_REPLY',$MODULE)}
 									</button>
-									{if php7_count($TO) > 1 || !empty($CC) || !empty($BCC)}
+									{if count($TO) > 1 || !empty($CC) || !empty($BCC)}
 										<button type="button" name="previewReplyAll" class="btn btn-sm btn-default" data-mode="emailReplyAll">
 											{vtranslate('LBL_REPLY_ALL',$MODULE)}
 										</button>
@@ -129,7 +129,7 @@
 										<span class="pull-right">{vtranslate('LBL_ATTACHMENT',$MODULE)}</span>
 									</span>
 									<span class="col-lg-9">
-										{if php7_count($RECORD->getAttachmentDetails()) le 0}
+										{if count($RECORD->getAttachmentDetails()) le 0}
 											{vtranslate('LBL_NO_ATTACHMENTS',$MODULE)}
 										{else}
 											{foreach item=ATTACHMENT_DETAILS from=$RECORD->getAttachmentDetails()}
@@ -146,7 +146,7 @@
 							</div>
 						</div>
 					</div>
-					<textarea style="display:none;" id="iframeDescription">{decode_html($RECORD->get('description'))}</textarea>
+					<textarea style="display:none;" id="iframeDescription">{$RECORD->get('description')}</textarea>
 					<div class="row email-info-row">
 						<div class="col-lg-2" style="padding-right:10px;">
 							<div class="pull-right">{vtranslate('LBL_DESCRIPTION',$MODULE)}</div>

@@ -14,7 +14,7 @@
 		public static $recordModuleString = 'record_module';
 		public static $recordSource = 'WEBSERVICE';
 
-		static function sanitizeDataWithColumn($row,$meta){
+		function sanitizeDataWithColumn($row,$meta){
 
 			$newRow = array();
 			if(isset($row['count(*)'])){
@@ -30,7 +30,7 @@
 			return $newRow;
 		}
 
-		static function sanitizeDataWithCountColumn($row,$meta){
+		function sanitizeDataWithCountColumn($row,$meta){
 			$newRow = array();
 			foreach($row as $col=>$val){
 				$newRow['count'] = $val;
@@ -38,7 +38,7 @@
 			return $newRow;
 		}
 
-		static function filterAndSanitize($row,$meta){
+		function filterAndSanitize($row,$meta){
 			$recordLabel = $row['label'];
 			$row = DataTransform::filterAllColumns($row,$meta);
 			$row = DataTransform::sanitizeData($row,$meta);
@@ -48,16 +48,15 @@
 			return $row;
 		}
 
-		static function sanitizeData($newRow,$meta,$t=null){
+		function sanitizeData($newRow,$meta,$t=null){
 
 			$newRow = DataTransform::sanitizeReferences($newRow,$meta);
 			$newRow = DataTransform::sanitizeOwnerFields($newRow,$meta,$t);
-            $newRow = DataTransform::sanitizeFileFieldsForIds($newRow, $meta);
 			$newRow = DataTransform::sanitizeFields($newRow,$meta);
 			return $newRow;
 		}
 
-		static function sanitizeForInsert($row,$meta){
+		function sanitizeForInsert($row,$meta){
 			global $adb;
 			$associatedToUser = false;
 			$parentTypeId = null;
@@ -149,7 +148,7 @@
 
 		}
 
-		static function filterAllColumns($row,$meta){
+		function filterAllColumns($row,$meta){
 
 			$recordString = DataTransform::$recordString;
 
@@ -165,7 +164,7 @@
 
 		}
 
-		static function sanitizeFields($row,$meta){
+		function sanitizeFields($row,$meta){
 			$default_charset = VTWS_PreserveGlobal::getGlobal('default_charset');
 			$recordString = DataTransform::$recordString;
 
@@ -203,7 +202,7 @@
 			return $row;
 		}
 
-		static function sanitizeReferences($row,$meta){
+		function sanitizeReferences($row,$meta){
 			global $adb,$log;
 			$references = $meta->getReferenceFieldDetails();
 			foreach($references as $field=>$typeList){
@@ -242,7 +241,7 @@
 			return $row;
 		}
 
-		static function sanitizeOwnerFields($row,$meta,$t=null){
+		function sanitizeOwnerFields($row,$meta,$t=null){
 			global $adb;
 			$ownerFields = $meta->getOwnerFields();
 			foreach($ownerFields as $index=>$field){
@@ -256,39 +255,8 @@
 			}
 			return $row;
 		}
-        
-        /**
-         * Function to attach the image/file ids in retrieve/query operations
-         * @param type $row
-         * @param type $meta
-         * @return <array>
-         */
-        static function sanitizeFileFieldsForIds($row, $meta) {
-            $moduleFields = $meta->getModuleFields();
-            $supportedUITypes = array(61, 69, 28); //file and image uitypes
-            $attachmentIds = array();
-            foreach ($moduleFields as $fieldName => $fieldObj) {
-                if (in_array($fieldObj->getUIType(), $supportedUITypes)) {
-                    //while doing retrieve operation we have record_id and on query operation we have id.
-                    $id = $row['record_id'] ? $row['record_id'] : $row['id'];
-                    $ids = Vtiger_Functions::getAttachmentIds($id, $meta->getEntityId());
-                if($ids) {
-                        foreach($ids as $id){
-                            array_push($attachmentIds, $id);
-                        }
-                    }
-                    break;
-                }
-            }
 
-            if (!empty($attachmentIds)){
-                $row['imageattachmentids'] = implode(',', $attachmentIds);
-            }
-
-            return $row;
-        }
-
-		static function sanitizeDateFieldsForInsert($row,$meta){
+		function sanitizeDateFieldsForInsert($row,$meta){
 			global $current_user;
 			$moduleFields = $meta->getModuleFields();
 			foreach($moduleFields as $fieldName=>$fieldObj){
@@ -302,7 +270,7 @@
 			return $row;
 		}
 
-		static function sanitizeCurrencyFieldsForInsert($row,$meta){
+		function sanitizeCurrencyFieldsForInsert($row,$meta){
 			global $current_user;
 			$moduleFields = $meta->getModuleFields();
 			foreach($moduleFields as $fieldName=>$fieldObj){

@@ -23,7 +23,7 @@ class Project_ExportChart_View extends Vtiger_Index_View {
 		}
 	}
 
-	function preProcess(Vtiger_Request $request, $display=true) {
+	function preProcess(Vtiger_Request $request) {
 		return false;
 	}
 

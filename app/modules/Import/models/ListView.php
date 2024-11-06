@@ -51,7 +51,7 @@ class Import_ListView_Model extends Vtiger_ListView_Model {
 			$searchParams = array();
 		}
 		$glue = "";
-		if(php7_count($queryGenerator->getWhereFields()) > 0 && (php7_count($searchParams)) > 0) {
+		if(count($queryGenerator->getWhereFields()) > 0 && (count($searchParams)) > 0) {
 			$glue = QueryGenerator::$AND;
 		}
 		$queryGenerator->parseAdvFilterList($searchParams, $glue);
@@ -62,8 +62,8 @@ class Import_ListView_Model extends Vtiger_ListView_Model {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => 'c'));
 		}
 
-		$orderBy = $this->getForSql('orderby');
-		$sortOrder = $this->getForSql('sortorder');
+		$orderBy = $this->get('orderby');
+		$sortOrder = $this->get('sortorder');
 		if(!empty($orderBy)) {
 			$queryGenerator = $this->get('query_generator');
 			$fieldModels = $queryGenerator->getModuleFields();
@@ -81,7 +81,7 @@ class Import_ListView_Model extends Vtiger_ListView_Model {
 
 		$importedRecordIds = $this->getLastImportedRecord();
 		$listViewRecordModels = array();
-		if(php7_count($importedRecordIds) != 0) {
+		if(count($importedRecordIds) != 0) {
 			$moduleModel = $this->get('module');
 			$listQuery .= ' AND '.$moduleModel->basetable.'.'.$moduleModel->basetableid.' IN ('. implode(',', $importedRecordIds).')';
 
@@ -133,7 +133,7 @@ class Import_ListView_Model extends Vtiger_ListView_Model {
 		$listQuery = $queryGenerator->getQuery();
 
 		$importedRecordIds = $this->getLastImportedRecord();
-		if(php7_count($importedRecordIds) != 0) {
+		if(count($importedRecordIds) != 0) {
 			$moduleModel = $this->get('module');
 			$listQuery .= ' AND '.$moduleModel->basetable.'.'.$moduleModel->basetableid.' IN ('. implode(',', $importedRecordIds).')';
 		}
@@ -148,7 +148,7 @@ class Import_ListView_Model extends Vtiger_ListView_Model {
 	 * @param <Number> $viewId - Custom View Id
 	 * @return Vtiger_ListView_Model instance
 	 */
-	public static function getInstance($moduleName, $viewId='0', $listHeader = array()) {
+	public static function getInstance($moduleName, $viewId='0') {
 		$db = PearDatabase::getInstance();
 		$currentUser = Users_Record_Model::getCurrentUserModel();
 

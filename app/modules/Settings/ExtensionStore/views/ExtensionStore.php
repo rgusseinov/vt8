@@ -57,6 +57,9 @@ class Settings_ExtensionStore_ExtensionStore_View extends Settings_Vtiger_Index_
 				if (!empty($customerCardId)) {
 					$this->customerCardInfo = $modelInstance->getCardDetails($customerCardId);
 				}
+			} else {
+				$modelInstance->unsetPassword();
+				$this->passwordStatus = false;
 			}
 		}
 	}
@@ -68,7 +71,7 @@ class Settings_ExtensionStore_ExtensionStore_View extends Settings_Vtiger_Index_
 		return $this->modelInstance;
 	}
 
-	function preProcess(Vtiger_Request $request, $display = true) {
+	function preProcess(Vtiger_Request $request) {
 		parent::preProcess($request, false);
 		$extensionStoreModuleModel = Settings_ExtensionStore_Module_Model::getInstance();
 		$viewer = $this->getViewer($request);

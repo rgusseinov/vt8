@@ -150,7 +150,7 @@ class HTTP_Session
      * @see    session_id()
      * @see    session_start()
      */
-    static function start($name = 'SessionID', $id = null)
+    function start($name = 'SessionID', $id = null)
     {
         HTTP_Session::name($name);
         if ($id) {
@@ -205,7 +205,7 @@ class HTTP_Session
      * @see    session_unset()
      * @see    session_destroy()
      */
-    static function destroy()
+    function destroy()
     {
         session_unset();
         session_destroy();
@@ -328,7 +328,7 @@ class HTTP_Session
      * @return string Previous ID of a session
      * @see    session_id()
      */
-    static function id($id = null)
+    function id($id = null)
     {
         return isset($id) ? session_id($id) : session_id();
     }
@@ -410,7 +410,7 @@ class HTTP_Session
      * @access public
      * @return bool
      */
-    static function isExpired()
+    function isExpired()
     {
         if (isset($_SESSION['__HTTP_Session_Expire_TS']) &&
             $_SESSION['__HTTP_Session_Expire_TS'] < time()) {
@@ -427,7 +427,7 @@ class HTTP_Session
      * @access public
      * @return bool
      */
-    static function isIdle()
+    function isIdle()
     {
         if (isset($_SESSION['__HTTP_Session_Idle_TS']) &&
             (($_SESSION['__HTTP_Session_Idle_TS'] +
@@ -557,7 +557,7 @@ class HTTP_Session
      * @access public
      * @return mixed  Value of a variable
      */
-    static function get($name, $default = null)
+    function get($name, $default = null)
     {
         if (!isset($_SESSION[$name]) && isset($default)) {
             $_SESSION[$name] = $default;
@@ -596,7 +596,7 @@ class HTTP_Session
      * @access public
      * @return mixed  Old value of a variable
      */
-    static function set($name, $value)
+    function set($name, $value)
     {
         $return = (isset($_SESSION[$name])) ? $_SESSION[$name] : null;
         if (null === $value) {

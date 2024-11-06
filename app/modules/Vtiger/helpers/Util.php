@@ -391,7 +391,7 @@ class Vtiger_Util_Helper {
 		$fileName = rtrim($fileName, '\\/<>?*:"<>|');
 
 		$fileNameParts = explode('.', $fileName);
-		$countOfFileNameParts = php7_count($fileNameParts);
+		$countOfFileNameParts = count($fileNameParts);
 		$badExtensionFound = false;
 
 		for ($i=0; $i<$countOfFileNameParts; $i++) {
@@ -585,7 +585,7 @@ class Vtiger_Util_Helper {
 				   $advFilterFieldInfoFormat = array();
 				   $fieldName = $fieldSearchInfo[0];
 				   preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
-					if (php7_count($matches) != 0) {
+					if (count($matches) != 0) {
 						list($full, $referenceParentField, $referenceModule, $referenceFieldName) = $matches;
 						$referenceModuleModel = Vtiger_Module_Model::getInstance($referenceModule);
 						$fieldInfo = Vtiger_Field_Model::getInstance($referenceFieldName, $referenceModuleModel);
@@ -642,7 +642,7 @@ class Vtiger_Util_Helper {
 				   $advFilterFieldInfoFormat['column_condition'] = $groupConditionGlue;
 				   $groupColumnsInfo[] = $advFilterFieldInfoFormat;
 			}
-			$noOfConditions = php7_count($groupColumnsInfo);
+			$noOfConditions = count($groupColumnsInfo);
 			//to remove the last column condition
 			$groupColumnsInfo[$noOfConditions-1]['column_condition']  = '';
 			$groupConditionInfo['columns'] = $groupColumnsInfo;
@@ -651,7 +651,7 @@ class Vtiger_Util_Helper {
 			$groupIterator++;
 		}
 		//We aer removing last condition since this condition if there is next group and this is the last group
-		unset($advFilterConditionFormat[php7_count($advFilterConditionFormat)-1]['condition']);
+		unset($advFilterConditionFormat[count($advFilterConditionFormat)-1]['condition']);
 		return $advFilterConditionFormat;
 
 	}
@@ -701,7 +701,7 @@ class Vtiger_Util_Helper {
 	* @return returns default value for data type if match case found
 	* else returns empty string
 	*/
-   static function getDefaultMandatoryValue($dataType) {
+   function getDefaultMandatoryValue($dataType) {
 	   $value;
 	   switch ($dataType) {
 		   case 'date':
@@ -939,7 +939,7 @@ class Vtiger_Util_Helper {
 		}
 
 		// see how many we have
-		$i = php7_count($matches['browser']);
+		$i = count($matches['browser']);
 		if ($i != 1) {
 			//we will have two since we are not using 'other' argument yet
 			//see if version is before or after the name
@@ -1158,20 +1158,12 @@ class Vtiger_Util_Helper {
 									}
 									break;
 			case 'picklist'		:	$pickListDetails = $fieldModel->getPicklistValues();
-                                    if($defaultValue){ 
-                                        $value = $defaultValue; 
-                                        break; 
-                                    } 
 									foreach ($pickListDetails as $key => $value) {
 										$value = $key;
 										break;
 									}
 									break;
 			case 'multipicklist':	$pickListDetails = $fieldModel->getPicklistValues();
-                                    if($defaultValue){ 
-                                        $value = $defaultValue; 
-                                        break; 
-                                    }
 									foreach ($pickListDetails as $key => $value) {
 										$value = $key;
 										break;
@@ -1181,7 +1173,7 @@ class Vtiger_Util_Helper {
 									$value = vtws_getWebserviceEntityId("DocumentFolders", "1");
 									break;
 			case 'reference'	:	$referenceFieldModule = $fieldModel->getReferenceList(true);
-									if (php7_count($referenceFieldModule) > 0) {
+									if (count($referenceFieldModule) > 0) {
 										$user = Users_Record_Model::getCurrentUserModel();
 										$referenceModule = $referenceFieldModule[0];
 										$referenceFieldModuleModel = Vtiger_Module_Model::getInstance($referenceModule);
@@ -1217,7 +1209,7 @@ class Vtiger_Util_Helper {
 												if (isset($source) && !empty($source)) {
 													$element['source'] = $source;
 												}
-												if (!function_exists("vtws_create")) {
+												if (!function_exists(vtws_create)) {
 													include_once 'include/Webservices/Create.php';
 												}
 												$entity = vtws_create($referenceModule, $element, $user);
@@ -1239,7 +1231,7 @@ class Vtiger_Util_Helper {
 
 	public static function convertSpaceToHyphen($string) {
 		if (!empty($string)) {
-			return str_replace(" ", "-", decode_html($string));
+			return str_replace(" ", "-", $string);
 		}
 	}
 
@@ -1263,15 +1255,15 @@ class Vtiger_Util_Helper {
     public static function validateFieldValue($fieldValue,$fieldModel){
         $fieldDataType = $fieldModel->getFieldDataType();
         $fieldInfo = $fieldModel->getFieldInfo();
-        $editablePicklistValues = isset($fieldInfo['editablepicklistvalues'])? $fieldInfo['editablepicklistvalues'] : null;
+        $editablePicklistValues = $fieldInfo['editablepicklistvalues'];
         if($fieldValue && $fieldDataType == 'picklist'){
-           if(!empty($editablePicklistValues) && !isset($editablePicklistValues[$fieldValue])){
+           if(!empty($editablePicklistValues) && !in_array($fieldValue, $editablePicklistValues)){
                 $fieldValue = null;
             }
-        }elseif(!empty($fieldValue) && $fieldDataType == 'multipicklist'){
+        }elseif(count($fieldValue) > 0 && $fieldDataType == 'multipicklist'){
             if(!empty($editablePicklistValues)){
                 foreach($fieldValue as $key => $value){
-                    if(!isset($editablePicklistValues[$value])){
+                    if(!in_array($value, $editablePicklistValues)){
                         unset($fieldValue[$key]);
                     }
                 }

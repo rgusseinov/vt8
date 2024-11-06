@@ -110,89 +110,87 @@ class Reports extends CRMEntity{
 	 *  This function accepts the vtiger_reportid as argument
 	 *  It sets primodule,secmodule,reporttype,reportname,reportdescription,folderid for the given vtiger_reportid
 	 */
-        function __construct($reportid="") {
-            global $adb,$current_user,$theme,$mod_strings;
-            $this->initListOfModules();
-            if($reportid != "")
-            {
-                // Lookup information in cache first
-                $cachedInfo = VTCacheUtils::lookupReport_Info($current_user->id, $reportid);
-                $subordinate_users = VTCacheUtils::lookupReport_SubordinateUsers($reportid);
 
-                $reportModel = Reports_Record_Model::getCleanInstance($reportid);
-                $sharingType = $reportModel->get('sharingtype');
-
-                if($cachedInfo === false) {
-                        $ssql = "select vtiger_reportmodules.*,vtiger_report.* from vtiger_report inner join vtiger_reportmodules on vtiger_report.reportid = vtiger_reportmodules.reportmodulesid";
-                        $ssql .= " where vtiger_report.reportid = ?";
-                        $params = array($reportid);
-
-                        require_once('include/utils/GetUserGroups.php');
-                        require('user_privileges/user_privileges_'.$current_user->id.'.php');
-                        $userGroups = new GetUserGroups();
-                        $userGroups->getAllUserGroups($current_user->id);
-                        $user_groups = $userGroups->user_groups;
-                        if(!empty($user_groups) && $sharingType == 'Private'){
-                                $user_group_query = " (shareid IN (".generateQuestionMarks($user_groups).") AND setype='groups') OR";
-                                array_push($params, $user_groups);
-                        }
-
-                        $non_admin_query = " vtiger_report.reportid IN (SELECT reportid from vtiger_reportsharing WHERE $user_group_query (shareid=? AND setype='users'))";
-                        if($sharingType == 'Private'){
-                                $ssql .= " and (( (".$non_admin_query.") or vtiger_report.sharingtype='Public' or vtiger_report.owner = ? or vtiger_report.owner in(select vtiger_user2role.userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'))";
-                                array_push($params, $current_user->id);
-                                array_push($params, $current_user->id);
-                        }
-
-                        $query = $adb->pquery("select userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'",array());
-                        $subordinate_users = Array();
-                        for($i=0;$i<$adb->num_rows($query);$i++){
-                                $subordinate_users[] = $adb->query_result($query,$i,'userid');
-                        }
-
-                        // Update subordinate user information for re-use
-                        VTCacheUtils::updateReport_SubordinateUsers($reportid, $subordinate_users);
-
-                        //Report sharing for vtiger7
-                        $queryObj = new stdClass();
-                        $queryObj->query = $ssql;
-                        $queryObj->queryParams = $params;
-                        $queryObj = self::getReportSharingQuery($queryObj, $sharingType);
-
-                        $result = $adb->pquery($queryObj->query, $queryObj->queryParams);
-                        if($result && $adb->num_rows($result)) {
-                                $reportmodulesrow = $adb->fetch_array($result);
-
-                                // Update information in cache now
-                                VTCacheUtils::updateReport_Info(
-                                        $current_user->id, $reportid, $reportmodulesrow["primarymodule"],
-                                        $reportmodulesrow["secondarymodules"], $reportmodulesrow["reporttype"],
-                                        $reportmodulesrow["reportname"], $reportmodulesrow["description"],
-                                        $reportmodulesrow["folderid"], $reportmodulesrow["owner"]
-                                );
-                        }
-
-                        // Re-look at cache to maintain code-consistency below
-                        $cachedInfo = VTCacheUtils::lookupReport_Info($current_user->id, $reportid);
-                }
-
-                if($cachedInfo) {
-                        $this->primodule = $cachedInfo["primarymodule"];
-                        $this->secmodule = $cachedInfo["secondarymodules"];
-                        $this->reporttype = $cachedInfo["reporttype"];
-                        $this->reportname = decode_html($cachedInfo["reportname"]);
-                        $this->reportdescription = decode_html($cachedInfo["description"]);
-                        $this->folderid = $cachedInfo["folderid"];
-                        if($is_admin==true || in_array($cachedInfo["owner"],$subordinate_users) || $cachedInfo["owner"]==$current_user->id)
-                                $this->is_editable = 'true';
-                        else
-                                $this->is_editable = 'false';
-                } 
-            }
-        }
 	function Reports($reportid="")
 	{
-            self::__construct($reportid);
+		global $adb,$current_user,$theme,$mod_strings;
+		$this->initListOfModules();
+		if($reportid != "")
+		{
+			// Lookup information in cache first
+			$cachedInfo = VTCacheUtils::lookupReport_Info($current_user->id, $reportid);
+			$subordinate_users = VTCacheUtils::lookupReport_SubordinateUsers($reportid);
+			
+			$reportModel = Reports_Record_Model::getCleanInstance($reportid);
+			$sharingType = $reportModel->get('sharingtype');
+			
+			if($cachedInfo === false) {
+				$ssql = "select vtiger_reportmodules.*,vtiger_report.* from vtiger_report inner join vtiger_reportmodules on vtiger_report.reportid = vtiger_reportmodules.reportmodulesid";
+				$ssql .= " where vtiger_report.reportid = ?";
+				$params = array($reportid);
+
+				require_once('include/utils/GetUserGroups.php');
+				require('user_privileges/user_privileges_'.$current_user->id.'.php');
+				$userGroups = new GetUserGroups();
+				$userGroups->getAllUserGroups($current_user->id);
+				$user_groups = $userGroups->user_groups;
+				if(!empty($user_groups) && $sharingType == 'Private'){
+					$user_group_query = " (shareid IN (".generateQuestionMarks($user_groups).") AND setype='groups') OR";
+					array_push($params, $user_groups);
+				}
+
+				$non_admin_query = " vtiger_report.reportid IN (SELECT reportid from vtiger_reportsharing WHERE $user_group_query (shareid=? AND setype='users'))";
+				if($sharingType == 'Private'){
+					$ssql .= " and (( (".$non_admin_query.") or vtiger_report.sharingtype='Public' or vtiger_report.owner = ? or vtiger_report.owner in(select vtiger_user2role.userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'))";
+					array_push($params, $current_user->id);
+					array_push($params, $current_user->id);
+				}
+
+				$query = $adb->pquery("select userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'",array());
+				$subordinate_users = Array();
+				for($i=0;$i<$adb->num_rows($query);$i++){
+					$subordinate_users[] = $adb->query_result($query,$i,'userid');
+				}
+
+				// Update subordinate user information for re-use
+				VTCacheUtils::updateReport_SubordinateUsers($reportid, $subordinate_users);
+				
+				//Report sharing for vtiger7
+				$queryObj = new stdClass();
+				$queryObj->query = $ssql;
+				$queryObj->queryParams = $params;
+				$queryObj = self::getReportSharingQuery($queryObj, $sharingType);
+				
+				$result = $adb->pquery($queryObj->query, $queryObj->queryParams);
+				if($result && $adb->num_rows($result)) {
+					$reportmodulesrow = $adb->fetch_array($result);
+
+					// Update information in cache now
+					VTCacheUtils::updateReport_Info(
+						$current_user->id, $reportid, $reportmodulesrow["primarymodule"],
+						$reportmodulesrow["secondarymodules"], $reportmodulesrow["reporttype"],
+						$reportmodulesrow["reportname"], $reportmodulesrow["description"],
+						$reportmodulesrow["folderid"], $reportmodulesrow["owner"]
+					);
+				}
+
+				// Re-look at cache to maintain code-consistency below
+				$cachedInfo = VTCacheUtils::lookupReport_Info($current_user->id, $reportid);
+			}
+
+			if($cachedInfo) {
+				$this->primodule = $cachedInfo["primarymodule"];
+				$this->secmodule = $cachedInfo["secondarymodules"];
+				$this->reporttype = $cachedInfo["reporttype"];
+				$this->reportname = decode_html($cachedInfo["reportname"]);
+				$this->reportdescription = decode_html($cachedInfo["description"]);
+				$this->folderid = $cachedInfo["folderid"];
+				if($is_admin==true || in_array($cachedInfo["owner"],$subordinate_users) || $cachedInfo["owner"]==$current_user->id)
+					$this->is_editable = 'true';
+				else
+					$this->is_editable = 'false';
+			} 
+			}
 	}
 
 	// Update the module list for listing columns for report creation.
@@ -549,7 +547,7 @@ class Reports extends CRMEntity{
 		}
 		$result = $adb->pquery($sql, $params);
 		$report = $adb->fetch_array($result);
-		if(php7_count($report)>0)
+		if(count($report)>0)
 		{
 			do
 			{
@@ -647,7 +645,7 @@ class Reports extends CRMEntity{
 		if($module != "")
 		{
 			$secmodule = explode(":",$module);
-			for($i=0;$i < php7_count($secmodule) ;$i++)
+			for($i=0;$i < count($secmodule) ;$i++)
 			{
 				//$this->updateModuleList($secmodule[$i]);
 				if($this->module_list[$secmodule[$i]]){
@@ -741,7 +739,7 @@ class Reports extends CRMEntity{
 
 			$profileList = getCurrentUserProfileList();
 			$sql = "select * from vtiger_field inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid where vtiger_field.tabid in (". generateQuestionMarks($tabid) .")  and vtiger_field.block in (". generateQuestionMarks($block) .") and vtiger_field.displaytype in (1,2,3,5) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
-			if (php7_count($profileList) > 0) {
+			if (count($profileList) > 0) {
 				$sql .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($params, $profileList);
 			}
@@ -909,7 +907,7 @@ class Reports extends CRMEntity{
 				"Next 7 Days","Next 30 Days","Next 60 Days","Next 90 Days","Next 120 Days"
 				);
 
-		for($i=0;$i<php7_count($datefiltervalue);$i++)
+		for($i=0;$i<count($datefiltervalue);$i++)
 		{
 			if($selecteddatefilter == $datefiltervalue[$i])
 			{
@@ -953,7 +951,7 @@ class Reports extends CRMEntity{
 		{
 			$profileList = getCurrentUserProfileList();
 			$sql = "select * from vtiger_field inner join vtiger_tab on vtiger_tab.tabid = vtiger_field.tabid inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid  where vtiger_field.tabid=? and (vtiger_field.uitype =5 or vtiger_field.displaytype=2) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.block in (". generateQuestionMarks($block) .") and vtiger_field.presence in (0,2)";
-			if (php7_count($profileList) > 0) {
+			if (count($profileList) > 0) {
 				$sql .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($params, $profileList);
 			}
@@ -1302,7 +1300,7 @@ function getEscapedColumns($selectedfields)
 		if($module == "Calendar")
 		{
 			$query .= " vtiger_field.tabid in (9,16) and vtiger_field.displaytype in (1,2,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
-			if (php7_count($profileList) > 0) {
+			if (count($profileList) > 0) {
 				$query .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($params, $profileList);
 			}
@@ -1312,7 +1310,7 @@ function getEscapedColumns($selectedfields)
 		{
 			array_push($params, $this->primodule, $this->secmodule);
 			$query .= " vtiger_field.tabid in (select tabid from vtiger_tab where vtiger_tab.name in (?,?)) and vtiger_field.displaytype in (1,2,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
-			if (php7_count($profileList) > 0) {
+			if (count($profileList) > 0) {
 				$query .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($params, $profileList);
 			}
@@ -1400,7 +1398,7 @@ function getEscapedColumns($selectedfields)
 				list($tablename,$colname,$module_field,$fieldname,$single) = split(":",$fieldcolname);
 				require('user_privileges/user_privileges_'.$current_user->id.'.php');
 				list($module,$field) = split("_",$module_field);
-				if(php7_sizeof($permitted_fields) == 0 && $is_admin == false && $profileGlobalPermission[1] == 1 && $profileGlobalPermission[2] == 1)
+				if(sizeof($permitted_fields) == 0 && $is_admin == false && $profileGlobalPermission[1] == 1 && $profileGlobalPermission[2] == 1)
 				{
 					$permitted_fields = $this->getaccesfield($module);
 				}
@@ -1488,7 +1486,7 @@ function getEscapedColumns($selectedfields)
                 
 				if(($col[4] == 'D' || ($col[4] == 'T' && $col[1] != 'time_start' && $col[1] != 'time_end') || ($col[4] == 'DT')) && !in_array($criteria['comparator'], $specialDateConditions)) {
 					$val = Array();
-					for($x=0;$x<php7_count($temp_val);$x++) {
+					for($x=0;$x<count($temp_val);$x++) {
                         if($col[4] == 'D') {
 							$date = new DateTimeField(trim($temp_val[$x]));
 							$val[$x] = $date->getDisplayDate();
@@ -1560,7 +1558,7 @@ function getEscapedColumns($selectedfields)
 		if(!empty($secondarymodule))
 		{
 			//$secondarymodule = explode(":",$secondarymodule);
-			for($i=0;$i < php7_count($secondarymodule) ;$i++)
+			for($i=0;$i < count($secondarymodule) ;$i++)
 			{
 				$options []= $this->sgetColumnstoTotalHTML($secondarymodule[$i],($i+1));
 			}
@@ -1599,7 +1597,7 @@ function getEscapedColumns($selectedfields)
 		if($secondarymodule != "")
 		{
 			$secondarymodule = explode(":",$secondarymodule);
-			for($i=0;$i < php7_count($secondarymodule) ;$i++)
+			for($i=0;$i < count($secondarymodule) ;$i++)
 			{
 				$options []= $this->sgetColumnstoTotalHTML($secondarymodule[$i],($i+1));
 			}
@@ -1635,7 +1633,7 @@ function getEscapedColumns($selectedfields)
 		{
 			$profileList = getCurrentUserProfileList();
 			$ssql = "select * from vtiger_field inner join vtiger_tab on vtiger_tab.tabid = vtiger_field.tabid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid  where vtiger_field.uitype != 50 and vtiger_field.tabid=? and vtiger_field.displaytype in (1,2,3) and vtiger_def_org_field.visible=0 and vtiger_profile2field.visible=0 and vtiger_field.presence in (0,2)";
-			if (php7_count($profileList) > 0) {
+			if (count($profileList) > 0) {
 				$ssql .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($sparams, $profileList);
 			}
@@ -1698,7 +1696,7 @@ function getEscapedColumns($selectedfields)
 					$selectedcolumn = "";
 					$selectedcolumn1 = "";
 
-					for($i=0;$i < php7_count($this->columnssummary) ;$i++)
+					for($i=0;$i < count($this->columnssummary) ;$i++)
 					{
 						$selectedcolumnarray = explode(":",$this->columnssummary[$i]);
 						$selectedcolumn = $selectedcolumnarray[1].":".$selectedcolumnarray[2].":".
@@ -1879,7 +1877,7 @@ function updateAdvancedCriteria($reportid, $advft_criteria, $advft_criteria_grou
 		if(($column_info[4] == 'D' || ($column_info[4] == 'T' && $column_info[1] != 'time_start' && $column_info[1] != 'time_end') || ($column_info[4] == 'DT')) && ($column_info[4] != '' && $adv_filter_value != '' ))
 		{
 			$val = Array();
-			for($x=0;$x<php7_count($temp_val);$x++) {
+			for($x=0;$x<count($temp_val);$x++) {
 				if(trim($temp_val[$x]) != '') {
 					$date = new DateTimeField(trim($temp_val[$x]));
 					if($column_info[4] == 'D') {

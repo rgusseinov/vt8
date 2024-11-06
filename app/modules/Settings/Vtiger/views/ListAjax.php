@@ -15,7 +15,7 @@ class Settings_Vtiger_ListAjax_View extends Settings_Vtiger_List_View {
         $this->exposeMethod('getPageCount');
     }
 
-	function preProcess(Vtiger_Request $request, $display=true) {
+	function preProcess(Vtiger_Request $request) {
 		return true;
 	}
 

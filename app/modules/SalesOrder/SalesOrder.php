@@ -106,13 +106,10 @@ class SalesOrder extends CRMEntity {
 	 *  This function creates an instance of LoggerManager class using getLogger method
 	 *  creates an instance for PearDatabase class and get values for column_fields array of SalesOrder class.
 	 */
-        function __construct() {
-            $this->log =Logger::getLogger('SalesOrder');
-            $this->db = PearDatabase::getInstance();
-            $this->column_fields = getColumnFields('SalesOrder');
-        }
 	function SalesOrder() {
-            self::__construct();
+		$this->log =LoggerManager::getLogger('SalesOrder');
+		$this->db = PearDatabase::getInstance();
+		$this->column_fields = getColumnFields('SalesOrder');
 	}
 
 	function save_module($module)
@@ -595,7 +592,7 @@ class SalesOrder extends CRMEntity {
 		foreach($tableColumns as $tableColumn){
 			$tableInfo = explode('.', $tableColumn);
 			$duplicateCheckClause .= " ifnull($tableColumn,'null') = ifnull(temp.$tableInfo[1],'null')";
-			if (php7_count($tableColumns) != $i++) $duplicateCheckClause .= " AND ";
+			if (count($tableColumns) != $i++) $duplicateCheckClause .= " AND ";
 		}
 
         $query = $selectClause . $fromClause .

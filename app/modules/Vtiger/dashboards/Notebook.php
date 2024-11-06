@@ -10,8 +10,7 @@
 
 class Vtiger_Notebook_Dashboard extends Vtiger_IndexAjax_View {
 	
-	public function process(Vtiger_Request $request) {
-		$widget = null;
+	public function process(Vtiger_Request $request, $widget=NULL) {
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
 		

@@ -211,7 +211,7 @@ class Vtiger_FieldBasic {
 	 * @internal TODO
 	 */
 	function __update() {
-		self::log("Make use of Vtiger_Field_Model => __update() api.");
+		self::log("Updating Field $this->name ... DONE");
 	}
 
 	/**
@@ -252,7 +252,7 @@ class Vtiger_FieldBasic {
 	 * Get module name to which this field instance is associated
 	 */
 	function getModuleName() {
-		return $this->block && $this->block->module ? $this->block->module->name : "";
+		return $this->block->module->name;
 	}
 
 	/**

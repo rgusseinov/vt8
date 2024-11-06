@@ -19,10 +19,6 @@ class VtigerInventoryOperation extends VtigerModuleOperation {
 
 	public function create($elementType, $element) {
 		self::$CREATE_OPERATI0N = true;
-		
-		if (!$element['hdnTaxType']) {
-			$element['hdnTaxType'] = Inventory_TaxRecord_Model::getSelectedDefaultTaxMode();
-		}
 		$element = $this->sanitizeInventoryForInsert($element);
 		$element = $this->sanitizeShippingTaxes($element);
 		$lineItems = $element['LineItems'];
@@ -168,20 +164,14 @@ class VtigerInventoryOperation extends VtigerModuleOperation {
 			vglobal('updateInventoryProductRel_deduct_stock', $currentValue);
 		} else {
 			$prevAction = $_REQUEST['action'];
-			$prevAjaxAction = $_REQUEST['ajxaction'];
-			
 			// This is added as we are passing data in user format, so in the crmentity insertIntoEntity API
 			// should convert to database format, we have added a check based on the action name there. But
 			// while saving Invoice and Purchase Order we are also depending on the same action file names to
 			// not to update stock if its an ajax save. In this case also we do not want line items to change.
 			$_REQUEST['action'] = 'FROM_WS';
-			
-			//To avoid deletion of lineitems we use the ajaxaction DETAILVIEW as if we were updating signle fields from the detail view:
-			$_REQUEST['ajxaction'] = 'DETAILVIEW'; 
-			
+
 			$parent = parent::revise($element);
 			$_REQUEST['action'] = $prevAction;
-			$_REQUEST['ajxaction'] = $prevAjaxAction;
 			$parent['LineItems'] = $handler->getAllLineItemForParent($parentId);
 		}
 		return array_merge($element,$parent);
@@ -234,6 +224,10 @@ class VtigerInventoryOperation extends VtigerModuleOperation {
 	 */
 	protected function sanitizeInventoryForInsert($element) {
 
+		if (!$element['hdnTaxType']) {
+			$element['hdnTaxType'] = Inventory_TaxRecord_Model::getSelectedDefaultTaxMode();
+		}
+
 		if (!empty($element['hdnTaxType'])) {
 			$_REQUEST['taxtype'] = $element['hdnTaxType'];
 		}
@@ -272,7 +266,7 @@ class VtigerInventoryOperation extends VtigerModuleOperation {
 		}
 
 		$lineItems = $element['LineItems'];
-		$totalNoOfProducts = php7_count($lineItems);
+		$totalNoOfProducts = count($lineItems);
 		$_REQUEST['totalProductCount'] = $totalNoOfProducts;
 		$_REQUEST['REQUEST_FROM_WS'] = true;
 

@@ -518,8 +518,6 @@ function getListQuery($module, $where = '') {
  */
 
 function setSessionVar($lv_array, $noofrows, $max_ent, $module = '', $related = '') {
-	global $currentModule;
-	
 	$start = '';
 	if ($noofrows >= 1) {
 		$lv_array['start'] = 1;
@@ -780,7 +778,7 @@ function listQueryNonAdminChange($query, $module, $scope = '') {
 
 function html_strlen($str) {
 	$chars = preg_split('/(&[^;\s]+;)|/', $str, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-	return php7_count($chars);
+	return count($chars);
 }
 
 function html_substr($str, $start, $length = NULL) {
@@ -796,7 +794,7 @@ function html_substr($str, $start, $length = NULL) {
 
 	// create our array of characters and html entities
 	$chars = preg_split('/(&[^;\s]+;)|/', $str, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE);
-	$html_length = php7_count($chars);
+	$html_length = count($chars);
 	// check if we can predict the return value and save some processing time
 	if (($html_length === 0) or ($start >= $html_length) or (isset($length) and ($length <= -$html_length)))
 		return "";

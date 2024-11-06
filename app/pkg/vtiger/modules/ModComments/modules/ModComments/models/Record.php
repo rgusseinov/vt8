@@ -89,7 +89,7 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 	public function trimFileName($fileName = false){
 		if(!empty($fileName)){
 			$fileDetails = explode('.',$fileName);
-			$noOfParts = php7_count($fileDetails);
+			$noOfParts = count($fileDetails);
 			$fileExtension = $fileDetails[$noOfParts-1];
 			$val = str_replace(".$fileExtension", '', $fileName);
 			$field_val = $val;
@@ -118,14 +118,14 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 			if (!empty($customer)) {
 				$recordModel = Vtiger_Record_Model::getInstanceById($customer);
 				$imageDetails = $recordModel->getImageDetails();
-				if (!empty($imageDetails[0]['url'])) {
-					return $imageDetails[0]['url'];
+				if(!empty($imageDetails)) {
+					return $imageDetails[0]['path'].'_'.$imageDetails[0]['name'];
 				} else
 					return vimage_path('CustomerPortal.png');
 			} else {
-				$imageDetails = $commentor->getImageDetails();
-				if (!empty($imageDetails[0]['url'])) {
-					return $imageDetails[0]['url'];
+				$imagePath = $commentor->getImageDetails();
+				if (!empty($imagePath[0]['name'])) {
+					return $imagePath[0]['path'] . '_' . $imagePath[0]['name'];
 				}
 			}
 		} elseif ($isMailConverterType) {
@@ -146,7 +146,7 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 					INNER JOIN vtiger_crmentity ON vtiger_modcomments.modcommentsid = vtiger_crmentity.crmid
 					WHERE modcommentsid = ? AND deleted = 0', array($record));
 		if($db->num_rows($result)) {
-			$row = $db->query_result_rowdata($result, 0);
+			$row = $db->query_result_rowdata($result, $i);
 			$self = new self();
 			$self->setData($row);
 			return $self;
@@ -265,7 +265,6 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 	 * @return ModComments_Record_Model(s)
 	 */
 	public static function getAllParentComments($parentId) {
-			$recordInstances = array();
 			$db = PearDatabase::getInstance();
 			$focus = CRMEntity::getInstance('ModComments');
 			$query = $focus->get_comments();
@@ -279,8 +278,11 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 					$recordInstance->setData($rowData);
 					$recordInstances[] = $recordInstance;
 				}
+
+				return $recordInstances;
+			} else {
+				return array();
 			}
-			return $recordInstances;
 	}
 
 	/**
@@ -410,27 +412,14 @@ class ModComments_Record_Model extends Vtiger_Record_Model {
 		$attachmentsList = array();
 		if($numOfRows) {
 			for($i=0; $i<$numOfRows; $i++) {
-                                $attachmentId = $db->query_result($attachmentRes, $i, 'attachmentsid');
-                                $rawFileName = $db->query_result($attachmentRes, $i, 'name');
-                                $storedName = $db->query_result($attachmentRes, $i, 'storedname');
-                                $path = $db->query_result($attachmentRes, $i, 'path');
-                                if($storedName) { 
-                                    $filename = $storedName;
-                                } else {
-                                    $filename = $rawFileName;
-                                }
-                                $attachmentsList[$i]['attachment'] = decode_html($rawFileName);
-                                $attachmentsList[$i]['fileid'] = $attachmentId;
-                                $attachmentsList[$i]['storedname'] = decode_html($storedName);
+				$attachmentsList[$i]['fileid'] = $db->query_result($attachmentRes, $i, 'attachmentsid');
+				$attachmentsList[$i]['attachment'] = decode_html($db->query_result($attachmentRes, $i, 'name'));
+				$path = $db->query_result($attachmentRes, $i, 'path');
 				$attachmentsList[$i]['path'] = $path;
-                                $saved_filename = $attachmentId."_".$filename;
-                                $filenamewithpath = $path.$saved_filename;
-                                $filesize = filesize($filenamewithpath);
-                                $attachmentsList[$i]['filenamewithpath'] = $filenamewithpath;
-				$attachmentsList[$i]['size'] = $filesize;
+				$attachmentsList[$i]['size'] = filesize($path.$attachmentsList[$i]['fileid'].'_'.$attachmentsList[$i]['attachment']);
 				$attachmentsList[$i]['type'] = $db->query_result($attachmentRes, $i, 'type');
 				$attachmentsList[$i]['cid'] = $db->query_result($attachmentRes, $i, 'cid');
-                        }
+			}
 		}
 		return $attachmentsList;
 	}

@@ -26,7 +26,7 @@ class Users_Module_Model extends Vtiger_Module_Model {
 				$currentUser = Users_Record_Model::getCurrentUserModel();
 				$overRideQuery = $overRideQuery. $condition;
 				$allSubordinates = $currentUser->getAllSubordinatesByReportsToField($record);
-				if(php7_count($allSubordinates) > 0) {
+				if(count($allSubordinates) > 0) {
 					$overRideQuery .= " AND vtiger_users.id NOT IN (". implode(',',$allSubordinates) .")"; // do not allow the subordinates
 				}
 			}
@@ -46,13 +46,13 @@ class Users_Module_Model extends Vtiger_Module_Model {
 		if(!empty($searchValue)) {
 			$db = PearDatabase::getInstance();
 
-			$query = 'SELECT * FROM vtiger_users WHERE userlabel LIKE ? AND status = ?';
+			$query = 'SELECT * FROM vtiger_users WHERE (first_name LIKE ? OR last_name LIKE ?) AND status = ?';
 			$currentUser = Users_Record_Model::getCurrentUserModel();
 			$allSubordinates = $currentUser->getAllSubordinatesByReportsToField($currentUser->getId());
-			$params = array("%$searchValue%", 'Active');
+			$params = array("%$searchValue%", "%$searchValue%", 'Active');
 
 			// do not allow the subordinates
-			if(php7_count($allSubordinates) > 0) {
+			if(count($allSubordinates) > 0) {
 				$query .= " AND vtiger_users.id NOT IN (". implode(',',$allSubordinates) .")";
 			}
 
@@ -105,11 +105,8 @@ class Users_Module_Model extends Vtiger_Module_Model {
 	public function deleteRecord(Vtiger_Record_Model $recordModel) {
 		$db = PearDatabase::getInstance();
 		$currentUser = Users_Record_Model::getCurrentUserModel();
-        $deleteUserId = $recordModel->getId();
-        if($deleteUserId != 1){
-            $query = "UPDATE vtiger_users SET status=?, date_modified=?, modified_user_id=? WHERE id=?";
-            $db->pquery($query, array('Inactive', date('Y-m-d H:i:s'), $currentUser->getId(), $deleteUserId), true,"Error marking record deleted: ");
-        }
+		$query = "UPDATE vtiger_users SET status=?, date_modified=?, modified_user_id=? WHERE id=?";
+		$db->pquery($query, array('Inactive', date('Y-m-d H:i:s'), $currentUser->getId(), $recordModel->getId()), true,"Error marking record deleted: ");
 	}
 
 	/**
@@ -126,15 +123,11 @@ class Users_Module_Model extends Vtiger_Module_Model {
 	*/
 	public function updateBaseCurrency($currencyName) {
 		$db = PearDatabase::getInstance();
-		$result = $db->pquery('SELECT currency_code, currency_symbol, currency_name FROM vtiger_currencies WHERE currency_name = ?', array($currencyName));
+		$result = $db->pquery('SELECT currency_code, currency_symbol FROM vtiger_currencies WHERE currency_name = ?', array($currencyName));
 		$num_rows = $db->num_rows($result);
 		if ($num_rows > 0) {
 			$currency_code = decode_html($db->query_result($result, 0, 'currency_code'));
 			$currency_symbol = decode_html($db->query_result($result, 0,'currency_symbol'));
-			$currencyName = decode_html($db->query_result($result, 0, 'currency_name')); // rewrite actual from table.
-		} else {
-			// Invalid currency name.
-			return;
 		}
 		$this->updateConfigFile($currencyName);
 		//Updating Database

@@ -20,7 +20,7 @@ if (file_exists('config_override.php')) {
 }
 
 // Extended inclusions
-require_once 'vendor/autoload.php';
+require_once 'includes/Loader.php';
 vimport ('includes.runtime.EntryPoint');
 
 $site_URLArray = explode('/',$site_URL);

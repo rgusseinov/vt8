@@ -128,7 +128,7 @@ class Install_Utils_Model {
 	public static function getSystemPreInstallParameters() {
 		$preInstallConfig = array();
 		// Name => array( System Value, Recommended value, supported or not(true/false) );
-		$preInstallConfig['LBL_PHP_VERSION']	= array(phpversion(), '7.0+,8.0+', (version_compare(phpversion(), '7.0', '>=')));
+		$preInstallConfig['LBL_PHP_VERSION']	= array(phpversion(), '5.4.0+, 7.0', (version_compare(phpversion(), '5.4.0', '>=')));
 		//$preInstallConfig['LBL_IMAP_SUPPORT']	= array(function_exists('imap_open'), true, (function_exists('imap_open') == true));
 		$preInstallConfig['LBL_ZLIB_SUPPORT']	= array(function_exists('gzinflate'), true, (function_exists('gzinflate') == true));
 
@@ -378,11 +378,6 @@ class Install_Utils_Model {
 
 		//Checking for database connection parameters
 		if($db_type) {
-			// Backward compatible mode for adodb library.
-			if ($db_type == 'mysqli') {
-				mysqli_report(MYSQLI_REPORT_ALL ^ MYSQLI_REPORT_STRICT);
-			}
-			
 			$conn = NewADOConnection($db_type);
 			$db_type_status = true;
 			if(@$conn->Connect($db_hostname,$db_username,$db_password)) {
@@ -391,7 +386,6 @@ class Install_Utils_Model {
 				if(self::isMySQL($db_type)) {
 					$mysql_server_version = self::getMySQLVersion($serverInfo);
 				}
-				$conn->Execute("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'"); /* force friendly mode */
 				$db_sqlmode_support = self::isMySQLSqlModeFriendly($conn);
 				if($create_db && $db_sqlmode_support) {
 					// drop the current database if it exists
@@ -406,7 +400,6 @@ class Install_Utils_Model {
 					$db_creation_failed = true;
 					$createdb_conn = NewADOConnection($db_type);
 					if(@$createdb_conn->Connect($db_hostname, $root_user, $root_password)) {
-						$createdb_conn->Execute("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'"); /* force friendly mode */
 						$query = "CREATE DATABASE ".$db_name;
 						if($create_utf8_db == 'true') {
 							if(self::isMySQL($db_type))
@@ -439,7 +432,7 @@ class Install_Utils_Model {
 			$error_msg_info = getTranslatedString('MSG_LIST_REASONS', 'Install').':<br>
 					-  '.getTranslatedString('MSG_DB_PARAMETERS_INVALID', 'Install').'
 					-  '.getTranslatedString('MSG_DB_USER_NOT_AUTHORIZED', 'Install');
-		} elseif(self::isMySQL($db_type) && version_compare($mysql_server_version,4.1,'<')) {
+		} elseif(self::isMySQL($db_type) && $mysql_server_version < 4.1) {
 			$error_msg = $mysql_server_version.' -> '.getTranslatedString('ERR_INVALID_MYSQL_VERSION', 'Install');
 		} elseif(!$db_sqlmode_support) {
 			$error_msg = getTranslatedString('ERR_DB_SQLMODE_NOTFRIENDLY', 'Install');
@@ -473,7 +466,7 @@ class Install_Utils_Model {
 			if ($handle = opendir($moduleFolder)) {
 				while (false !== ($file = readdir($handle))) {
 					$packageNameParts = explode(".",$file);
-					if($packageNameParts[php7_count($packageNameParts)-1] != 'zip'){
+					if($packageNameParts[count($packageNameParts)-1] != 'zip'){
 						continue;
 					}
 					array_pop($packageNameParts);
@@ -495,14 +488,5 @@ class Install_Utils_Model {
 				closedir($handle);
 			}
 		}
-	}
-
-	/* 
-	 * Register installed user detail to inform about product updates and news.
-	 */
-	public static function registerUser($name, $email, $industry) {
-		require_once 'vtlib/Vtiger/Net/Client.php';
-		$client = new Vtiger_Net_Client("https://stats.vtiger.com/register.php");
-		@$client->doPost(array("name" => $name, "email" => $email, "industry" => $industry), 5);
 	}
 }

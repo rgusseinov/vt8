@@ -42,7 +42,7 @@ if(empty($from)) {
 global $adb;
 global $log;
 global $site_URL;
-$log =Logger::getLogger('SendReminder');
+$log =& LoggerManager::getLogger('SendReminder');
 $log->debug(" invoked SendReminder ");
 
 // retrieve the translated strings.
@@ -94,7 +94,7 @@ if($adb->num_rows($result) >= 1)
 		$activitymode = ($result_set['activitytype'] == "Task")?"Task":"Events";
 		$parent_type = $result_set['setype'];
 		$activity_sub = $result_set['subject'];
-		$to_addr= array();
+		$to_addr='';
 
 		if($parent_type!='')
 		$parent_content = getParentInfo($parent_type)."\n";
@@ -194,7 +194,7 @@ if($adb->num_rows($result) >= 1)
 			$recordModel = Vtiger_Record_Model::getInstanceById($activity_id, 'Calendar');
 			$recordDetailViewLink = $recordModel->getDetailViewUrl();
 			$contents = $contents."<br/> ".vtranslate('LBL_CLICK_HERE_TO_VIEW', 'Calendar')."&nbsp;<a href=$site_URL/$recordDetailViewLink>".vtranslate('LBL_RECORD', 'Calendar')."</a>";
-			if(php7_count($to_addr) >=1)
+			if(count($to_addr) >=1)
 			{
 				send_email($to_addr,$from,$subject,$contents,$mail_server,$mail_server_username,$mail_server_password);
 				$upd_query = "UPDATE vtiger_activity_reminder SET reminder_sent = ?";

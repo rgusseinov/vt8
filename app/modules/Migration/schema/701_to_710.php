@@ -88,11 +88,10 @@ if (defined('VTIGER_UPGRADE')) {
             continue;
         }
         $moduleClass = CRMEntity::getInstance($moduleModel->getName());
-        $baseTableId = isset($moduleClass->table_index)? $moduleClass->table_index : null;
+        $baseTableId = $moduleClass->table_index;
         if ($baseTableId) {
             $baseTableName = $moduleClass->table_name;
-            $customTable = isset($moduleClass->customFieldTable)? $moduleClass->customFieldTable : null;
-			if (!$customTable) continue;
+            $customTable = $moduleClass->customFieldTable;
             $customTableName = $customTable[0];
             $customTableId = $customTable[1];
             $customTableColumns = $db->getColumnNames($customTableName);
@@ -375,7 +374,7 @@ if (defined('VTIGER_UPGRADE')) {
 			if (!array_key_exists($columnName, $updatedColumnsList)) {
 				if (preg_match('/vtiger_crmentity:createdtime:(\w*\:)*T/', $columnName) || preg_match('/vtiger_crmentity:modifiedtime:(\w*\:)*T/', $columnName)) {
 					$columnParts = explode(':', $columnName);
-					$lastKey = php7_count($columnParts)-1;
+					$lastKey = count($columnParts)-1;
 
 					if ($columnParts[$lastKey] == 'T') {
 						$columnParts[$lastKey] = 'DT';
@@ -405,7 +404,7 @@ if (defined('VTIGER_UPGRADE')) {
 			if (!array_key_exists($columnName, $updatedColumnsList)) {
 				if (preg_match('/vtiger_crmentity(\w*):createdtime:(\w*\:)*T/', $columnName) || preg_match('/vtiger_crmentity(\w*):modifiedtime:(\w*\:)*T/', $columnName)) {
 					$columnParts = explode(':', $columnName);
-					$lastKey = php7_count($columnParts)-1;
+					$lastKey = count($columnParts)-1;
 
 					if ($columnParts[$lastKey] == 'T') {
 						$columnParts[$lastKey] = 'DT';
@@ -426,6 +425,9 @@ if (defined('VTIGER_UPGRADE')) {
 		echo "<br>Succecssfully migrated columns in <b>$tableName</b> table<br>";
 	}
 	//END::Updating custom view and report columns, filters for createdtime and modifiedtime fields as typeofdata (T~...) is being transformed to (DT~...)
+
+	//Update existing package modules
+	Install_Utils_Model::installModules();
 
 	echo '<br>Succecssfully vtiger version updated to <b>7.1.0</b><br>';
 }

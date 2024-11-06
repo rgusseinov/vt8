@@ -27,7 +27,7 @@ class Vtiger_CRMEntity extends CRMEntity {
 	function __construct() {
 		global $log;
 		$this->column_fields = getColumnFields(get_class($this));
-		$this->db = PearDatabase::getInstance();
+		$this->db = new PearDatabase();
 		$this->log = $log;
 	}
 
@@ -117,7 +117,7 @@ class Vtiger_CRMEntity extends CRMEntity {
 						(";
 
 					// Build the query based on the group association of current user.
-					if(php7_sizeof($current_user_groups) > 0) {
+					if(sizeof($current_user_groups) > 0) {
 						$sec_query .= " vtiger_crmentity.smownerid IN (". implode(",", $current_user_groups) .") OR ";
 					}
 					$sec_query .= " vtiger_crmentity.smownerid IN

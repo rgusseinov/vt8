@@ -137,7 +137,7 @@ class Calendar_ListView_Model extends Vtiger_ListView_Model {
             if($webserviceField->getDisplayType() == '6') continue;
 			// check if the field is reference field
 			preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
-			if(php7_count($matches) > 0) {
+			if(count($matches) > 0) {
 				list($full, $referenceParentField, $referenceModule, $referenceFieldName) = $matches;
 				$referenceModuleModel = Vtiger_Module_Model::getInstance($referenceModule);
 				$referenceFieldModel = Vtiger_Field_Model::getInstance($referenceFieldName, $referenceModuleModel);
@@ -191,7 +191,7 @@ class Calendar_ListView_Model extends Vtiger_ListView_Model {
         }
         
         $glue = "";
-        if(php7_count($queryGenerator->getWhereFields()) > 0 && (php7_count($searchParams)) > 0) {
+        if(count($queryGenerator->getWhereFields()) > 0 && (count($searchParams)) > 0) {
             $glue = QueryGenerator::$AND;
         }
         $queryGenerator->parseAdvFilterList($searchParams, $glue);
@@ -203,8 +203,8 @@ class Calendar_ListView_Model extends Vtiger_ListView_Model {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
         
-        $orderBy = $this->getForSql('orderby');
-		$sortOrder = $this->getForSql('sortorder');
+        $orderBy = $this->get('orderby');
+		$sortOrder = $this->get('sortorder');
         if(empty($sortOrder)) {
             $sortOrder = 'DESC';
         }
@@ -310,7 +310,7 @@ class Calendar_ListView_Model extends Vtiger_ListView_Model {
 			}
 		}
 		//setting list view count before unsetting permission denied records - to make sure paging should not fail
-		$pagingModel->set('_listcount', php7_count($listViewRecordModels));
+		$pagingModel->set('_listcount', count($listViewRecordModels));
 		foreach($recordsToUnset as $record) {
 			unset($listViewRecordModels[$record]);
 		}

@@ -15,24 +15,20 @@ require_once 'include/Webservices/Utils.php';
 global $adv_filter_options;
 global $mod_strings;
 
-$adv_filter_options = array();
-
-if ($mod_strings) {
-	$adv_filter_options = array("e" => "" . $mod_strings['equals'] . "",
-		"n" => "" . $mod_strings['not equal to'] . "",
-		"s" => "" . $mod_strings['starts with'] . "",
-		"ew" => "" . $mod_strings['ends with'] . "",
-		"c" => "" . $mod_strings['contains'] . "",
-		"k" => "" . $mod_strings['does not contain'] . "",
-		"l" => "" . $mod_strings['less than'] . "",
-		"g" => "" . $mod_strings['greater than'] . "",
-		"m" => "" . $mod_strings['less or equal'] . "",
-		"h" => "" . $mod_strings['greater or equal'] . "",
-		"b" => "" . $mod_strings['before'] . "",
-		"a" => "" . $mod_strings['after'] . "",
-		"bw" => "" . $mod_strings['between'] . "",
-	);
-}
+$adv_filter_options = array("e" => "" . $mod_strings['equals'] . "",
+	"n" => "" . $mod_strings['not equal to'] . "",
+	"s" => "" . $mod_strings['starts with'] . "",
+	"ew" => "" . $mod_strings['ends with'] . "",
+	"c" => "" . $mod_strings['contains'] . "",
+	"k" => "" . $mod_strings['does not contain'] . "",
+	"l" => "" . $mod_strings['less than'] . "",
+	"g" => "" . $mod_strings['greater than'] . "",
+	"m" => "" . $mod_strings['less or equal'] . "",
+	"h" => "" . $mod_strings['greater or equal'] . "",
+	"b" => "" . $mod_strings['before'] . "",
+	"a" => "" . $mod_strings['after'] . "",
+	"bw" => "" . $mod_strings['between'] . "",
+);
 
 class CustomView extends CRMEntity {
 
@@ -56,19 +52,16 @@ class CustomView extends CRMEntity {
 	 * @param $module -- The module Name:: Type String(optional)
 	 * @returns  nothing
 	 */
-        function __construct($module = "") {
-            global $current_user;
-            $this->customviewmodule = $module;
-            $this->escapemodule[] = $module . "_";
-            $this->escapemodule[] = "_";
-            $this->smownerid = $current_user->id;
-            $this->moduleMetaInfo = array();
-            if ($module != "" && $module != 'Calendar') {
-                    $this->meta = $this->getMeta($module, $current_user);
-            }
-        }   
 	function CustomView($module = "") {
-            self::__construct($module);
+		global $current_user, $adb;
+		$this->customviewmodule = $module;
+		$this->escapemodule[] = $module . "_";
+		$this->escapemodule[] = "_";
+		$this->smownerid = $current_user->id;
+		$this->moduleMetaInfo = array();
+		if ($module != "" && $module != 'Calendar') {
+			$this->meta = $this->getMeta($module, $current_user);
+		}
 	}
 
 	/**
@@ -92,9 +85,9 @@ class CustomView extends CRMEntity {
 	 */
 	function getViewId($module) {
 		global $adb, $current_user;
-		$now_action = vtlib_purify(isset($_REQUEST['action']) ? $_REQUEST['action'] : '');
+		$now_action = vtlib_purify($_REQUEST['action']);
 		if(!$now_action) {
-			$now_action = vtlib_purify(isset($_REQUEST['view']) ? $_REQUEST['view'] : '');
+			$now_action = vtlib_purify($_REQUEST['view']);
 		}
 		if (empty($_REQUEST['viewname'])) {
 			if (isset($_SESSION['lvs'][$module]["viewname"]) && $_SESSION['lvs'][$module]["viewname"] != '') {
@@ -213,7 +206,7 @@ class CustomView extends CRMEntity {
 		if ($markselected == false)
 			$selected = '';
 
-		$ssql = "select vtiger_customview.*, vtiger_users.first_name,vtiger_users.last_name,vtiger_users.userlabel from vtiger_customview inner join vtiger_tab on vtiger_tab.name = vtiger_customview.entitytype
+		$ssql = "select vtiger_customview.*, vtiger_users.first_name,vtiger_users.last_name from vtiger_customview inner join vtiger_tab on vtiger_tab.name = vtiger_customview.entitytype
 					left join vtiger_users on vtiger_customview.userid = vtiger_users.id ";
 		$ssql .= " where vtiger_tab.tabid=?";
 		$sparams = array($tabid);
@@ -234,7 +227,7 @@ class CustomView extends CRMEntity {
 			if ($cvrow['status'] == CV_STATUS_DEFAULT || $cvrow['userid'] == $current_user->id) {
 				$disp_viewname = $viewname;
 			} else {
-				$userName = $cvrow['userlabel'];
+				$userName = getFullNameFromArray('Users', $cvrow);
 				$disp_viewname = $viewname . " [" . $userName . "] ";
 			}
 
@@ -316,7 +309,7 @@ class CustomView extends CRMEntity {
 
 			$params = array($tab_ids, $block_ids);
 
-			if (php7_count($profileList) > 0) {
+			if (count($profileList) > 0) {
 				$sql.= "  and vtiger_profile2field.profileid in (" . generateQuestionMarks($profileList) . ")";
 				array_push($params, $profileList);
 			}
@@ -475,7 +468,7 @@ class CustomView extends CRMEntity {
 
 			$params = array($tabid, $blockids);
 
-			if (php7_count($profileList) > 0) {
+			if (count($profileList) > 0) {
 				$sql.= " and vtiger_profile2field.profileid in (" . generateQuestionMarks($profileList) . ")";
 				array_push($params, $profileList);
 			}
@@ -938,7 +931,7 @@ class CustomView extends CRMEntity {
 
 					$advFilterColumn = $criteria['columnname'];
 					$advFilterComparator = $criteria['comparator'];
-					$advFilterColumnCondition = isset($criteria['column_condition'])? $criteria['column_condition'] : null;
+					$advFilterColumnCondition = $criteria['column_condition'];
 
 					$columnInfo = explode(":", $advFilterColumn);
 					$fieldName = $columnInfo[2];
@@ -946,8 +939,7 @@ class CustomView extends CRMEntity {
 					$moduleModel = Vtiger_Module_Model::getInstance($moduleName);
 					preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
 
-					$referenceParentField = null;
-					if (php7_count($matches) != 0) {
+					if (count($matches) != 0) {
 						list($full, $referenceParentField, $referenceModule, $referenceFieldName) = $matches;
 					}
 					if ($referenceParentField) {
@@ -981,7 +973,7 @@ class CustomView extends CRMEntity {
 					$specialDateTimeConditions = Vtiger_Functions::getSpecialDateTimeCondtions();
 					if (($col[4] == 'D' || ($col[4] == 'T' && $col[1] != 'time_start' && $col[1] != 'time_end') || ($col[4] == 'DT')) && !in_array($criteria['comparator'], $specialDateTimeConditions)) {
 						$val = Array();
-						for ($x = 0; $x < php7_count($temp_val); $x++) {
+						for ($x = 0; $x < count($temp_val); $x++) {
 							if(empty($temp_val[$x])) {
 								$val[$x] = '';
 							} else if ($col[4] == 'D') {
@@ -1187,9 +1179,9 @@ class CustomView extends CRMEntity {
 						if ($this->customviewmodule == 'Calendar' && ($columns[1] == 'date_start' || $columns[1] == 'due_date')) {
 							$tableColumnSql = '';
 							if ($columns[1] == 'date_start') {
-								$tableColumnSql = "(CONCAT(date_start,' ',time_start))";
+								$tableColumnSql = "CAST((CONCAT(date_start,' ',time_start)) AS DATETIME)";
 							} else {
-								$tableColumnSql = "(CONCAT(due_date,' ',time_end))";
+								$tableColumnSql = "CAST((CONCAT(due_date,' ',time_end)) AS DATETIME)";
 							}
 						} else {
 							$tableColumnSql = $columns[0] . "." . $columns[1];
@@ -1235,9 +1227,9 @@ class CustomView extends CRMEntity {
 				if ($columnname != "" && $comparator != "") {
 					$valuearray = explode(",", trim($value));
 
-					if (isset($valuearray) && php7_count($valuearray) > 1 && $comparator != 'bw') {
+					if (isset($valuearray) && count($valuearray) > 1 && $comparator != 'bw') {
 						$advorsql = "";
-						for ($n = 0; $n < php7_count($valuearray); $n++) {
+						for ($n = 0; $n < count($valuearray); $n++) {
 							$advorsql[] = $this->getRealValues($columns[0], $columns[1], $comparator, trim($valuearray[$n]), $datatype);
 						}
 						//If negative logic filter ('not equal to', 'does not contain') is used, 'and' condition should be applied instead of 'or'
@@ -1247,7 +1239,7 @@ class CustomView extends CRMEntity {
 							$advorsqls = implode(" or ", $advorsql);
 						$advfiltersql = " (" . $advorsqls . ") ";
 					}
-					elseif ($comparator == 'bw' && php7_count($valuearray) == 2) {
+					elseif ($comparator == 'bw' && count($valuearray) == 2) {
 						$advfiltersql = "(" . $columns[0] . "." . $columns[1] . " between '" . getValidDBInsertDateTimeValue(trim($valuearray[0]), $datatype) . "' and '" . getValidDBInsertDateTimeValue(trim($valuearray[1]), $datatype) . "')";
 					}
 					elseif ($comparator == 'y') {
@@ -1279,7 +1271,7 @@ class CustomView extends CRMEntity {
 					}
 
 					$advfiltergroupsql .= $advfiltersql;
-					if ($columncondition != NULL && $columncondition != '' && php7_count($groupcolumns) > $columnindex) {
+					if ($columncondition != NULL && $columncondition != '' && count($groupcolumns) > $columnindex) {
 						$advfiltergroupsql .= ' ' . $columncondition . ' ';
 					}
 				}
@@ -1938,7 +1930,7 @@ class CustomView extends CRMEntity {
 			if (trim($block_label) == '') {
 				$block_info[$pre_block_label] = $block_info[$pre_block_label] . "," . $block_result['block'];
 			} else {
-				$lan_block_label = isset($current_mod_strings[$block_label])? $current_mod_strings[$block_label] : $block_label;
+				$lan_block_label = $current_mod_strings[$block_label];
 				if (isset($block_info[$lan_block_label]) && $block_info[$lan_block_label] != '') {
 					$block_info[$lan_block_label] = $block_info[$lan_block_label] . "," . $block_result['block'];
 				} else {
@@ -2028,7 +2020,7 @@ class CustomView extends CRMEntity {
 								$temp_result[] = $row['id'];
 							}
 							$user_array = $temp_result;
-							if (php7_sizeof($user_array) > 0) {
+							if (sizeof($user_array) > 0) {
 								if (!in_array($current_user->id, $user_array))
 									$permission = "no";
 								else

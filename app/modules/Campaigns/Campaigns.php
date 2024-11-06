@@ -68,14 +68,12 @@ class Campaigns extends CRMEntity {
 
 	// For Alphabetical search
 	var $def_basicsearch_col = 'campaignname';
-        function __construct() {
-            $this->log =Logger::getLogger('campaign');
-            $this->db = PearDatabase::getInstance();
-            $this->column_fields = getColumnFields('Campaigns');
-        }   
+
 	function Campaigns()
 	{
-            self::__construct();	
+		$this->log =LoggerManager::getLogger('campaign');
+		$this->db = PearDatabase::getInstance();
+		$this->column_fields = getColumnFields('Campaigns');
 	}
 
 	/** Function to handle module specific operations when saving a entity
@@ -173,8 +171,8 @@ class Campaigns extends CRMEntity {
 
 		if($return_value == null)
 			$return_value = Array();
-		else if($is_CampaignStatusAllowed && is_array($return_value['header'])) {
-			$statusPos = php7_count($return_value['header']) - 2; // Last column is for Actions, exclude that. Also the index starts from 0, so reduce one more count.
+		else if($is_CampaignStatusAllowed) {
+			$statusPos = count($return_value['header']) - 2; // Last column is for Actions, exclude that. Also the index starts from 0, so reduce one more count.
 			$return_value = $this->add_status_popup($return_value, $statusPos, 'Accounts');
 		}
 
@@ -274,7 +272,7 @@ class Campaigns extends CRMEntity {
 		if($return_value == null)
 			$return_value = Array();
 		else if($is_CampaignStatusAllowed) {
-			$statusPos = php7_count($return_value['header']) - 2; // Last column is for Actions, exclude that. Also the index starts from 0, so reduce one more count.
+			$statusPos = count($return_value['header']) - 2; // Last column is for Actions, exclude that. Also the index starts from 0, so reduce one more count.
 			$return_value = $this->add_status_popup($return_value, $statusPos, 'Contacts');
 		}
 
@@ -370,7 +368,7 @@ class Campaigns extends CRMEntity {
 		if($return_value == null)
 			$return_value = Array();
 		else if($is_CampaignStatusAllowed) {
-			$statusPos = php7_count($return_value['header']) - 2; // Last column is for Actions, exclude that. Also the index starts from 0, so reduce one more count.
+			$statusPos = count($return_value['header']) - 2; // Last column is for Actions, exclude that. Also the index starts from 0, so reduce one more count.
 			$return_value = $this->add_status_popup($return_value, $statusPos, 'Leads');
 		}
 
@@ -548,7 +546,7 @@ class Campaigns extends CRMEntity {
 			$popupitemshtml = '';
 			foreach($this->campaignrelstatus as $campaingrelstatus)
 			{
-				$camprelstatus = getTranslatedString($campaingrelstatus["campaignrelstatus"],'Campaigns');
+				$camprelstatus = getTranslatedString($campaingrelstatus[campaignrelstatus],'Campaigns');
 				$popupitemshtml .= "<a onmouseover=\"javascript: showBlock('campaignstatus_popup_$key')\" href=\"javascript:updateCampaignRelationStatus('$related_module', '".$this->id."', '$key', '$campaingrelstatus[campaignrelstatusid]', '".addslashes($camprelstatus)."');\">$camprelstatus</a><br />";
 			}
 			$popuphtml = '<div onmouseover="javascript:clearTimeout(statusPopupTimer);" onmouseout="javascript:closeStatusPopup(\'campaignstatus_popup_'.$key.'\');" style="margin-top: -14px; width: 200px;" id="campaignstatus_popup_'.$key.'" class="calAction"><div style="background-color: #FFFFFF; padding: 8px;">'.$popupitemshtml.'</div></div>';

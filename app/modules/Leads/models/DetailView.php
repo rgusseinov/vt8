@@ -22,11 +22,7 @@ class Leads_DetailView_Model extends Accounts_DetailView_Model {
 		$recordModel = $this->getRecord();
 		$emailModuleModel = Vtiger_Module_Model::getInstance('Emails');
 
-		$baseDetailViewModel = new Vtiger_DetailView_Model();
-		$baseDetailViewModel->setModule($moduleModel);
-		$baseDetailViewModel->setRecord($recordModel);
-
-		$linkModelList = $baseDetailViewModel::getDetailViewLinks($linkParams);
+		$linkModelList = Vtiger_DetailView_Model::getDetailViewLinks($linkParams);
 
 		if($currentUserModel->hasModulePermission($emailModuleModel->getId())) {
 			$basicActionLink = array(

@@ -129,7 +129,7 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 			}
 
 			$glue = '';
-			if($searchParams && php7_count($queryGenerator->getWhereFields())) {
+			if($searchParams && count($queryGenerator->getWhereFields())) {
 				$glue = QueryGenerator::$AND;
 			}
 			$searchParams = array_merge($searchParams, $tagParams);
@@ -251,12 +251,22 @@ class Vtiger_ExportData_Action extends Vtiger_Mass_Action {
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
 		header("Cache-Control: post-check=0, pre-check=0", false );
 
-		ob_clean();
-		$fp = fopen("php://output", "a+");
-		fputcsv($fp, $headers);	
+		$header = implode("\", \"", $headers);
+		$header = "\"" .$header;
+		$header .= "\"\r\n";
+		echo $header;
 
 		foreach($entries as $row) {
-			fputcsv($fp, $row);
+			foreach ($row as $key => $value) {
+				/* To support double quotations in CSV format
+				 * To review: http://creativyst.com/Doc/Articles/CSV/CSV01.htm#EmbedBRs
+				 */
+				$row[$key] = str_replace('"', '""', $value);
+			}
+			$line = implode("\",\"",$row);
+			$line = "\"" .$line;
+			$line .= "\"\r\n";
+			echo $line;
 		}
 	}
 

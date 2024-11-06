@@ -1,5 +1,4 @@
 <?php
-
 /*********************************************************************************
  * The contents of this file are subject to the SugarCRM Public License Version 1.1.2
  * ("License"); You may not use this file except in compliance with the 
@@ -12,7 +11,7 @@
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.;
  * All Rights Reserved.
  * Contributor(s): ______________________________________.
- ********************************************************************************/
+********************************************************************************/
 
 // Adjust error_reporting favourable to deployment.
 version_compare(PHP_VERSION, '5.5.0') <= 0 ? error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED & E_ERROR) : error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED  & E_ERROR & ~E_STRICT); // PRODUCTION
@@ -24,7 +23,7 @@ include('vtigerversion.php');
 
 // more than 8MB memory needed for graphics
 // memory limit default value = 64M
-ini_set('memory_limit', '512M');
+ini_set('memory_limit','512M');
 
 // show or hide calendar, world clock, calculator, chat and CKEditor 
 // Do NOT remove the quotes if you set these to false! 
@@ -32,7 +31,7 @@ $CALENDAR_DISPLAY = 'true';
 $USE_RTE = 'true';
 
 // helpdesk support email id and support name (Example: 'support@vtiger.com' and 'vtiger support')
-$HELPDESK_SUPPORT_EMAIL_ID = 'minaya.tr@gmail.com';
+$HELPDESK_SUPPORT_EMAIL_ID = 'r.gusseinov@mail.ru';
 $HELPDESK_SUPPORT_NAME = 'your-support name';
 $HELPDESK_SUPPORT_EMAIL_REPLY_ID = $HELPDESK_SUPPORT_EMAIL_ID;
 
@@ -45,7 +44,7 @@ $HELPDESK_SUPPORT_EMAIL_REPLY_ID = $HELPDESK_SUPPORT_EMAIL_ID;
       db_name
 */
 
-$dbconfig['db_server'] = '172.28.170.183'; // db
+$dbconfig['db_server'] = 'db';
 $dbconfig['db_port'] = ':3306';
 $dbconfig['db_username'] = 'vt_user';
 $dbconfig['db_password'] = '777';
@@ -55,7 +54,7 @@ $dbconfig['db_status'] = 'true';
 
 // TODO: test if port is empty
 // TODO: set db_hostname dependending on db_type
-$dbconfig['db_hostname'] = $dbconfig['db_server'] . $dbconfig['db_port'];
+$dbconfig['db_hostname'] = $dbconfig['db_server'].$dbconfig['db_port'];
 
 // log_sql default value = false
 $dbconfig['log_sql'] = false;
@@ -83,9 +82,9 @@ $host_name = $dbconfig['db_hostname'];
 $site_URL = 'http://localhost:81/';
 
 // url for customer portal (Example: http://vtiger.com/portal)
-$PORTAL_URL = $site_URL . '/customerportal';
+$PORTAL_URL = $site_URL.'/customerportal';
 // root directory path
-$root_directory = '';
+$root_directory = '/var/www/html/';
 
 // cache direcory path
 $cache_dir = 'cache/';
@@ -101,7 +100,7 @@ $upload_dir = 'cache/upload/';
 
 // maximum file size for uploaded files in bytes also used when uploading import files
 // upload_maxsize default value = 3000000
-$upload_maxsize = 3145728; //3MB
+$upload_maxsize = 3145728;//3MB
 
 // flag to allow export functionality
 // 'all' to allow anyone to use exports 
@@ -119,6 +118,9 @@ $list_max_entries_per_page = '20';
 
 // history_max_viewed default value = 5
 $history_max_viewed = '5';
+
+// default_module default value = Home
+$default_module = 'Home';
 
 // default_action default value = index
 $default_action = 'index';
@@ -157,7 +159,7 @@ $display_empty_home_blocks = false;
 $disable_stats_tracking = false;
 
 // Generating Unique Application Key
-$application_unique_key = 'b88692472a77ec8b1370e19d4bd94817';
+$application_unique_key = '49a832781c18da96cd1c74ccc42cc55a';
 
 // trim descriptions, titles in listviews to this value
 $listview_max_textlength = 40;
@@ -169,14 +171,12 @@ $php_max_execution_time = 0;
 $default_timezone = 'UTC';
 
 /** If timezone is configured, try to set it */
-if (isset($default_timezone) && function_exists('date_default_timezone_set')) {
-      @date_default_timezone_set($default_timezone);
+if(isset($default_timezone) && function_exists('date_default_timezone_set')) {
+	@date_default_timezone_set($default_timezone);
 }
 
 //Set the default layout 
 $default_layout = 'v7';
 
-//Maximum Listview Fields Selection Size
-$maxListFieldsSelectionSize = 15;
-
 include_once 'config.security.php';
+?>

@@ -77,7 +77,7 @@ class Calendar_Record_Model extends Vtiger_Record_Model {
 			$recurringInfo = $recurringObject->getUserRecurringInfo();
 
 			if ($recurringObject->getRecurringType() == 'Weekly') {
-				$noOfDays = php7_count($recurringInfo['dayofweek_to_repeat']);
+				$noOfDays = count($recurringInfo['dayofweek_to_repeat']);
 				for ($i = 0; $i < $noOfDays; ++$i) {
 					$recurringData['week'.$recurringInfo['dayofweek_to_repeat'][$i]] = 'checked';
 				}

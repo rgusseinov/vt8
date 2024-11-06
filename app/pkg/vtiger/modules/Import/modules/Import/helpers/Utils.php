@@ -22,15 +22,15 @@ class Import_Utils_Helper {
 	static $supportedDelimiters = array(','=>'comma', ';'=>'semicolon', '|'=> 'Pipe', '^'=>'Caret');
 	static $supportedFileExtensions = array('csv','vcf');
 
-	public static function getSupportedFileExtensions() {
+	public function getSupportedFileExtensions() {
 		return self::$supportedFileExtensions;
 	}
 
-	public static function getSupportedFileEncoding() {
+	public function getSupportedFileEncoding() {
 		return self::$supportedFileEncoding;
 	}
 
-	public static function getSupportedDelimiters() {
+	public function getSupportedDelimiters() {
 		return self::$supportedDelimiters;
 	}
 

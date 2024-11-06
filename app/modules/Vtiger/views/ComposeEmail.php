@@ -174,7 +174,7 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
 			foreach($selectIds as $id) { 
 				  if ($id) { 
 						$parentIdComponents = explode('@', $id); 
-						if (php7_count($parentIdComponents) > 1) { 
+						if (count($parentIdComponents) > 1) { 
 								$id = $parentIdComponents[0]; 
 								if ($parentIdComponents[1] === '-1') { 
 										$recordModel = Users_Record_Model::getInstanceById($id, 'Users'); 
@@ -269,7 +269,7 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
 		return;
 	}
 
-	public function getRecordsListFromRequest(Vtiger_Request $request, $model = false) {
+	public function getRecordsListFromRequest(Vtiger_Request $request) {
 		$cvId = $request->get('viewname');
 		$selectedIds = $request->get('selected_ids');
 		$excludedIds = $request->get('excluded_ids');
@@ -296,7 +296,7 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
         }
 
 		if(!empty($selectedIds) && $selectedIds != 'all') {
-			if(!empty($selectedIds) && php7_count($selectedIds) > 0) {
+			if(!empty($selectedIds) && count($selectedIds) > 0) {
 				return $selectedIds;
 			}
 		}
@@ -512,13 +512,7 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
 	function emailForward($request){
 		$viewer = $this->getViewer($request);
 		$moduleName = $request->getModule();
-                $this->emailActionsData($request);
-                
-                $parentId = $request->get('parentId');
-                $recordModel = Vtiger_Record_Model::getInstanceById($parentId);
-                $parentModuleName = $recordModel->getModuleName();
-                
-                $viewer->assign('FIELD_MODULE',$parentModuleName);
+		$this->emailActionsData($request);
 		$viewer->assign('TO', '');
 		$viewer->assign('TOMAIL_INFO', array());
 		$viewer->assign('RELATED_LOAD', true);
@@ -567,11 +561,6 @@ class Vtiger_ComposeEmail_View extends Vtiger_Footer_View {
 		if($recordModel->get('email_flag') == 'MailManager' || $recordModel->get('email_flag') == 'MAILSCANNER') {
 			$TO = array($recordModel->get('from_email'));
 		}
-                $parentId = $request->get('parentId');
-                $parentIdRecordModel = Vtiger_Record_Model::getInstanceById($parentId);
-                $parentModuleName = $parentIdRecordModel->getModuleName();
-                
-                $viewer->assign('FIELD_MODULE',$parentModuleName);
 		$viewer->assign('TO',$TO);
 		$viewer->assign('TOMAIL_INFO', $toMailInfo);
 		$viewer->assign('TOMAIL_NAMES_LIST', json_encode($toMailNamesList, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP));

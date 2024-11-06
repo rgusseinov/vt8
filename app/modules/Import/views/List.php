@@ -99,7 +99,7 @@ class Import_List_View extends Vtiger_Popup_View{
 		if(!$this->listViewEntries){
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
 		}
-		$noOfEntries = php7_count($this->listViewEntries);
+		$noOfEntries = count($this->listViewEntries);
 		$viewer->assign('MODULE', $moduleName);
 
 		$viewer->assign('PAGING_MODEL', $pagingModel);

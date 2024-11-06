@@ -34,7 +34,7 @@
 			{assign var=SOURCE_MODEL value=$RECORD}
 		</div>
 		<div class="widget_contents">
-			{if php7_count($ACTIVITIES) neq '0'}
+			{if count($ACTIVITIES) neq '0'}
 				{foreach item=RECORD key=KEY from=$ACTIVITIES}
 					{assign var=START_DATE value=$RECORD->get('date_start')}
 					{assign var=START_TIME value=$RECORD->get('time_start')}
@@ -113,8 +113,8 @@
 														<input type="hidden" class="fieldname" value='{$FIELD_MODEL->get('name')}' data-prev-value='{$FIELD_MODEL->getDisplayValue($FIELD_MODEL->get('fieldvalue'))}' />
 													{/if}
 												</span>
-                                                                                        {/if}
-                                                                                    </div>
+											</div>
+										{/if}
 									{/if}
 								</div>
 							</div>

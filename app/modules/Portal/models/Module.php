@@ -21,7 +21,7 @@ class Portal_Module_Model extends Vtiger_Module_Model {
 		return $links;
 	}
     
-    public static function savePortalRecord($recordId, $bookmarkName = false, $bookmarkUrl = false) {
+    public function saveRecord($recordId, $bookmarkName, $bookmarkUrl) {
         $db = PearDatabase::getInstance();
         if(empty($recordId)) {
             $portalId = $db->getUniqueID('vtiger_portal');
@@ -37,7 +37,7 @@ class Portal_Module_Model extends Vtiger_Module_Model {
         return true;
     }
     
-    public static function getPortalRecord($recordId) {
+    public function getRecord($recordId) {
         $db = PearDatabase::getInstance();
         
         $result = $db->pquery('SELECT portalname, portalurl FROM vtiger_portal WHERE portalid = ?', array($recordId));
@@ -48,19 +48,19 @@ class Portal_Module_Model extends Vtiger_Module_Model {
         return $data;
     }
     
-    public static function deletePortalRecord($recordId) {
+    public function deleteRecord($recordId) {
         $db = PearDatabase::getInstance();
         $db->pquery('DELETE FROM vtiger_portal WHERE portalid = ?', array($recordId));
     }
     
-    public static function getWebsiteUrl($recordId) {
+    public function getWebsiteUrl($recordId) {
         $db = PearDatabase::getInstance();
         $result = $db->pquery('SELECT portalurl FROM vtiger_portal WHERE portalid=?', array($recordId));
         
         return $db->query_result($result, 0, 'portalurl');
     }
     
-    public static function getAllRecords() {
+    public function getAllRecords() {
         $db = PearDatabase::getInstance();
         $record = array();
         
@@ -75,7 +75,7 @@ class Portal_Module_Model extends Vtiger_Module_Model {
         return $record;
     }
     
-    public static function deleteRecords(Vtiger_Request $request) {
+    public function deleteRecords(Vtiger_Request $request) {
         $searchValue = $request->get('search_value');
         $selectedIds = $request->get('selected_ids');
         $excludedIds = $request->get('excluded_ids');
@@ -85,16 +85,16 @@ class Portal_Module_Model extends Vtiger_Module_Model {
         $query = 'DELETE FROM vtiger_portal';
         $params = array();
         
-        if(!empty($selectedIds) && $selectedIds != 'all' && php7_count($selectedIds) > 0) {
+        if(!empty($selectedIds) && $selectedIds != 'all' && count($selectedIds) > 0) {
             $query .= " WHERE portalid IN (".generateQuestionMarks($selectedIds).")";
             $params = $selectedIds;
         } else if($selectedIds == 'all') {
-            if(empty($searchValue) && php7_count($excludedIds) > 0) {
+            if(empty($searchValue) && count($excludedIds) > 0) {
                 $query .= " WHERE portalid NOT IN (".generateQuestionMarks($excludedIds).")";
                 $params = $excludedIds;
-            } else if(!empty($searchValue) && php7_count($excludedIds) < 1) {
+            } else if(!empty($searchValue) && count($excludedIds) < 1) {
                 $query .= " WHERE portalname LIKE '%".$searchValue."%'";
-            } else if(!empty($searchValue) && php7_count($excludedIds) > 0) {
+            } else if(!empty($searchValue) && count($excludedIds) > 0) {
                 $query .= " WHERE portalname LIKE '%".$searchValue."%' AND portalid NOT IN (".generateQuestionMarks($excludedIds).")";
                 $params = $excludedIds;
             }

@@ -100,7 +100,7 @@ function send_mail($module,$to_email,$from_name,$from_email,$subject,$contents,$
 
 	if($mail_status != 1)
 	{
-        $mail_error = getMailError($mail, $mail_status, $to_email);
+		$mail_error = getMailError($mail,$mail_status,$mailto);
 	}
 	else
 	{
@@ -153,11 +153,11 @@ function addSignature($contents, $fromname, $fromEmail = '') {
 	$sign = VTCacheUtils::getUserSignature($fromname);
 	if ($sign == null) {
 		$sign = VTCacheUtils::getUserSignature($fromEmail);
-		$result = $adb->pquery("select signature, userlabel from vtiger_users where user_name=? or user_name=? or email1=? or email2=? or secondaryemail=?", array($fromname, $fromEmail, $fromEmail, $fromEmail, $fromEmail));
+		$result = $adb->pquery("select signature, first_name, last_name from vtiger_users where user_name=? or user_name=? or email1=? or email2=? or secondaryemail=?", array($fromname, $fromEmail, $fromEmail, $fromEmail, $fromEmail));
 		$sign = $adb->query_result($result,0,"signature");
 		VTCacheUtils::setUserSignature($fromname, $sign);
 		VTCacheUtils::setUserSignature($fromEmail, $sign);
-		VTCacheUtils::setUserFullName($fromname, $adb->query_result($result,0,"userlabel"));
+		VTCacheUtils::setUserFullName($fromname, $adb->query_result($result,0,"first_name").' '.$adb->query_result($result,0,"last_name"));
 	}
 
 	$sign = nl2br($sign);
@@ -215,10 +215,10 @@ function setMailerProperties($mail,$subject,$contents,$from_email,$from_name,$to
 		$userFullName = $HELPDESK_SUPPORT_NAME;
 	}
 	if(empty($userFullName)) {
-		$rs = $adb->pquery("select first_name,last_name,userlabel from vtiger_users where user_name=?", array($from_name));
+		$rs = $adb->pquery("select first_name,last_name from vtiger_users where user_name=?", array($from_name));
 		$num_rows = $adb->num_rows($rs);
 		if($num_rows > 0) {
-			$fullName = $adb->query_result($rs, 0, 'userlabel');
+			$fullName = getFullNameFromQResult($rs, 0, 'Users');
 			VTCacheUtils::setUserFullName($from_name, $fullName);
 		}
 	} else {
@@ -230,12 +230,12 @@ function setMailerProperties($mail,$subject,$contents,$from_email,$from_name,$to
 	if($to_email != '')
 	{
 		if(is_array($to_email)) {
-			for($j=0,$num=php7_count($to_email);$j<$num;$j++) {
+			for($j=0,$num=count($to_email);$j<$num;$j++) {
 				$mail->addAddress($to_email[$j]);
 			}
 		} else {
 			$_tmp = explode(",",$to_email);
-			for($j=0,$num=php7_count($_tmp);$j<$num;$j++) {
+			for($j=0,$num=count($_tmp);$j<$num;$j++) {
 				$mail->addAddress($_tmp[$j]);
 			}
 		}
@@ -406,7 +406,7 @@ function setCCAddress($mail,$cc_mod,$cc_val)
 	if($cc_val != '')
 	{
 		$ccmail = explode(",",trim($cc_val,","));
-		for($i=0;$i<php7_count($ccmail);$i++)
+		for($i=0;$i<count($ccmail);$i++)
 		{
 			$addr = $ccmail[$i];
 			$cc_name = preg_replace('/([^@]+)@(.*)/', '$1', $addr); // First Part Of Email
@@ -494,7 +494,7 @@ function getMailError($mail,$mail_status,$to)
 	global $adb;
 	$adb->println("Inside the function getMailError");
 
-	$msg = array_search($mail_status,$mail->getTranslations());
+	$msg = array_search($mail_status,$mail->language);
 	$adb->println("Error message ==> ".$msg);
 
 	if($msg == 'connect_host')
@@ -621,7 +621,7 @@ function getDefaultAssigneeEmailIds($groupId) {
 
 		//Clearing static cache for sub groups
 		GetGroupUsers::$groupIdsList = array();
-		if(php7_count($userGroups->group_users) == 0) return array();
+		if(count($userGroups->group_users) == 0) return array();
 
 		$result = $adb->pquery('SELECT email1,email2,secondaryemail FROM vtiger_users WHERE vtiger_users.id IN
 											('.  generateQuestionMarks($userGroups->group_users).') AND vtiger_users.status= ?',

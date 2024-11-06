@@ -100,7 +100,7 @@ class Mobile_WS_ListModuleRecords extends Mobile_WS_Controller {
 		}
 		
 		$moreRecords = false;
-		if(php7_count($listViewEntries) > $pageLimit) {
+		if(count($listViewEntries) > $pageLimit) {
 			$moreRecords = true;
 			array_pop($records);
 		}

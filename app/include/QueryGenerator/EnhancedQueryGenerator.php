@@ -32,7 +32,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 	}
 
 	public function getModuleFields() {
-		if (!isset($this->moduleFields) || $this->moduleFields == null) {
+		if ($this->moduleFields == null) {
 			$moduleFields = parent::getModuleFields();
 
 			//add reference fields also in the list
@@ -79,7 +79,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 			}
 			$this->moduleFields = $moduleFields;
 		}
-		return isset($this->moduleFields) ? $this->moduleFields : null;
+		return $this->moduleFields;
 	}
 
 	public function parseAdvFilterList($advFilterList, $glue = '') {
@@ -91,7 +91,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 		$specialDateTimeConditions = Vtiger_Functions::getSpecialDateTimeCondtions();
 		foreach ($advFilterList as $groupindex => $groupcolumns) {
 			$filtercolumns = $groupcolumns['columns'];
-			if (php7_count($filtercolumns) > 0) {
+			if (count($filtercolumns) > 0) {
 				$this->startGroup('');
 				foreach ($filtercolumns as $index => $filter) {
 					//If comparator is "e" or "n" then do not escapeSqlString.
@@ -172,7 +172,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 						$value = array();
 						$value[] = $this->fixDateTimeValue($name, $date, true);
 						// Still fixDateTimeValue returns only date value, we need to append time because it is DT type
-						for ($i = 0; $i < php7_count($value); $i++) {
+						for ($i = 0; $i < count($value); $i++) {
 							$values = explode(' ', $value[$i]);
 							if ($values[1] == '') {
 								$values[1] = '00:00:00';
@@ -219,7 +219,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 		if ($fieldObject && isset($fieldObject->referenceFieldName)) {
 			// if its a reference field then we need to add the fieldname to table name
 			preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldObject->referenceFieldName, $matches);
-			if (php7_count($matches) != 0) {
+			if (count($matches) != 0) {
 				list($full, $referenceField, $referenceModule, $fieldname) = $matches;
 			}
 			$field = $fieldObject;
@@ -232,7 +232,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 	public function getSelectClauseColumnSQL() {
 		$columns = array();
 		$moduleFields = $this->getModuleFields();
-		$accessibleFieldList = is_array($moduleFields) ? array_keys($moduleFields) : array();
+		$accessibleFieldList = array_keys($moduleFields);
 
 		$moduleFields = $this->getModuleFields();
 
@@ -241,7 +241,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 		foreach ($this->fields as $field) {
 			// handle for reference field
 			preg_match('/(\w+) ; \((\w+)\) (\w+)/', $field, $matches);
-			if (php7_count($matches) != 0) {
+			if (count($matches) != 0) {
 				list($full, $referenceField, $referenceModule, $fieldname) = $matches;
 				$parentReferenceFieldModel = null;
 				$parentReferenceFieldModel = $moduleFields[$field];
@@ -311,7 +311,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 			$referenceParentFieldName = '';
 			// for reference field do not add the table names to the list
 			preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
-			if (php7_count($matches) != 0) {
+			if (count($matches) != 0) {
 				list($full, $referenceParentFieldName, $referenceModuleName, $fieldName) = $matches;
 			}
 
@@ -394,7 +394,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 			if (empty($fieldName))
 				continue;
 
-			$field = isset($moduleFields) ? $moduleFields[$fieldName] : null;
+			$field = $moduleFields[$fieldName];
 			if (empty($field))
 				continue; // not accessible field.
 
@@ -402,7 +402,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 			$referenceParentFieldName = '';
 			// for reference field do not add the table names to the list
 			preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
-			if (php7_count($matches) != 0) {
+			if (count($matches) != 0) {
 				list($full, $referenceParentFieldName, $referenceModuleName, $fieldName) = $matches;
 			}
 
@@ -531,7 +531,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 			$tableJoinMapping[$table] = 'INNER JOIN';
 		}
 		$ownerFields = $this->meta->getOwnerFields();
-		if (php7_count($ownerFields) > 0) {
+		if (count($ownerFields) > 0) {
 			$ownerField = $ownerFields[0];
 		}
 
@@ -624,11 +624,11 @@ class EnhancedQueryGenerator extends QueryGenerator {
 			$parentReferenceField = '';
 			$baseFieldName = $fieldName = $conditionInfo['name'];
 			$parentReferenceField = $referenceModule = '';
-			$field = isset($moduleFieldList) ? $moduleFieldList[$fieldName] : null;
+			$field = $moduleFieldList[$fieldName];
 
 			// if its a reference field then we need to add the fieldname to table name
 			preg_match('/(\w+) ; \((\w+)\) (\w+)/', $baseFieldName, $matches);
-			if (php7_count($matches) != 0) {
+			if (count($matches) != 0) {
 				list($full, $parentReferenceField, $referenceModule, $fieldName) = $matches;
 			}
 
@@ -643,12 +643,12 @@ class EnhancedQueryGenerator extends QueryGenerator {
 			$operator = strtolower($conditionInfo['operator']);
 			if ($operator == 'between' && $this->isDateType($field->getFieldDataType())) {
 				$start = explode(' ', $conditionInfo['value'][0]);
-				if (php7_count($start) == 2)
+				if (count($start) == 2)
 					$conditionInfo['value'][0] = getValidDBInsertDateTimeValue($start[0].' '.$start[1]);
 
-				$end = explode(' ', $conditionInfo['value'][1]);
+				$end = explode(' ', $conditionInfo['values'][1]);
 				// Dates will be equal for Today, Tomorrow, Yesterday.
-				if (php7_count($end) == 2) {
+				if (count($end) == 2) {
 					if ($start[0] == $end[0]) {
 						$dateTime = new DateTime($conditionInfo['value'][0]);
 						$nextDay = $dateTime->modify('+1 days');
@@ -725,8 +725,8 @@ class EnhancedQueryGenerator extends QueryGenerator {
 						$values = explode(',', $value);
 						$startDateValue = explode(' ', $values[0]);
 						$endDateValue = explode(' ', $values[1]);
-						if (php7_count($startDateValue) == 2 && php7_count($endDateValue) == 2) {
-							$fieldSql .= " CONCAT($dateFieldColumnName,' ',$timeFieldColumnName) $valueSql";
+						if (count($startDateValue) == 2 && count($endDateValue) == 2) {
+							$fieldSql .= " CAST(CONCAT($dateFieldColumnName,' ',$timeFieldColumnName) AS DATETIME) $valueSql";
 						} else {
 							$fieldSql .= "$dateFieldColumnName $valueSql";
 						}
@@ -735,8 +735,8 @@ class EnhancedQueryGenerator extends QueryGenerator {
 							$value = $value[0];
 						}
 						$values = explode(' ', $value);
-						if (php7_count($values) == 2) {
-							$fieldSql .= "$fieldGlue CONCAT($dateFieldColumnName,' ',$timeFieldColumnName) $valueSql ";
+						if (count($values) == 2) {
+							$fieldSql .= "$fieldGlue CAST(CONCAT($dateFieldColumnName,' ',$timeFieldColumnName) AS DATETIME) $valueSql ";
 						} else {
 							$fieldSql .= "$fieldGlue $dateFieldColumnName $valueSql";
 						}
@@ -877,7 +877,7 @@ class EnhancedQueryGenerator extends QueryGenerator {
 
 		$parentReferenceField = '';
 		preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
-		if (php7_count($matches) != 0) {
+		if (count($matches) != 0) {
 			list($full, $parentReferenceField, $referenceModule, $fieldName) = $matches;
 		}
 		if ($orderByFieldModel && $orderByFieldModel->getFieldDataType() == 'reference') {

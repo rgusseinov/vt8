@@ -136,7 +136,7 @@ class Vtiger_ExtensionViews_View extends Vtiger_Index_View {
 		}
 		$pagingModel->set('page', $page);
 		$logData = WSAPP_Logs::getSyncCounts($pagingModel, $moduleName);
-		$logsCount = php7_count($logData);
+		$logsCount = count($logData);
 
 		// if user has not authenticated the extension redirect to settings page
 		if(!$syncReady && $viewType != 'modal' && $logsCount == 0) {
@@ -147,7 +147,7 @@ class Vtiger_ExtensionViews_View extends Vtiger_Index_View {
 		}
 
 		$pagingModel->calculatePageRange($logData);
-		if(php7_count($logData) > $pagingModel->getPageLimit()){
+		if(count($logData) > $pagingModel->getPageLimit()){
 			array_pop($logData);
 			$logsCount = $logsCount - 1;
 			$pagingModel->set('nextPageExists', true);

@@ -57,7 +57,7 @@
 			}
 
 			$usersList = array_unique($usersList);
-			$numOfPeople = php7_count($usersList);
+			$numOfPeople = count($usersList);
 
 			$summaryInfo['projecttaskstatus'] =  array(
 													'LBL_TASKS_OPEN'	=> $tasksOpen,

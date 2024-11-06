@@ -67,9 +67,9 @@ class ListViewController {
 		$rowCount = $this->db->num_rows($result);
 
 		$columnName = $field->getColumnName();
-		if(isset($field->referenceFieldName) && $field->referenceFieldName) {
+		if($field->referenceFieldName) {
 			preg_match('/(\w+) ; \((\w+)\) (\w+)/', $field->referenceFieldName, $matches);
-			if (php7_count($matches) != 0) {
+			if (count($matches) != 0) {
 				list($full, $parentReferenceFieldName, $referenceModule, $referenceFieldName) = $matches;
 			}
 			$columnName = $parentReferenceFieldName.$referenceFieldName;
@@ -84,10 +84,10 @@ class ListViewController {
 		}
 
 		$idList = array_keys($idList);
-		if(php7_count($idList) == 0) {
+		if(count($idList) == 0) {
 			return;
 		}
-		if(isset($parentReferenceFieldName) && $parentReferenceFieldName) {
+		if($parentReferenceFieldName) {
 			$moduleList = $referenceFieldInfoList[$field->referenceFieldName];
 		} else {
 			$moduleList = $referenceFieldInfoList[$fieldName];
@@ -127,7 +127,7 @@ class ListViewController {
 		$fields = $this->queryGenerator->getFields(); 
 		$headerFields = array();
 		foreach($fields as $fieldName) {
-			if(is_array($moduleFields) && array_key_exists($fieldName, $moduleFields)) {
+			if(array_key_exists($fieldName, $moduleFields)) {
 				$headerFields[$fieldName] = $moduleFields[$fieldName];
 			}
 		}
@@ -142,7 +142,7 @@ class ListViewController {
 		$meta = $this->queryGenerator->getMeta($this->queryGenerator->getModule());
 		$baseModule = $module;
 		$moduleFields = $this->queryGenerator->getModuleFields();
-		$accessibleFieldList = is_array($moduleFields) ? array_keys($moduleFields) : array();
+		$accessibleFieldList = array_keys($moduleFields);
 		$listViewFields = array_intersect($fields, $accessibleFieldList);
 
 		$referenceFieldList = $this->queryGenerator->getReferenceFieldList();
@@ -166,7 +166,7 @@ class ListViewController {
 
 				//if the assigned to is related to the reference field
 				preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
-				if(php7_count($matches) > 0) {
+				if(count($matches) > 0) {
 					list($full, $referenceParentField, $module, $fieldName) = $matches;
 					$columnName = strtolower($referenceParentField.$fieldName);
 				} else {
@@ -179,8 +179,8 @@ class ListViewController {
 						$idList[] = $id;
 					}
 				}
-				if(php7_count($idList) > 0) {
-					if(isset($this->onwerNameList[$fieldName]) && !is_array($this->ownerNameList[$fieldName])) {
+				if(count($idList) > 0) {
+					if(!is_array($this->ownerNameList[$fieldName])) {
 						$this->ownerNameList[$fieldName] = getOwnerNameList($idList);
 					} else {
 						//array_merge API loses key information so need to merge the arrays
@@ -208,7 +208,7 @@ class ListViewController {
 		//performance optimization for uitype 61
 		$attachmentsCache = array();
 		$attachmentIds = array();
-		if(php7_count($fileTypeFields)) {
+		if(count($fileTypeFields)) {
 			foreach($fileTypeFields as $fileTypeField) {
 				for ($i = 0; $i < $rowCount; ++$i) {
 					$attachmentId = $db->query_result($result,$i,$fileTypeField);
@@ -216,7 +216,7 @@ class ListViewController {
 				}
 			}
 		}
-		if(php7_count($attachmentIds)) {
+		if(count($attachmentIds)) {
 			$getAttachmentsNamesSql = 'SELECT attachmentsid,name FROM vtiger_attachments WHERE attachmentsid IN (' . generateQuestionMarks($attachmentIds) . ')';
 			$attachmentNamesRes = $db->pquery($getAttachmentsNamesSql,$attachmentIds);
 			$attachmentNamesRowCount = $db->num_rows($attachmentNamesRes);
@@ -255,7 +255,7 @@ class ListViewController {
 				$fieldDataType = $field->getFieldDataType();
 				// for reference fields read the value differently
 				preg_match('/(\w+) ; \((\w+)\) (\w+)/', $fieldName, $matches);
-				if(php7_count($matches) > 0) {
+				if(count($matches) > 0) {
 					list($full, $referenceParentField, $module, $fieldName) = $matches;
 					$matches = null;
 					$rawValue = $this->db->query_result($result, $i, strtolower($referenceParentField.$fieldName));
@@ -456,7 +456,7 @@ class ListViewController {
 				} elseif($field->getFieldDataType() == 'reference') {
 					$referenceFieldInfoList = $this->queryGenerator->getReferenceFieldInfoList();
 					$moduleList = $referenceFieldInfoList[$fieldName];
-					if(php7_count($moduleList) == 1) {
+					if(count($moduleList) == 1) {
 						$parentModule = $moduleList[0];
 					} else {
 						$parentModule = $this->typeList[$value];
@@ -491,7 +491,7 @@ class ListViewController {
 					}
 				} elseif ( in_array($uitype,array(7,9,90)) ) {
 					$value = "<span align='right'>".textlength_check($value)."</span>";
-				} elseif($field && isset($field->isNameField) && $field->isNameField) {
+				} elseif($field && $field->isNameField) {
 					$value = "<a href='?module=$field->moduleName&view=Detail&".
 								"record=$recordId' title='".vtranslate($field->moduleName, $field->moduleName)."'>$value</a>";
 				} elseif($field->getUIType() == 61) {

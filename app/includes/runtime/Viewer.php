@@ -8,7 +8,9 @@
  * All Rights Reserved.
  ************************************************************************************/
 
-class Vtiger_Viewer extends Smarty {
+vimport ('~/libraries/Smarty/libs/SmartyBC.class.php');
+
+class Vtiger_Viewer extends SmartyBC {
 
 	const DEFAULTLAYOUT = 'v7';
 	const DEFAULTTHEME  = 'softed';
@@ -58,6 +60,12 @@ class Vtiger_Viewer extends Smarty {
 		$this->setTemplateDir(array($templatesDir));
 		$this->setCompileDir($compileDir);		
 
+		// FOR SECURITY
+		// Escape all {$variable} to overcome XSS
+		// We need to use {$variable nofilter} to overcome double escaping
+		// TODO: Until we review the use disabled.
+		//$this->registerFilter('variable', array($this, 'safeHtmlFilter'));
+		
 		// FOR DEBUGGING: We need to have this only once.
 		static $debugViewerURI = false;
 		if (self::$debugViewer && $debugViewerURI === false) {
@@ -70,11 +78,6 @@ class Vtiger_Viewer extends Smarty {
 			
 			$this->log("URI: $debugViewerURI, TYPE: " . $_SERVER['REQUEST_METHOD']);
 		}
-	}
-
-	// Backward compatible to SmartyBC
-	function get_template_vars($name = NULL) {
-		return $this->getTemplateVars($name);
 	}
 	
 	function safeHtmlFilter($content, $smarty) {
@@ -118,7 +121,7 @@ class Vtiger_Viewer extends Smarty {
 			// Fall back lookup on actual module, in case where parent module doesn't contain actual module within in (directory structure)
 			if(strpos($moduleName, '/') > 0) {
 				$moduleHierarchyParts = explode('/', $moduleName);
-				$actualModuleName = $moduleHierarchyParts[php7_count($moduleHierarchyParts)-1];
+				$actualModuleName = $moduleHierarchyParts[count($moduleHierarchyParts)-1];
 				$baseModuleName = $moduleHierarchyParts[0];
 				$fallBackOrder = array (
 					"$actualModuleName",
@@ -141,7 +144,7 @@ class Vtiger_Viewer extends Smarty {
 	public function assign($tpl_var, $value = null, $nocache = false) {
 		// Reject unexpected value assignments.
 		if ($tpl_var == 'SELECTED_MENU_CATEGORY') {
-			if ($value && preg_match("/[^a-zA-Z0-9_-]/", $value, $m)) {
+			if ($val && preg_match("/[^a-zA-Z0-9_-]/", $val, $m)) {
 				return;
 			}
 		}

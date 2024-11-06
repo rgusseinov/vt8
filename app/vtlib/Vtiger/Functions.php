@@ -20,48 +20,17 @@ class Vtiger_Functions {
 		return (isset($user->is_admin) && $user->is_admin == 'on');
 	}
 
-    /**
-     * this function returns JS date format of current user
-     *
-     * return string
-    */
-    public static function currentUserJSDateFormat()
-    {
-        $datePopupFormat = '';
-        $currentUser = Users_Record_Model::getCurrentUserModel();
-
-        switch ($currentUser->get('date_format')) {
-            case 'dd.mm.yyyy':
-                $datePopupFormat = '%d.%m.%Y';
-				break;
-			case 'mm.dd.yyyy':
-                $datePopupFormat = '%m.%d.%Y';
-				break;
-			case 'yyyy.mm.dd':
-                $datePopupFormat = '%Y.%m.%d';
-				break;
-			case 'dd/mm/yyyy':
-                $datePopupFormat = '%d/%m/%Y';
-				break;
-			case 'mm/dd/yyyy':
-                $datePopupFormat = '%m/%d/%Y';
-				break;
-			case 'yyyy/mm/dd':
-                $datePopupFormat = '%Y/%m/%d';
-                break;
-            case 'dd-mm-yyyy':
-                $datePopupFormat = '%d-%m-%Y';
-                break;
-            case 'mm-dd-yyyy':
-                $datePopupFormat = '%m-%d-%Y';
-                break;
-            case 'yyyy-mm-dd':
-                $datePopupFormat = '%Y-%m-%d';
-                break;
-        }
-
-        return $datePopupFormat;
-    }
+	static function currentUserJSDateFormat($localformat) {
+		global $current_user;
+		if ($current_user->date_format == 'dd-mm-yyyy') {
+			$dt_popup_fmt = "%d-%m-%Y";
+		} elseif ($current_user->date_format == 'mm-dd-yyyy') {
+			$dt_popup_fmt = "%m-%d-%Y";
+		} elseif ($current_user->date_format == 'yyyy-mm-dd') {
+			$dt_popup_fmt = "%Y-%m-%d";
+		}
+		return $dt_popup_fmt;
+	}
 
 	/**
 	 * This function returns the date in user specified format.
@@ -120,7 +89,7 @@ class Vtiger_Functions {
 				self::$currencyInfoCache[$row['id']] = $row;
 			}
 		}
-		return isset(self::$currencyInfoCache[$currencyid])? self::$currencyInfoCache[$currencyid] : null;
+		return self::$currencyInfoCache[$currencyid];
 	}
 
 	static function getCurrencyName($currencyid, $show_symbol = true) {
@@ -134,8 +103,8 @@ class Vtiger_Functions {
 	static function getCurrencySymbolandRate($currencyid) {
 		$currencyInfo = self::getCurrencyInfo($currencyid);
 		$currencyRateSymbol = array(
-			'rate' => $currencyInfo ? $currencyInfo['conversion_rate'] : 0,
-			'symbol'=>$currencyInfo ? $currencyInfo['currency_symbol'] : ""
+			'rate' => $currencyInfo['conversion_rate'],
+			'symbol'=>$currencyInfo['currency_symbol']
 		);
 		return $currencyRateSymbol;
 	}
@@ -174,7 +143,7 @@ class Vtiger_Functions {
 
 		if ($name && !isset(self::$moduleNameIdCache[$name])) {$reload = true;}
 		else if ($id && !isset(self::$moduleIdNameCache[$id])) {$reload = true;}
-		else if ($name) {
+		else {
 			if (!$id) $id = self::$moduleNameIdCache[$name]['tabid'];
 			if (!isset(self::$moduleIdDataCache[$id])) { $reload = true; }
 		}
@@ -269,7 +238,7 @@ class Vtiger_Functions {
 		}
 
 		if ($missing) {
-			$sql = sprintf("SELECT crmid, setype, label FROM vtiger_crmentity WHERE %s", implode(' OR ', array_fill(0, php7_count($missing), 'crmid=?')));
+			$sql = sprintf("SELECT crmid, setype, label FROM vtiger_crmentity WHERE %s", implode(' OR ', array_fill(0, count($missing), 'crmid=?')));
 			$result = $adb->pquery($sql, $missing);
 			while ($row = $adb->fetch_array($result)) {
 				self::$crmRecordIdMetadataCache[$row['crmid']] = $row;
@@ -381,7 +350,7 @@ class Vtiger_Functions {
 				if ($module == 'Groups') {
 					$metainfo = array('tablename' => 'vtiger_groups','entityidfield' => 'groupid','fieldname' => 'groupname');
 				} else if ($module == 'DocumentFolders') {
-					$metainfo = array('tablename' => 'vtiger_attachmentsfolder','entityidfield' => 'folderid','fieldname' => 'foldername');
+					$metainfo = array('tablename' => 'vtiger_attachmentsfolder','entityidfield' => 'folderid','fieldname' => 'foldername'); 
 				} else {
 					$metainfo = self::getEntityModuleInfo($module);
 				}
@@ -391,7 +360,7 @@ class Vtiger_Functions {
 				$columns  = explode(',', $metainfo['fieldname']);
 
 				// NOTE: Ignore field-permission check for non-admin (to compute record label).
-				$columnString = php7_count($columns) < 2? $columns[0] :
+				$columnString = count($columns) < 2? $columns[0] :
 					sprintf("concat(%s)", implode(",' ',", $columns));
 
 				$sql = sprintf('SELECT '. implode(',',$columns).', %s AS id FROM %s WHERE %s IN (%s)',
@@ -592,7 +561,7 @@ class Vtiger_Functions {
 
 		if (!is_dir($filepath . $year . "/" . $month)) {
 			//create new folder
-			$monthFilePath = "$year/$month";
+			$monthFilePath = "$year/$month"; 
 			$monthPath = $filepath.$monthFilePath;
 			mkdir($filepath . $monthFilePath);
 			exec("chown -R $permissions  $monthPath");
@@ -629,7 +598,7 @@ class Vtiger_Functions {
 				if (!$ok) return false;
 			}
 		} else {
-			if (stripos($data, $short ? "<?" : "<?php") !== false) { // suspicious dynamic content
+			if (stripos($data, $short ? "<?" : "<?php") !== false) { // suspicious dynamic content 
 				return false;
 			}
 		}
@@ -637,7 +606,7 @@ class Vtiger_Functions {
 	}
 
 	static function validateImage($file_details) {
-		global $app_strings, $log;
+		global $app_strings;
 		$allowedImageFormats = array('jpeg', 'png', 'jpg', 'pjpeg', 'x-png', 'gif', 'bmp');
 
 		$mimeTypesList = array_merge($allowedImageFormats, array('x-ms-bmp'));//bmp another format
@@ -649,7 +618,6 @@ class Vtiger_Functions {
 
 		$saveimage = 'true';
 		if (!in_array($filetype, $allowedImageFormats)) {
-                        $log->debug('file type not matched allowed formats');
 			$saveimage = 'false';
 		}
 
@@ -657,36 +625,24 @@ class Vtiger_Functions {
 		$mimeType = self::mime_content_type($file_details['tmp_name']);
 		$mimeTypeContents = explode('/', $mimeType);
 		if (!$file_details['size'] || strtolower($mimeTypeContents[0]) !== 'image' || !in_array($mimeTypeContents[1], $mimeTypesList)) {
-                    $log->debug('Failed because of size or image not supported types');
 			$saveimage = 'false';
 		}
 
 		//metadata check
-		$shortTag = strtolower(ini_get('short_open_tag'));
-		$shortTagSupported = ($shortTag == '1' || $shortTag == 'on') ? TRUE : FALSE;
+		$shortTagSupported = ini_get('short_open_tag') ? true : false;
 		if ($saveimage == 'true') {
-                    $tmpFileName = $file_details['tmp_name'];
-                    if($file_details['type'] == 'image/jpeg' || $file_details['type'] == 'image/tiff') {
-                        $exifdata = @exif_read_data($file_details['tmp_name']);
-                        if($exifdata && !self::validateImageMetadata($exifdata, $shortTagSupported)) {
-                            $log->debug('Image metadata validation failed');
-                            $saveimage = 'false';
-                        }
-                        //remove sensitive information(like,GPS or camera information) from the image
-                        if(($saveimage == 'true' ) && ($file_details['type'] == 'image/jpeg' ) && extension_loaded('gd') && function_exists('gd_info')) {
-                            $img = imagecreatefromjpeg($tmpFileName);
-                            imagejpeg ($img, $tmpFileName);
-                        }
-                    }
+			$exifdata = exif_read_data($file_details['tmp_name']);
+			if ($exifdata && !self::validateImageMetadata($exifdata, $shortTagSupported)) {
+				$saveimage = 'false';
+			}
 		}
 
 		// Check for php code injection
 		if ($saveimage == 'true') {
-                    $imageContents = file_get_contents($file_details['tmp_name']);
-                    if (stripos($imageContents, $shortTagSupported ? "<?" : "<?php") !== false) { // suspicious dynamic content.
-                        $log->debug('Php injection suspected');
-                        $saveimage = 'false';
-                    }
+			$imageContents = file_get_contents($file_details['tmp_name']);
+			if (stripos($imageContents, $shortTagSupported ? "<?" : "<?php") !== false) { // suspicious dynamic content.
+				$saveimage = 'false';
+			}
 		}
 		return $saveimage;
 	}
@@ -699,14 +655,14 @@ class Vtiger_Functions {
 		$description = $emailTemplate->getProcessedDescription();
 		$tokenDataPair = explode('$', $description);
 		$fields = Array();
-		for ($i = 1; $i < php7_count($token_data_pair); $i++) {
+		for ($i = 1; $i < count($token_data_pair); $i++) {
 			$module = explode('-', $tokenDataPair[$i]);
 			$fields[$module[0]][] = $module[1];
 		}
-		if (is_array($fields['custom']) && php7_count($fields['custom']) > 0) {
+		if (is_array($fields['custom']) && count($fields['custom']) > 0) {
 			$description = self::getMergedDescriptionCustomVars($fields, $description,$id,$parent_type);
 		}
-		if(is_array($fields['companydetails']) && php7_count($fields['companydetails']) > 0){
+		if(is_array($fields['companydetails']) && count($fields['companydetails']) > 0){
 			$description = self::getMergedDescriptionCompanyDetails($fields,$description);
 		}
 
@@ -1075,8 +1031,8 @@ class Vtiger_Functions {
 		return $result;
 	}
 
-	/**
-	* Function to determine mime type of file.
+	/** 
+	* Function to determine mime type of file. 
 	* Compatible with mime_magic or fileinfo php extension.
 	*/
 	static function mime_content_type($filename) {
@@ -1101,7 +1057,7 @@ class Vtiger_Functions {
 	static function verifyClaimedMIME($targetFile,$claimedMime) {
 		$fileMimeContentType= self::mime_content_type($targetFile);
 		if (in_array(strtolower($fileMimeContentType), $claimedMime)) {
-			return false;
+			return false; 
 		}
 		return true;
 	}
@@ -1153,9 +1109,9 @@ class Vtiger_Functions {
 		return array('Invoice', 'Quotes', 'PurchaseOrder', 'SalesOrder', 'Products', 'Services');
 	}
 
-	/**
+	/** 
 	 * Function to encode an array to json with all the options
-	 * @param <Array> $array
+	 * @param <Array> $array 
 	 * @return <sting> Json String
 	 */
 	static function jsonEncode($array) {
@@ -1193,14 +1149,11 @@ class Vtiger_Functions {
 	 * @return string returns track image contents
 	 */
 	static function getTrackImageContent($recordId, $parentId) {
-            $params = array();
-            $params['record'] = $recordId;
-            $params['parentId'] = $parentId;
-            $params['method'] = 'open';
-
-            $trackURL = Vtiger_Functions::generateTrackingURL($params);
-            $imageDetails = "<img src='$trackURL' alt='' width='1' height='1'>";
-            return $imageDetails;
+		$siteURL = vglobal('site_URL');
+		$applicationKey = vglobal('application_unique_key');
+		$trackURL = "$siteURL/modules/Emails/actions/TrackAccess.php?record=$recordId&parentId=$parentId&applicationKey=$applicationKey";
+		$imageDetails = "<img src='$trackURL' alt='' width='1' height='1'>";
+		return $imageDetails;
 	}
 
 	/**
@@ -1244,27 +1197,17 @@ class Vtiger_Functions {
 	 * @return boolean Returns true if $value is date else returns false
 	 */
 	static function isDateValue($value) {
-            $value = trim($value);
-            $delim = array('/','.');
-            foreach ($delim as $delimiter){
-                    $x = strpos($value, $delimiter);
-                    if($x === false) continue;
-                    else{
-                            $value=str_replace($delimiter, '-', $value);
-                            break;
-                    }
-            }
-            $valueParts = explode('-', $value);
-            if (php7_count($valueParts) == 3 && (strlen($valueParts[0]) == 4 || strlen($valueParts[1]) == 4 || strlen($valueParts[2]) == 4)) {
-                    $time = strtotime($value);
-                    if ($time && $time > 0) {
-                            return true;
-                    } else {
-                            return false;
-                    }
-            } else {
-                    return false;
-            }
+		$valueParts = explode('-', $value);
+		if (count($valueParts) == 3 && (strlen($valueParts[0]) == 4 || strlen($valueParts[1]) == 4 || strlen($valueParts[2]) == 4)) {
+			$time = strtotime($value);
+			if ($time && $time > 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -1391,9 +1334,9 @@ class Vtiger_Functions {
 
 	/**
 	 * Function which will determine whether the table contains user specific field
-	 * @param type $tableName -- name of the table
+	 * @param type $tableName -- name of the table 
 	 * @param type $moduleName -- moduleName
-	 * @return boolean
+	 * @return boolean 
 	 */
 	public static function isUserSpecificFieldTable($tableName, $moduleName) {
 		$moduleName = strtolower($moduleName);
@@ -1418,7 +1361,7 @@ class Vtiger_Functions {
 	static function jwtDecode($id_token) {
 		$token_parts = explode(".", $id_token);
 
-		// First, in case it is url-encoded, fix the characters to be
+		// First, in case it is url-encoded, fix the characters to be 
 		// valid base64
 		$encoded_token = str_replace('-', '+', $token_parts[1]);
 		$encoded_token = str_replace('_', '/', $encoded_token);
@@ -1446,14 +1389,14 @@ class Vtiger_Functions {
 		$encryption = new Encryption();
 		return '$ve$'.$encryption->encrypt($text);
 	}
-
-	/*
+	
+	/* 
 	 * Function to determine if text is masked.
 	 */
 	static function isProtectedText($text) {
 		return !empty($text) && (strpos($text, '$ve$') === 0);
 	}
-
+	
 	/*
 	 * Function to unmask the text.
 	 */
@@ -1482,7 +1425,7 @@ class Vtiger_Functions {
 	/**
 	 * Function to check if a module($sourceModule) is related to Documents module.
 	 * @param <string> $sourceModule - Source module
-	 * @return <boolean> Returns TRUE if $sourceModule is related to Documents module and
+	 * @return <boolean> Returns TRUE if $sourceModule is related to Documents module and 
 	 * Documents module is active else returns FALSE.
 	 */
 	static function isDocumentsRelated($sourceModule) {
@@ -1511,10 +1454,10 @@ class Vtiger_Functions {
 		$value = $db->sql_escape_string($value);
 		return $value;
 	}
-
+    
     /**
      * Request parameters and it's type.
-     * @var type
+     * @var type 
      */
     protected static $type = array(
 	'record' => 'id',
@@ -1551,7 +1494,7 @@ class Vtiger_Functions {
         switch ($type) {
             case 'id' : $ok = (preg_match('/[^0-9xH]/', $value)) ? false : $ok;
                 break;
-            case 'email' : $ok = self::validateTypeEmail($value);
+            case 'email' : $ok = (!filter_var($value, FILTER_VALIDATE_EMAIL)) ? false : $ok;
                 break;
             case 'idlist' : $ok = (preg_match('/[a-zA-Z]/', $value)) ? false : $ok;
                 break;
@@ -1567,17 +1510,7 @@ class Vtiger_Functions {
         }
         return $ok;
     }
-
-    public static function validateTypeEmail(string $value) {
-      $ok = TRUE;
-      $mailaddresses = explode(',', $value);
-
-      foreach($mailaddresses as $mailaddress){
-        if(!filter_var($mailaddress, FILTER_VALIDATE_EMAIL)) $ok = FALSE;
-      }
-      return $ok;
-    }
-
+    
     /**
 	 * Function to get file public url to access outside of CRM (from emails)
 	 * @param <Integer> $fileId
@@ -1589,172 +1522,8 @@ class Vtiger_Functions {
         $fileId = $imageId;
         $fileName = $imageName;
 		if ($fileId) {
-			$publicUrl = "public.php?fid=$fileId&key=".md5($fileName);
+			$publicUrl = "public.php?fid=$fileId&key=".$fileName;
 		}
 		return $publicUrl;
-	}
-
-    /**
-     * Function to get the attachmentsid to given crmid
-     * @param type $crmid
-     * @param type $webaservice entity id
-     * @return <Array>
-     */
-    static function getAttachmentIds($crmid, $WsEntityId) {
-        $adb = PearDatabase::getInstance();
-        $attachmentIds = false;
-        if(!empty($crmid)) {
-            $query = "SELECT attachmentsid FROM vtiger_seattachmentsrel WHERE crmid = ?";
-            $result = $adb->pquery($query, array($crmid));
-            $noofrows = $adb->num_rows($result);
-            if ($noofrows) {
-                for ($i = 0; $i < $noofrows; $i++) {
-                    $attachmentIds[] = vtws_getId($WsEntityId,$adb->query_result($result, $i, 'attachmentsid'));
-                }
-            }
-        }
-        return $attachmentIds;
-    }
-
-    static function generateTrackingURL($params = []){
-        $options = array(
-            'handler_path' => 'modules/Emails/handlers/Tracker.php',
-            'handler_class' => 'Emails_Tracker_Handler',
-            'handler_function' => 'process',
-            'handler_data' => $params
-        );
-
-        return Vtiger_ShortURL_Helper::generateURL($options);
-    }
-    
-    	/*
-	 * function to strip base64 data of the image from the content ($input)
-	 * if mark will be true, then we are keeping the strip details in the $markers variable
-	 */
-	public static function strip_base64_data ($input, $mark = false, &$markers = null) {
-		if ($markers === null) {
-			$markers = array();
-		}
-
-		// Alternative function for:
-		// $input = preg_replace("/(\(data:\w+\/\w+;base64,[^\)]+\))/", "", $input);
-		// Regex failed when $input had large-base64 content.
-		$parts = [];
-
-		if ($mark) {
-			if (!is_string($mark)) {
-				$mark = "__VTIGERB64STRIPMARK_";
-			}
-		}
-
-		$markindex = 0;
-		$startidx = 0;
-		$endidx = 0;
-		$offset = 0;
-		do {
-			/* Determine basd on text-embed or html-embed of base64 */
-			$endchar = "";
-
-			// HTML embed in attributes (eg. img src="...").
-			$startidx = strpos($input, '"data:', $offset);
-			if ($startidx !== false) {
-				$endchar = '"';
-			} else {
-				// HTML embed in attributes (eg. img src='...').
-				$startidx = strpos($input, "'data:", $offset);
-				if ($startidx !== false) {
-					$endchar = "'";
-				} else {
-					// TEXT embed with wrap [eg. (data...)]
-					$startidx = strpos($input, "(data:", $offset);
-					if ($startidx !== false) {
-						$endchar = ")";
-					} else {
-						break;
-					}
-				}
-			}
-
-			$skipidx = strpos($input, ";base64,", $startidx);
-			if ($skipidx === false) {
-				break;
-			}
-			$endidx = strpos($input, $endchar, $skipidx);
-			if ($endidx === false) {
-				break;
-			}
-
-			$parts[] = substr($input, $offset, ($startidx - $offset));
-
-			// Retain marker if requested.
-			if ($mark) {
-				$marker = $mark . ($markindex++);
-				$parts[] = $marker;
-				$markers[$marker] = substr($input, min($startidx, $startidx), ($endidx - $startidx)+1);
-			}
-			$offset = $endidx + 1;
-		} while (true);
-
-		if ($offset < strlen($input)) {
-			$parts[] = substr($input, $offset);
-		}
-				return implode("", $parts);
-	}
-	
-	/*
-	 * function to strip office365 inline image src data(https://sc.vtiger.in/screenshots/amitr-sc-at-01-04-2021-11-57-00.png) from the content ($input)
-	 * if mark will be true, then we are keeping the strip details in the $markers variable
-	 */
-	public static function stripInlineOffice365Image ($input, $mark = false, &$markers = null) {
-		if ($markers === null) {
-			$markers = array();
-		}
-		
-		$parts = [];
-
-		if ($mark) {
-			if (!is_string($mark)) {
-				$mark = "__VTIGERO365STRIPMARK_";
-			}
-		}
-
-		$markindex = 0;
-		$startidx = 0;
-		$endidx = 0;
-		$offset = 0;
-		
-		do {
-			$endchar = "";
-			$startidx = strpos($input, '(https://attachments.office.net/owa/', $offset);
-			if ($startidx !== false) {
-				$endchar = ")";
-			} else {
-				break;
-			}
-
-			$skipidx = strpos($input, "(https://attachments.office.net/owa/", $startidx);
-			if ($skipidx === false) {
-				break;
-			}
-			$endidx = strpos($input, $endchar, $skipidx);
-			if ($endidx === false) {
-				break;
-			}
-
-			$parts[] = substr($input, $offset, ($startidx - $offset));
-
-			// Retain marker if requested.
-			if ($mark) {
-				$marker = $mark . ($markindex++);
-				$parts[] = $marker;
-				$markers[$marker] = substr($input, min($startidx, $startidx), ($endidx - $startidx) + 1);
-			}
-			$offset = $endidx + 1;
-		} while (true);
-
-		if ($offset < strlen($input)) {
-			$parts[] = substr($input, $offset);
-		}
-		return implode("", $parts);
 	}
 }

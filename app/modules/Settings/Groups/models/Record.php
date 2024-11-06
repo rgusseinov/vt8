@@ -114,11 +114,11 @@ class Settings_Groups_Record_Model extends Settings_Vtiger_Record_Model {
 			$db->pquery('DELETE FROM vtiger_group2role WHERE groupid=?', array($groupId));
 			$db->pquery('DELETE FROM vtiger_group2rs WHERE groupid=?', array($groupId));
 
-			$noOfMembers = php7_count($members);
+			$noOfMembers = count($members);
 			for ($i = 0; $i < $noOfMembers; ++$i) {
 				$id = $members[$i];
 				$idComponents = Settings_Groups_Member_Model::getIdComponentsFromQualifiedId($id);
-				if ($idComponents && php7_count($idComponents) == 2) {
+				if ($idComponents && count($idComponents) == 2) {
 					$memberType = $idComponents[0];
 					$memberId = $idComponents[1];
 
@@ -346,21 +346,20 @@ class Settings_Groups_Record_Model extends Settings_Vtiger_Record_Model {
 	 * @param <Object> $value
 	 * @return Settings_Groups_Record_Model instance, if exists. Null otherwise
 	 */
-	public static function getInstance() {
-            list($value) = func_get_args();
-            $db = PearDatabase::getInstance();
+	public static function getInstance($value) {
+		$db = PearDatabase::getInstance();
 
-            if (Vtiger_Utils::isNumber($value)) {
-                    $sql = 'SELECT * FROM vtiger_groups WHERE groupid = ?';
-            } else {
-                    $sql = 'SELECT * FROM vtiger_groups WHERE groupname = ?';
-            }
-            $params = array($value);
-            $result = $db->pquery($sql, $params);
-            if ($db->num_rows($result) > 0) {
-                    return self::getInstanceFromQResult($result, 0);
-            }
-            return null;
+		if (Vtiger_Utils::isNumber($value)) {
+			$sql = 'SELECT * FROM vtiger_groups WHERE groupid = ?';
+		} else {
+			$sql = 'SELECT * FROM vtiger_groups WHERE groupname = ?';
+		}
+		$params = array($value);
+		$result = $db->pquery($sql, $params);
+		if ($db->num_rows($result) > 0) {
+			return self::getInstanceFromQResult($result, 0);
+		}
+		return null;
 	}
 	
 	/* Function to get the instance of the group by Name

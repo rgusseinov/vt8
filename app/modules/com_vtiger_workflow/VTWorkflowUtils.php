@@ -40,7 +40,7 @@ class VTWorkflowUtils {
 	function adminUser() {
         $user = Users::getActiveAdminUser();
 		global $current_user;
-		if (empty(self::$userStack) || php7_count(self::$userStack) == 0) {
+		if (empty(self::$userStack) || count(self::$userStack) == 0) {
 			self::$loggedInUser = $current_user;
 		}
 		array_push(self::$userStack, $current_user);
@@ -65,7 +65,7 @@ class VTWorkflowUtils {
 	 */
 	function revertUser() {
 		global $current_user;
-		if (php7_count(self::$userStack) != 0) {
+		if (count(self::$userStack) != 0) {
 			$current_user = array_pop(self::$userStack);
 		} else {
 			$current_user = null;
@@ -119,7 +119,7 @@ class VTWorkflowUtils {
 	 * @params :: $modulename - name of the module
 	 */
 
-	public static function checkModuleWorkflow($modulename) {
+	function checkModuleWorkflow($modulename) {
 		$result = true;
 		if (in_array($modulename, array('Emails', 'Faq', 'PBXManager', 'Users')) || !getTabid($modulename)) {
 			$result = false;

@@ -261,7 +261,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 				}
 			} else {
 				if (!empty($mergeType) && $mergeType != Import_Utils_Helper::$AUTO_MERGE_NONE) {
-					if (php7_count($this->mergeFields) == 0) {
+					if (count($this->mergeFields) == 0) {
 						$mergeType = Import_Utils_Helper::$AUTO_MERGE_IGNORE;
 					}
 					$index = 0;
@@ -281,7 +281,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 												} else {
 													$referenceFileValueComponents = explode(':::', $comparisonValue);
 												}
-												if (php7_count($referenceFileValueComponents) > 1) {
+												if (count($referenceFileValueComponents) > 1) {
 													$comparisonValue = trim($referenceFileValueComponents[1]);
 												}
 												break;
@@ -555,9 +555,9 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 					} else {
 						$fieldValueDetails = $fieldValue;
 					}
-					if (is_array($fieldValueDetails) && php7_count($fieldValueDetails) > 1) {
+					if (count($fieldValueDetails) > 1) {
 						$referenceModuleName = trim($fieldValueDetails[0]);
-						if (php7_count($fieldValueDetails) == 2) {
+						if (count($fieldValueDetails) == 2) {
 							$entityLabel = trim($fieldValueDetails[1]);
 							$entityId = getEntityId($referenceModuleName, decode_html($entityLabel));
 						} else {//multi reference field
@@ -633,7 +633,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 
 				$picklistValueInLowerCase = strtolower($fieldValue);
 				$allPicklistValuesInLowerCase = array_map('strtolower', $allPicklistValues);
-				if (php7_sizeof($allPicklistValuesInLowerCase) > 0 && php7_sizeof($allPicklistValues) > 0) {
+				if (sizeof($allPicklistValuesInLowerCase) > 0 && sizeof($allPicklistValues) > 0) {
 					$picklistDetails = array_combine($allPicklistValuesInLowerCase, $allPicklistValues);
 				}
 
@@ -685,7 +685,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 						$fieldValue = '';
 					} 
 					$valuesList = explode(' ', $fieldValue);
-					if(php7_count($valuesList) == 1) $fieldValue = '';
+					if(count($valuesList) == 1) $fieldValue = '';
 					$fieldValue = getValidDBInsertDateTimeValue($fieldValue);
 					if (preg_match("/^[0-9]{2,4}[-][0-1]{1,2}?[0-9]{1,2}[-][0-3]{1,2}?[0-9]{1,2} ([0-1][0-9]|[2][0-3])([:][0-5][0-9]){1,2}$/",
 							$fieldValue) == 0) {
@@ -705,26 +705,14 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 					}
 
 					$valuesList = explode(' ', $fieldValue);
-					if (php7_count($valuesList) > 1) {
+					if (count($valuesList) > 1) {
 						$fieldValue = $valuesList[0];
 					}
 
 					$userDateFormat = $current_user->column_fields['date_format'];
-					if ('dd.mm.yyyy' === $userDateFormat) {
-						$dateFormat = 'd.m.Y';
-					} else if ('mm.dd.yyyy' === $userDateFormat) {
-						$dateFormat = 'm.d.Y';
-					} else if ('yyyy.mm.dd' === $userDateFormat) {
-						$dateFormat = 'Y.m.d';
-					} else if ('dd/mm/yyyy' === $userDateFormat) {
-						$dateFormat = 'd/m/Y';
-					} else if ('mm/dd/yyyy' === $userDateFormat) {
-						$dateFormat = 'm/d/Y';
-					} else if ('yyyy/mm/dd' === $userDateFormat) {
-						$dateFormat = 'Y/m/d';
-					} else if ('dd-mm-yyyy' === $userDateFormat) {
+					if ($userDateFormat == 'dd-mm-yyyy') {
 						$dateFormat = 'd-m-Y';
-					} else if ('mm-dd-yyyy' === $userDateFormat) {
+					} else if ($userDateFormat == 'mm-dd-yyyy') {
 						$dateFormat = 'm-d-Y';
 					} else {
 						$dateFormat = 'Y-m-d';
@@ -885,7 +873,8 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			$importDataController->importData();
 			$importStatusCount = $importDataController->getImportStatusCount();
 			$recordsToImport = $importDataController->getNumberOfRecordsToImport($importDataController->user);
-			$emailSubject = getTranslatedString('LBL_SCHEDULE_IMPORT_SUBJECT', 'Import').' '.$importDataController->module;
+
+			$emailSubject = 'vtiger CRM - Scheduled Import Report for '.$importDataController->module;
 			$viewer = new Vtiger_Viewer();
 			$viewer->assign('FOR_MODULE', $importDataController->module);
 			$viewer->assign('INVENTORY_MODULES', getInventoryModules());
@@ -894,17 +883,20 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 			$importResult = $viewer->view('Import_Result_Details.tpl','Import',true);
 			$importResult = str_replace('align="center"', '', $importResult);
 
-                        $emailData = getTranslatedString('LBL_IMPORT_COMPLETED', 'Import').' '.$importResult.getTranslatedString('LBL_CHECK_IMPORT_STATUS', 'Import');
+			$emailData = 'vtiger CRM has just completed your import process. <br/><br/>' .
+						$importResult.'<br/><br/>'.
+						'We recommend you to login to the CRM and check few records to confirm that the import has been successful.';
 
-			$userName = $importDataController->user->column_fields['userlabel'];
+			$userName = getFullNameFromArray('Users', $importDataController->user->column_fields);
 			$userEmail = $importDataController->user->email1;
 			$vtigerMailer->AddAddress($userEmail, $userName);
 			$vtigerMailer->Subject = $emailSubject;
 			$vtigerMailer->Body    = $emailData;
-			$vtigerMailer->Send(true);
+			$vtigerMailer->Send();
 
 			$importDataController->finishImport();
 		}
+		Vtiger_Mailer::dispatchQueue(null);
 	}
 
 	public function getNumberOfRecordsToImport($user){
@@ -1049,7 +1041,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 				unset($_REQUEST['contactidlist']);
 				if ($recordData['contact_id']) {
 					$contactIdsList = explode(', ', $recordData['contact_id']);
-					if (php7_count($contactIdsList) > 1) {
+					if (count($contactIdsList) > 1) {
 						$_REQUEST['contactidlist'] = implode(';', $contactIdsList);
 					}
 				}
@@ -1078,7 +1070,7 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 
 						$fieldValueInLowerCase = strtolower($fieldValue);
 						$picklistValuesInLowerCase = array_map('strtolower', $picklistValues);
-						if (php7_sizeof($picklistValuesInLowerCase)&& php7_sizeof($picklistValues)) {
+						if (sizeof($picklistValuesInLowerCase)&& sizeof($picklistValues)) {
 							$picklistDetails = array_combine($picklistValuesInLowerCase, $picklistValues);
 						}
 

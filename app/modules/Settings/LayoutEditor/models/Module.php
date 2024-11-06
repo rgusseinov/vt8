@@ -21,7 +21,7 @@ class Settings_LayoutEditor_Module_Model extends Vtiger_Module_Model {
 	 * Function that returns all the fields for the module
 	 * @return <Array of Vtiger_Field_Model> - list of field models
 	 */
-	public function getFields($blockInstance = false) {
+	public function getFields() {
 		if(empty($this->fields)){
 			$fieldList = array();
 			$blocks = $this->getBlocks();
@@ -33,7 +33,7 @@ class Settings_LayoutEditor_Module_Model extends Vtiger_Module_Model {
 				}
 				$blockId[] = $block->get('id');
 			}
-			if(php7_count($blockId) > 0) {
+			if(count($blockId) > 0) {
 				$fieldList = Settings_LayoutEditor_Field_Model::getInstanceFromBlockIdList($blockId,$moduleModel);
 			}
 			//To handle special case for invite users
@@ -233,12 +233,13 @@ class Settings_LayoutEditor_Module_Model extends Vtiger_Module_Model {
 							   break;
 			   Case 'Currency' :
 							   $fieldLength = $params['fieldLength'];
-                               $decimal = $params['decimal'];
-                               $uitype = 71;
-                               $dbfldlength = $fieldLength + $decimal;
-                               $type="NUMERIC(".$dbfldlength.",".$decimal.")"; //adodb type
-                               $uichekdata='N~O';
-                               break;
+							   $decimal = $params['decimal'];
+							   $uitype = 71;
+							   $dbfldlength = $fieldLength + $decimal + 1;
+							   $decimal = $decimal + 3;
+							   $type="NUMERIC(".$dbfldlength.",".$decimal.")"; //adodb type
+							   $uichekdata='N~O';
+							   break;
 			   Case 'Date' :
 							   $uichekdata='D~O';
 							   $uitype = 5;
@@ -467,7 +468,7 @@ class Settings_LayoutEditor_Module_Model extends Vtiger_Module_Model {
 		}
 
 		//Fields Info
-		if (php7_count($fieldIdsList) < 4) {//Maximum 3 fields are allowed
+		if (count($fieldIdsList) < 4) {//Maximum 3 fields are allowed
 			$query = 'UPDATE vtiger_field SET isunique = CASE WHEN fieldid IN ('.  generateQuestionMarks($fieldIdsList).') THEN 1 ELSE 0 END WHERE tabid=?';
 			$params = array_merge($fieldIdsList, array($tabId));
 			$db->pquery($query, $params);

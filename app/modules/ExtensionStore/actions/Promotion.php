@@ -15,10 +15,6 @@ class ExtensionStore_Promotion_Action extends Vtiger_Index_View {
 		$this->exposeMethod('maxCreatedOn');
 	}
 
-    public function requiresPermission(\Vtiger_Request $request) {
-		return array();
-	}
-    
 	public function process(Vtiger_Request $request) {
 		$mode = $request->getMode();
 		if (!empty($mode)) {

@@ -47,7 +47,7 @@ class EmailTemplate {
         if($result != 0){
             $templateVariablePair = $matches[0];
             $this->templateFields = Array();
-            for ($i = 0; $i < php7_count($templateVariablePair); $i++) {
+            for ($i = 0; $i < count($templateVariablePair); $i++) {
                 $templateVariablePair[$i] = str_replace('$', '', $templateVariablePair[$i]);
                 list($module, $columnName) = explode('-', $templateVariablePair[$i]);
                 list($parentColumn, $childColumn) = explode(':', $columnName);
@@ -99,7 +99,7 @@ class EmailTemplate {
 		$baseTable = $meta->getEntityBaseTable();
 		$tableList[$baseTable] = $baseTable;
 		
-		if (!empty($variableList) && (php7_count($variableList) > 0)) {
+		if (count($variableList) > 0) {
 			foreach ($variableList as $column) {
 				if (in_array($column, $allColumnList)) {
 					$fieldList[] = array_search($column, $fieldColumnMapping);
@@ -123,7 +123,7 @@ class EmailTemplate {
 				}
 			}
 
-			if (php7_count($tableList) > 0 && php7_count($columnListTable) > 0) {
+			if (count($tableList) > 0 && count($columnListTable) > 0) {
 				$moduleTableIndexList = $meta->getEntityTableIndexList();
 				$sql = 'SELECT '.$tableList[0].'.'.$moduleTableIndexList[$tableList[0]].' AS vt_recordid, ' . implode(', ', $columnListTable) . ' FROM ' . $tableList[0];
 				foreach ($tableList as $index => $tableName) {
@@ -220,7 +220,7 @@ s								 */
 							$values[$fieldName] !== null) {
 						if (strcasecmp($webserviceField->getFieldDataType(), 'reference') === 0) {
 							$details = $webserviceField->getReferenceList();
-							if (php7_count($details) == 1) {
+							if (count($details) == 1) {
 								$referencedObjectHandler = vtws_getModuleHandlerFromName(
 										$details[0], $this->user);
 							} else {

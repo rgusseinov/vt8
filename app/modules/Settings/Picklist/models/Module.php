@@ -52,7 +52,7 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 			$result = $db->pquery($sql, array($pickListFieldName));
 			$picklistid = $db->query_result($result,0,"picklistid");
 			//add the picklist values to the selected roles
-			for($j=0;$j<php7_count($rolesSelected);$j++){
+			for($j=0;$j<count($rolesSelected);$j++){
 				$roleid = $rolesSelected[$j];
 				Vtiger_Cache::delete('PicklistRoleBasedValues',$pickListFieldName.$roleid);
 				$sql ="SELECT max(sortid)+1 as sortid
@@ -284,15 +284,13 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 				$deleteValueList[] = ' ( roleid = "'.$roleId.'" AND '.'picklistvalueid = "'.$pickListValueId.'") ';
 			}
 		}
-                if(!empty($insertValueList)){
-                    $insertQuery = 'INSERT IGNORE INTO vtiger_role2picklist (roleid,picklistvalueid,picklistid) VALUES '. implode(",", $insertValueList);
-                    $result = $db->pquery($insertQuery, array());
-                }
+		$query = 'INSERT IGNORE INTO vtiger_role2picklist (roleid,picklistvalueid,picklistid) VALUES '. generateQuestionMarks($insertValueList);
+		$result = $db->pquery($query, $insertValueList);
 
-                if(!empty($deleteValueList)){
-                    $deleteQuery = 'DELETE FROM vtiger_role2picklist WHERE '.implode(' OR ',$deleteValueList);
-                    $result = $db->pquery($deleteQuery,array());
-                }
+		$deleteQuery = 'DELETE FROM vtiger_role2picklist WHERE '.implode(' OR ',$deleteValueList);
+
+		$result = $db->pquery($deleteQuery,array());
+
 		//retaining to older value
 		$db->dieOnError = $dieOnErrorOldValue;
 
@@ -512,7 +510,7 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 					$picklistNameRaw = $db->query_result($result, $i, $fieldName);
 					$picklistName = decode_html($picklistNameRaw);
 					// show color only for accesable picklist values
-					if($isRoleBasedPicklist && !isset($accessablePicklistValues[$picklistName	])) {
+					if($isRoleBasedPicklist && !isset($accessablePicklistValues[$picklistNameRaw])) {
 						$color = '';
 					}
 					if(!empty($color)) {
@@ -538,7 +536,6 @@ class Settings_Picklist_Module_Model extends Vtiger_Module_Model {
 	public static function getPicklistColorByValue($fieldName, $fieldValue) {
 		$db = PearDatabase::getInstance();
 		$tableName = "vtiger_$fieldName";
-		$color = '';
 		if(Vtiger_Utils::CheckTable($tableName)) {
 			$colums = $db->getColumnNames($tableName);
 			$fieldValue = decode_html($fieldValue);

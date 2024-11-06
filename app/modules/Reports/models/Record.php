@@ -131,7 +131,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 	 * @param <String> $module
 	 * @return <Reports_Record_Model>
 	 */
-	public static function getInstanceById($recordId, $module=null) {
+	public static function getInstanceById($recordId) {
 		$db = PearDatabase::getInstance();
 
 		$self = new self();
@@ -275,9 +275,6 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 	function isRecordHasViewAccess($reportType){
 		$db = PearDatabase::getInstance();
 		$current_user = vglobal('current_user');
-        if(strtolower($current_user->is_admin) == "on") {
-            return true;
-        }
 			$params = array();
 			$sql = ' SELECT vtiger_report.reportid,vtiger_report.reportname FROM vtiger_report ';
 			require('user_privileges/user_privileges_'.$current_user->id.'.php');
@@ -445,15 +442,12 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 
 		$reportId = $this->getId();
 
-		//Newly created records are always as Private, only shared users can see report
-		$sharingType = 'Private';
-		
+		//When members variable is not empty, it means record shared with other users, so
+		//sharing type of a report should be private
+		$sharingType = 'Public';
 		$members = $this->get('members',array());
-		
-		if($members && php7_count($members) == 1){
-			if($members[0] == 'All::Users'){
-				$sharingType = 'Public';
-			}
+		if(!empty($members)){
+			$sharingType = 'Private';
 		}
 
 		if(empty($reportId)) {
@@ -552,7 +546,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 		$db = PearDatabase::getInstance();
 
 		$calculationFields = $this->get('calculationFields');
-		for ($i=0; $i<php7_count($calculationFields); $i++) {
+		for ($i=0; $i<count($calculationFields); $i++) {
 			$db->pquery('INSERT INTO vtiger_reportsummary (reportsummaryid, summarytype, columnname) VALUES (?,?,?)',
 					array($this->getId(), $i, $calculationFields[$i]));
 		}
@@ -580,7 +574,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 
 		$reportId = $this->getId();
 		$sharingInfo = $this->get('sharingInfo');
-		for($i=0; $i<php7_count($sharingInfo); $i++) {
+		for($i=0; $i<count($sharingInfo); $i++) {
 			$db->pquery('INSERT INTO vtiger_reportsharing(reportid, shareid, setype) VALUES (?,?,?)',
 					array($reportId, $sharingInfo[$i]['id'], $sharingInfo[$i]['type']));
 		}
@@ -594,11 +588,11 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 		
 		$members = $this->get('members',array());
 		if(!empty($members)) {
-			$noOfMembers = php7_count($members);
+			$noOfMembers = count($members);
 			for ($i = 0; $i < $noOfMembers; ++$i) {
 				$id = $members[$i];
 				$idComponents = Settings_Groups_Member_Model::getIdComponentsFromQualifiedId($id);
-				if ($idComponents && php7_count($idComponents) == 2) {
+				if ($idComponents && count($idComponents) == 2) {
 					$memberType = $idComponents[0];
 					$memberId = $idComponents[1];
 
@@ -628,7 +622,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 		$selectedFields = $this->get('selectedFields');
 
 		if(!empty($selectedFields)){
-		   for($i=0 ;$i<php7_count($selectedFields);$i++) {
+		   for($i=0 ;$i<count($selectedFields);$i++) {
 				if(!empty($selectedFields[$i])) {
 					$db->pquery("INSERT INTO vtiger_selectcolumn(queryid, columnindex, columnname) VALUES (?,?,?)",
 							array($this->getId(), $i, decode_html($selectedFields[$i])));
@@ -689,7 +683,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 					if(($columnInfo[4] == 'D' || ($columnInfo[4] == 'T' && $columnInfo[1] != 'time_start' && $columnInfo[1] != 'time_end') ||
 									($columnInfo[4] == 'DT')) && ($columnInfo[4] != '' && $advFilterValue != '' ) && !in_array($advFilterComparator, $specialDateConditions)) {
 						$val = Array();
-						for($i=0; $i<php7_count($tempVal); $i++) {
+						for($i=0; $i<count($tempVal); $i++) {
 							if(trim($tempVal[$i]) != '') {
 								$date = new DateTimeField(trim($tempVal[$i]));
 								if($columnInfo[4] == 'D') {
@@ -951,7 +945,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 		$secondaryModules = $this->getSecondaryModules();
 		if (!empty ($secondaryModules)) {
 			$secondaryModulesList = explode(':', $secondaryModules);
-			$count = php7_count($secondaryModulesList);
+			$count = count($secondaryModulesList);
 
 			$secondaryModuleFields = $this->getSecondaryModuleFields();
 
@@ -1007,7 +1001,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 			$columns = $group['columns'];
 			$and = $or = 0;
 			$block = $group['condition'];
-			if(php7_count($columns) != 1) {
+			if(count($columns) != 1) {
 				foreach($columns as $column) {
 					if($column['column_condition'] == 'and') {
 						++$and;
@@ -1015,7 +1009,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 						++$or;
 					}
 				}
-				if($and == php7_count($columns)-1 && php7_count($columns) != 1) {
+				if($and == count($columns)-1 && count($columns) != 1) {
 					$allGroupColumns = array_merge($allGroupColumns, $group['columns']);
 				} else {
 					$anyGroupColumns = array_merge($anyGroupColumns, $group['columns']);
@@ -1047,17 +1041,12 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 			$tranformedStandardFilter['comparator'] = 'bw';
 
 			$fields = explode(':',$standardFilter['columnname']);
-            $standardReports = array('Last Month Activities', 'This Month Activities');
+
 			if($fields[1] == 'createdtime' || $fields[1] == 'modifiedtime' ||($fields[0] == 'vtiger_activity' && $fields[1] == 'date_start')){
-                if(in_array($this->get('reportname'), $standardReports)){
-                    $tranformedStandardFilter['columnname'] = "$fields[0]Calendar:$fields[1]:$fields[3]:$fields[2]:DT";
-                    $tranformedStandardFilter['comparator'] = $standardFilter['type'];
-                }else{
-                    $tranformedStandardFilter['columnname'] = "$fields[0]:$fields[1]:$fields[3]:$fields[2]:DT";
-                    $date[] = $standardFilter['startdate'].' 00:00:00';
-                    $date[] = $standardFilter['enddate'].' 00:00:00';
-                    $tranformedStandardFilter['value'] =  implode(',',$date);
-                }
+				$tranformedStandardFilter['columnname'] = "$fields[0]:$fields[1]:$fields[3]:$fields[2]:DT";
+				$date[] = $standardFilter['startdate'].' 00:00:00';
+				$date[] = $standardFilter['enddate'].' 00:00:00';
+				$tranformedStandardFilter['value'] =  implode(',',$date);
 			} else{
 				$tranformedStandardFilter['columnname'] = "$fields[0]:$fields[1]:$fields[3]:$fields[2]:D";
 				$tranformedStandardFilter['value'] = $standardFilter['startdate'].','.$standardFilter['enddate'];
@@ -1175,7 +1164,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 		return Reports_ScheduleReports_Model::getInstanceById($this->getId());
 	}
 
-	public function getRecordsListFromRequest(Vtiger_Request $request, $model = false) {
+	public function getRecordsListFromRequest(Vtiger_Request $request) {
 		$folderId = $request->get('viewname');
 		$module = $request->get('module');
 		$selectedIds = $request->get('selected_ids');
@@ -1184,7 +1173,7 @@ class Reports_Record_Model extends Vtiger_Record_Model {
 		$searchParams = $searchParams[0];
 
 		if(!empty($selectedIds) && $selectedIds != 'all') {
-			if(!empty($selectedIds) && php7_count($selectedIds) > 0) {
+			if(!empty($selectedIds) && count($selectedIds) > 0) {
 				return $selectedIds;
 			}
 		}

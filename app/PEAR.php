@@ -156,7 +156,7 @@ class PEAR
     // }}}
 
     // {{{ constructor
-	
+
     /**
      * Constructor.  Registers this object in
      * $_PEAR_destructor_object_list for destructor emulation if a
@@ -167,7 +167,7 @@ class PEAR
      * @access public
      * @return void
      */
-	function __construct($error_class = null)
+    function PEAR($error_class = null)
     {
         $classname = strtolower(get_class($this));
         if ($this->_debug) {
@@ -190,13 +190,6 @@ class PEAR
                 $classname = get_parent_class($classname);
             }
         }
-    }
-    function PEAR($error_class = null)
-    {
-        // PHP4-style constructor.
-        // This will NOT be invoked, unless a sub-class that extends `foo` calls it.
-        // In that case, call the new-style constructor to keep compatibility.
-        self::__construct($error_class);
     }
 
     // }}}
@@ -234,7 +227,7 @@ class PEAR
     * @return mixed   A reference to the variable. If not set it will be
     *                 auto initialised to NULL.
     */
-    static function &getStaticProperty($class, $var)
+    function &getStaticProperty($class, $var)
     {
         static $properties;
         return $properties[$class][$var];
@@ -252,7 +245,7 @@ class PEAR
     * @param  mixed $args  The arguments to pass to the function
     * @return void
     */
-    static function registerShutdownFunc($func, $args = array())
+    function registerShutdownFunc($func, $args = array())
     {
         $GLOBALS['_PEAR_shutdown_funcs'][] = array($func, $args);
     }
@@ -271,7 +264,7 @@ class PEAR
      * @access  public
      * @return  bool    true if parameter is an error
      */
-    static function isError($data, $code = null)
+    function isError($data, $code = null)
     {
         if (is_a($data, 'PEAR_Error')) {
             if (is_null($code)) {
@@ -327,7 +320,7 @@ class PEAR
      * @since PHP 4.0.5
      */
 
-    static function setErrorHandling($mode = null, $options = null)
+    function setErrorHandling($mode = null, $options = null)
     {
         if (isset($this) && is_a($this, 'PEAR')) {
             $setmode     = $this->_default_error_mode;
@@ -516,7 +509,7 @@ class PEAR
      * @see PEAR::setErrorHandling
      * @since PHP 4.0.5
      */
-    static function &raiseError($message = null,
+    function &raiseError($message = null,
                          $code = null,
                          $mode = null,
                          $options = null,
@@ -849,7 +842,7 @@ class PEAR_Error
      * @access public
      *
      */
-    function __construct($message = 'unknown error', $code = null,
+    function PEAR_Error($message = 'unknown error', $code = null,
                         $mode = null, $options = null, $userinfo = null)
     {
         if ($mode === null) {
@@ -906,15 +899,6 @@ class PEAR_Error
             trigger_error("PEAR_ERROR_EXCEPTION is obsolete, use class PEAR_Exception for exceptions", E_USER_WARNING);
             eval('$e = new Exception($this->message, $this->code);throw($e);');
         }
-    }
-    function PEAR_Error($message = 'unknown error', $code = null,
-                        $mode = null, $options = null, $userinfo = null)
-    {
-		// PHP4-style constructor.
-        // This will NOT be invoked, unless a sub-class that extends `foo` calls it.
-        // In that case, call the new-style constructor to keep compatibility.
-        self::__construct($message, $code,$mode, $options, $userinfo);
-        
     }
 
     // }}}

@@ -31,7 +31,7 @@
 	<input type='hidden' name="pageLimit" value="{$PAGING_MODEL->getPageLimit()}" id='pageLimit'>
 	<input type="hidden" name="noOfEntries" value="{$LISTVIEW_ENTRIES_COUNT}" id="noOfEntries">
 	<input type="hidden" name="currentSearchParams" value="{Vtiger_Util_Helper::toSafeHTML(Zend_JSON::encode($SEARCH_DETAILS))}" id="currentSearchParams" />
-        <input type="hidden" name="currentTagParams" value="{Vtiger_Util_Helper::toSafeHTML(Zend_JSON::encode($TAG_DETAILS))}" id="currentTagParams" />
+	<input type="hidden" name="currentTagParams" value="{Vtiger_Util_Helper::toSafeHTML(Zend_JSON::encode($TAG_DETAILS))}" id="currentTagParams" />
 	<input type="hidden" name="noFilterCache" value="{$NO_SEARCH_PARAMS_CACHE}" id="noFilterCache" >
 	<input type="hidden" name="orderBy" value="{$ORDER_BY}" id="orderBy">
 	<input type="hidden" name="sortOrder" value="{$SORT_ORDER}" id="sortOrder">
@@ -114,25 +114,17 @@
 				</tr>
 
 				{if $MODULE_MODEL->isQuickSearchEnabled() && !$SEARCH_MODE_RESULTS}
-                                    <tr class="searchRow listViewSearchContainer">
-                                        <th class="inline-search-btn">
-                                            <div class="table-actions">
-                                                <button class="btn btn-success btn-sm {if php7_count($SEARCH_DETAILS) gt 0}hide{/if}" data-trigger="listSearch">
-                                                    <i class="fa fa-search"></i> &nbsp;
-                                                    <span class="s2-btn-text">{vtranslate("LBL_SEARCH",$MODULE)}</span>
-                                                </button>
-                                                <button class="searchAndClearButton t-btn-sm btn btn-danger {if php7_count($SEARCH_DETAILS) eq 0}hide{/if}" data-trigger="clearListSearch"><i class="fa fa-close"></i>&nbsp;{vtranslate("LBL_CLEAR",$MODULE)}</button>
-                                            </div>
-                                        </th>
-                                    {foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
+					<tr class="searchRow">
+						<th class="inline-search-btn">
+					<div class="table-actions">
+						<button class="btn btn-success btn-sm" data-trigger="listSearch">{vtranslate("LBL_SEARCH",$MODULE)}</button>
+					</div>
+					</th>
+					{foreach item=LISTVIEW_HEADER from=$LISTVIEW_HEADERS}
 						<th>
 							{assign var=FIELD_UI_TYPE_MODEL value=$LISTVIEW_HEADER->getUITypeModel()}
-							{assign var=SEARCH_INFO_DETAILS_FOR_FIELD value=array( 'searchValue' => '', 'comparator' => '' )}
-							{if isset($SEARCH_DETAILS[$LISTVIEW_HEADER->getName()])}
-								{assign var=SEARCH_INFO_DETAILS_FOR_FIELD value=$SEARCH_DETAILS[$LISTVIEW_HEADER->getName()]}
-							{/if}
-							{include file=vtemplate_path($FIELD_UI_TYPE_MODEL->getListSearchTemplateName(),$MODULE) FIELD_MODEL= $LISTVIEW_HEADER SEARCH_INFO=$SEARCH_INFO_DETAILS_FOR_FIELD USER_MODEL=$CURRENT_USER_MODEL}
-							<input type="hidden" class="operatorValue" value="{$SEARCH_INFO_DETAILS_FOR_FIELD['comparator']}">
+							{include file=vtemplate_path($FIELD_UI_TYPE_MODEL->getListSearchTemplateName(),$MODULE) FIELD_MODEL= $LISTVIEW_HEADER SEARCH_INFO=$SEARCH_DETAILS[$LISTVIEW_HEADER->getName()] USER_MODEL=$CURRENT_USER_MODEL}
+							<input type="hidden" class="operatorValue" value="{$SEARCH_DETAILS[$LISTVIEW_HEADER->getName()]['comparator']}">
 						</th>
 					{/foreach}
 					</tr>
@@ -232,7 +224,7 @@
 				{/foreach}
 				{if $LISTVIEW_ENTRIES_COUNT eq '0'}
 					<tr class="emptyRecordsDiv">
-						{assign var=COLSPAN_WIDTH value={php7_count($LISTVIEW_HEADERS)}+1}
+						{assign var=COLSPAN_WIDTH value={count($LISTVIEW_HEADERS)}+1}
 						<td colspan="{$COLSPAN_WIDTH}">
 							<div class="emptyRecordsContent">
 								{assign var=SINGLE_MODULE value="SINGLE_$MODULE"}

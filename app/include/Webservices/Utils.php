@@ -503,7 +503,7 @@ function vtws_CreateCompanyLogoFile($fieldname) {
 
 function vtws_getActorEntityName ($name, $idList) {
 	$db = PearDatabase::getInstance();
-	if (!is_array($idList) && php7_count($idList) == 0) {
+	if (!is_array($idList) && count($idList) == 0) {
 		return array();
 	}
 	$entity = VtigerWebserviceObject::fromName($db, $name);
@@ -512,7 +512,7 @@ function vtws_getActorEntityName ($name, $idList) {
 
 function vtws_getActorEntityNameById ($entityId, $idList) {
 	$db = PearDatabase::getInstance();
-	if (!is_array($idList) && php7_count($idList) == 0) {
+	if (!is_array($idList) && count($idList) == 0) {
 		return array();
 	}
 	$nameList = array();
@@ -918,7 +918,7 @@ function vtws_updateWebformsRoundrobinUsersLists($ownerId, $newOwnerId) {
 					}
 					$usersList = $revisedUsersList;
 				}
-				if (php7_count($usersList) == 0) {
+				if (count($usersList) == 0) {
 					$db->pquery('UPDATE vtiger_webforms SET roundrobin_userid = ?,roundrobin = ? where id =?', array("--None--", 0, $webformId));
 				} else {
 					$usersList = json_encode($usersList);
@@ -962,7 +962,7 @@ function vtws_transferOwnershipForWorkflowTasks($ownerModel, $newOwnerModel) {
 		require_once("modules/com_vtiger_workflow/VTTaskManager.inc");
 		require_once 'modules/com_vtiger_workflow/tasks/'.$className.'.inc';
 		$unserializeTask = unserialize($task);
-		if(property_exists($unserializeTask, "field_value_mapping")) {
+		if(array_key_exists("field_value_mapping",$unserializeTask)) {
 			$fieldMapping = Zend_Json::decode($unserializeTask->field_value_mapping);
 			if (!empty($fieldMapping)) {
 				foreach ($fieldMapping as $key => $condition) {
@@ -985,7 +985,7 @@ function vtws_transferOwnershipForWorkflowTasks($ownerModel, $newOwnerModel) {
 			}
 		} else {
 			//For VTCreateTodoTask and VTCreateEventTask
-			if(property_exists($unserializeTask, 'assigned_user_id')){
+			if(array_key_exists('assigned_user_id', $unserializeTask)){
 				$value = $unserializeTask->assigned_user_id;
 				if($value == $ownerId) {
 					$unserializeTask->assigned_user_id = $newOwnerId;
@@ -1285,36 +1285,4 @@ function vtws_isDuplicatesAllowed($webserviceObject){
 	return $allowed;
 }
 
-function vtws_filedetails($fileData){
-    $fileDetails = array();
-    if(!empty($fileData)) {
-        $fileName = $fileData['name'];
-        $fileType = $fileData['type'];
-        $fileName = html_entity_decode($fileName, ENT_QUOTES, vglobal('default_charset'));
-        $filenamewithpath = $fileData['path'].$fileData['attachmentsid'].'_'.$fileData['storedname'];
-        $filesize = filesize($filenamewithpath);
-        $fileDetails['fileid'] = $fileData['attachmentsid'];
-        $fileDetails['filename'] = $fileName;
-        $fileDetails['filetype'] = $fileType;
-        $fileDetails['filesize'] = $filesize;
-        $fileDetails['filecontents'] = base64_encode(file_get_contents($filenamewithpath));
-    }
-    return $fileDetails;
-}
-
-function vtws_getAttachmentRecordId($attachmentId) {
-    $db = PearDatabase::getInstance();
-    $crmid = false;
-    if(!empty($attachmentId)) {
-        $query = "SELECT vtiger_seattachmentsrel.crmid FROM vtiger_seattachmentsrel "
-                . "INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_seattachmentsrel.crmid"
-                . " WHERE vtiger_seattachmentsrel.attachmentsid = ? AND vtiger_crmentity.deleted = ?";
-        $result = $db->pquery($query, array($attachmentId, 0));
-        
-        if ($db->num_rows($result) > 0) {
-            $crmid = $db->query_result($result, 0, 'crmid');
-        }
-    }
-    return $crmid;
-}
 ?>

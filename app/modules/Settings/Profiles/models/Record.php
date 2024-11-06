@@ -451,7 +451,7 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 
 		$allModuleModules = Vtiger_Module_Model::getAll(array(0), Settings_Profiles_Module_Model::getNonVisibleModulesList());
 		$allModuleModules[$eventModule->getId()] = $eventModule;
-		if(php7_count($allModuleModules) > 0) {
+		if(count($allModuleModules) > 0) {
 			$actionModels = Vtiger_Action_Model::getAll(true);
 			foreach($allModuleModules as $tabId => $moduleModel) {
 				if($moduleModel->isActive()) {
@@ -545,7 +545,7 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 					foreach ($actionsIdsList as $actionId => $permission) {
 						$permissionValue = $this->tranformInputPermissionValue($permission);
 						if(isset(Vtiger_Action_Model::$standardActions[$actionId])) {
-							if($permissionValue == Settings_Profiles_Module_Model::IS_PERMITTED_VALUE) {
+							if($permission == Settings_Profiles_Module_Model::IS_PERMITTED_VALUE) {
 								$actionEnabled = true;
 							}
 							$actionsUpdateQuery .= " WHEN operation = $actionId THEN $permissionValue ";
@@ -570,14 +570,14 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 					//Insert Process
 					//Standard permissions
 					$i = 0;
-					$count = php7_count($actionsIdsList);
-                    $actionParams = array();
-					$actionsInsertQuery = 'INSERT INTO vtiger_profile2standardpermissions(profileid, tabid, operation, permissions) VALUES ';
+					$count = count($actionsIdsList);
+                    $params = array();
+					$actionsInsertQuery .= 'INSERT INTO vtiger_profile2standardpermissions(profileid, tabid, operation, permissions) VALUES ';
 					foreach ($actionsIdsList as $actionId => $permission) {
 						$actionEnabled = true;
 						$permissionValue = $this->tranformInputPermissionValue($permission);
-						$actionsInsertQuery .= '(?, ?, ?, ?)';
-                        array_push($actionParams, $profileId, $tabId, $actionId, $permissionValue);
+						$actionsInsertQuery .= "(?, ?, ?, ?)";
+                        array_push($params, $profileId, $tabId, $actionId, $permissionValue);
 
 						if ($i !== $count-1) {
 							$actionsInsertQuery .= ', ';
@@ -585,18 +585,18 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 						$i++;
 					}
 					if ($actionsIdsList) {
-						$db->pquery($actionsInsertQuery, $actionParams);
+						$db->pquery($actionsInsertQuery, array());
 					}
 
 					//Utility permissions
 					$i = 0;
-					$count = php7_count($utilityIdsList);
-                    $utilityParams = array();
-					$utilityInsertQuery = 'INSERT INTO vtiger_profile2utility(profileid, tabid, activityid, permission) VALUES ';
+					$count = count($utilityIdsList);
+                    $params = array();
+					$utilityInsertQuery .= 'INSERT INTO vtiger_profile2utility(profileid, tabid, activityid, permission) VALUES ';
 					foreach($utilityIdsList as $actionId => $permission) {
 						$permissionValue = $this->tranformInputPermissionValue($permission);
-						$utilityInsertQuery .= '(?, ?, ?, ?)';
-                        array_push($utilityParams, $profileId, $tabId, $actionId, $permissionValue);
+						$utilityInsertQuery .= "(?, ?, ?, ?)";
+                        array_push($params, $profileId, $tabId, $actionId, $permissionValue);
 
 						if ($i !== $count-1) {
 							$utilityInsertQuery .= ', ';
@@ -604,9 +604,12 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 						$i++;
 					}
 					if ($utilityIdsList) {
-						$db->pquery($utilityInsertQuery, $utilityParams);
+						$db->pquery($utilityInsertQuery, array());
 					}
 				}
+			} elseif ($this->isRestrictedModule($moduleModel->getName())) {
+				//To check the module is restricted or not(Emails, Webmails)
+				$actionEnabled = true;
 			}
 		} else {
 			$actionEnabled = true;
@@ -794,6 +797,15 @@ class Settings_Profiles_Record_Model extends Settings_Vtiger_Record_Model {
 			return false;
 		}
     }
+
+	/**
+	 * Function to check whether module is restricted for to show actions and field access
+	 * @param <String> $moduleName
+	 * @return <boolean> true/false
+	 */
+	public function isRestrictedModule($moduleName) {
+		return in_array($moduleName, array('Emails'));
+	}
 
 	/**
 	 * Function recalculate the sharing rules

@@ -176,7 +176,7 @@ class Documents_Module_Model extends Vtiger_Module_Model {
 		$showRelatedFieldModel = $this->getHeaderAndSummaryViewFieldsList();
 		$relatedListFields = array();
         $defaultFields = array();
-		if(php7_count($showRelatedFieldModel) > 0) {
+		if(count($showRelatedFieldModel) > 0) {
 			foreach ($showRelatedFieldModel as $key => $field) {
 				$relatedListFields[$field->get('column')] = $field->get('name');
 			}

@@ -49,27 +49,27 @@ class WebserviceField{
 	private $isunique = 0;
 
 	private function __construct($adb,$row){
-		$this->uitype = isset($row['uitype'])? $row['uitype'] : 0;
-		$this->blockId = isset($row['block'])? $row['block'] : 0;
+		$this->uitype = $row['uitype'];
+		$this->blockId = $row['block'];
 		$this->blockName = null;
-		$this->tableName = isset($row['tablename'])? $row['tablename'] : null;
-		$this->columnName = isset($row['columnname'])? $row['columnname'] : null;
-		$this->fieldName = isset($row['fieldname'])? $row['fieldname'] : null;
-		$this->fieldLabel = isset($row['fieldlabel'])? $row['fieldlabel'] : null;
-		$this->displayType = isset($row['displaytype'])? $row['displaytype'] : null;
-		$this->massEditable = (isset($row['masseditable']) && $row['masseditable'] === '1')? true: false;
-		$this->presence = isset($row['presence'])? $row['presence'] : null;
-		$this->isunique = isset($row['isunique']) && $row['isunique'] ? true : false;
-		$typeOfData = isset($row['typeofdata'])? $row['typeofdata'] : null;
+		$this->tableName = $row['tablename'];
+		$this->columnName = $row['columnname'];
+		$this->fieldName = $row['fieldname'];
+		$this->fieldLabel = $row['fieldlabel'];
+		$this->displayType = $row['displaytype'];
+		$this->massEditable = ($row['masseditable'] === '1')? true: false;
+		$this->presence = $row['presence'];
+		$this->isunique = ($row['isunique']) ? true : false;
+		$typeOfData = $row['typeofdata'];
 		$this->typeOfData = $typeOfData;
 		$typeOfData = explode("~",$typeOfData);
-		$this->mandatory = (php7_count($typeOfData) > 1 && $typeOfData[1] == 'M')? true: false;
+		$this->mandatory = ($typeOfData[1] == 'M')? true: false;
 		if($this->uitype == 4){
 			$this->mandatory = false;
 		}
 		$this->fieldType = $typeOfData[0];
-		$this->tabid = isset($row['tabid'])? $row['tabid']: 0;
-		$this->fieldId = isset($row['fieldid'])? $row['fieldid'] : 0;
+		$this->tabid = $row['tabid'];
+		$this->fieldId = $row['fieldid'];
 		$this->pearDB = $adb;
 		$this->fieldDataType = null;
 		$this->dataFromMeta = false;
@@ -258,7 +258,7 @@ class WebserviceField{
 			$referenceTypes = array();
 			if($this->getUIType() != $this->genericUIType){
 				$sql = "select type from vtiger_ws_referencetype where fieldtypeid=?";
-				$params = array(isset($fieldTypeData['fieldtypeid'])? $fieldTypeData['fieldtypeid'] : 0);
+				$params = array($fieldTypeData['fieldtypeid']);
 			}else{
 				$sql = 'SELECT relmodule AS type FROM vtiger_fieldmodulerel WHERE fieldid=? ORDER BY sequence ASC';
 				$params = array($this->getFieldId());
@@ -336,7 +336,6 @@ class WebserviceField{
 
 	function getPicklistDetails(){
 		$cache = Vtiger_Cache::getInstance();
-        $fieldName = $this->getFieldName();
 		if($cache->getPicklistDetails($this->getTabId(),$this->getFieldName())){
 			return $cache->getPicklistDetails($this->getTabId(),$this->getFieldName());
 		} else {
@@ -347,26 +346,7 @@ class WebserviceField{
 				foreach ($allRegions as $regionId => $regionDetails) {
 					$picklistDetails[] = array('value' => $regionId, 'label' => $regionDetails['name']);
 				}
-			}elseif ($fieldName == 'defaultlandingpage') {
-                $picklistDetails = array(); 
-                $presence = array(0);
-                $restrictedModules = array('Webmails', 'Emails', 'Integration', 'Dashboard','ModComments');
-                $query = 'SELECT name, tablabel, tabid FROM vtiger_tab WHERE presence IN (' . generateQuestionMarks($presence) . ') AND isentitytype = ? AND name NOT IN (' . generateQuestionMarks($restrictedModules) . ')';
-
-                $result = $this->pearDB->pquery($query, array($presence, '1', $restrictedModules));
-                $numOfRows = $this->pearDB->num_rows($result);
-
-                $picklistDetails[] = array('value' => 'Home', 'label' => vtranslate('Home', 'Home'));
-                for ($i = 0; $i < $numOfRows; $i++) {
-                    $moduleName = $this->pearDB->query_result($result, $i, 'name');
-
-                    // check the module access permission, if user has permission then show it in default module list
-                    if (vtlib_isModuleActive($moduleName)) {
-                        $moduleLabel = $this->pearDB->query_result($result, $i, 'tablabel');
-                        $picklistDetails[] = array('value' => $moduleName, 'label' => vtranslate($moduleLabel, $moduleName));
-                    }
-                }
-            } else {
+			} else {
 				$hardCodedPickListNames = array('hdntaxtype','email_flag');
 				$hardCodedPickListValues = array('hdntaxtype'=> array(	array('label' => 'Individual',	'value' => 'individual'),
 																		array('label' => 'Group',		'value' => 'group')),
@@ -412,7 +392,7 @@ class WebserviceField{
 		}else{
 			$user = VTWS_PreserveGlobal::getGlobal('current_user');
 			$details = getPickListValues($fieldName,$user->roleid);
-			for($i=0;$i<php7_sizeof($details);++$i){
+			for($i=0;$i<sizeof($details);++$i){
 				$elem = array();
 				$picklistValue = decode_html($details[$i]);
 				$elem["label"] = getTranslatedString($picklistValue, $moduleName, $language);

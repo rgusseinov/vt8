@@ -13,10 +13,10 @@
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
 {assign var="FIELD_INFO" value=$FIELD_MODEL->getFieldInfo()}
 {if $FIELD_MODEL->get('uitype') eq '53'}
-	{assign var=ALL_ACTIVEUSER_LIST value=$FIELD_INFO['picklistvalues'][vtranslate('LBL_USERS')]}
-	{assign var=ALL_ACTIVEGROUP_LIST value=$FIELD_INFO['picklistvalues'][vtranslate('LBL_GROUPS')]}
+	{assign var=ALL_ACTIVEUSER_LIST value=$USER_MODEL->getAccessibleUsers()}
+	{assign var=ALL_ACTIVEGROUP_LIST value=$USER_MODEL->getAccessibleGroups()}
 	{assign var=ASSIGNED_USER_ID value=$FIELD_MODEL->get('name')}
-        {assign var=CURRENT_USER_ID value=$USER_MODEL->get('id')}
+    {assign var=CURRENT_USER_ID value=$USER_MODEL->get('id')}
 	{assign var=FIELD_VALUE value=$FIELD_MODEL->get('fieldvalue')}
 
 	{assign var=ACCESSIBLE_USER_LIST value=$USER_MODEL->getAccessibleUsersForModule($MODULE)}
@@ -27,7 +27,7 @@
 	{/if}
 	<select class="inputElement select2" type="owner" data-fieldtype="owner" data-fieldname="{$ASSIGNED_USER_ID}" data-name="{$ASSIGNED_USER_ID}" name="{$ASSIGNED_USER_ID}" 
             {if $FIELD_INFO["mandatory"] eq true} data-rule-required="true" {/if}
-            {if php7_count($FIELD_INFO['validator'])} 
+            {if count($FIELD_INFO['validator'])} 
                 data-specific-rules='{ZEND_JSON::encode($FIELD_INFO["validator"])}'
             {/if}
             >

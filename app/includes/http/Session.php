@@ -8,16 +8,6 @@
  * All Rights Reserved.
  ************************************************************************************/
 
-/**
- * Override default user-session storage functions if custom session connector exist.
- */
-$runtime_configs = Vtiger_Runtime_Configs::getInstance();
-$custom_session_handlerclass = $runtime_configs->getConnector('session');
-if($custom_session_handlerclass) {
-	$handler = $custom_session_handlerclass::getInstance();
-	session_set_save_handler($handler, true);
-}
-
 // Import dependencies
 include_once 'libraries/HTTP_Session2/HTTP/Session2.php';
 
@@ -61,8 +51,7 @@ class Vtiger_Session {
 	 * Is key defined in session?
 	 */
 	static function has($key) {
-		$val = static::get($key, null);
-		return $val === null;
+		return HTTP_Session2::is_set($key);
 	}
 
 	/**

@@ -24,7 +24,6 @@ class VTWorkflowManager{
 
 	function __construct($adb){
 		$this->adb = $adb;
-                $this->setMaxAllowedScheduledWorkflows();
 	}
 
 	function save($workflow){
@@ -41,20 +40,20 @@ class VTWorkflowManager{
 			$workflowId = $adb->getUniqueID("com_vtiger_workflows");
 			$workflow->id = $workflowId;
 			$wf=$workflow;
-			if(!isset($wf->filtersavedinnew) || $wf->filtersavedinnew == null) $wf->filtersavedinnew = 5;
+			if($wf->filtersavedinnew == null) $wf->filtersavedinnew = 5;
 
 			$result=$adb->getColumnNames("com_vtiger_workflows");
 			if(in_array("type",$result)) {
 				$adb->pquery("insert into com_vtiger_workflows
 							(workflow_id, module_name, summary, test, execution_condition, type, defaultworkflow, filtersavedinnew,
 							schtypeid, schtime, schdayofmonth, schdayofweek, schannualdates, nexttrigger_time, status, workflowname) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-						array($workflowId, $wf->moduleName, $wf->description, ($wf->test?$wf->test:'[]'),  $wf->executionCondition, $wf->type, $wf->defaultworkflow, $wf->filtersavedinnew,
+						array($workflowId, $wf->moduleName, $wf->description, $wf->test,  $wf->executionCondition, $wf->type, $wf->defaultworkflow, $wf->filtersavedinnew,
 						$wf->schtypeid, $wf->schtime, $wf->schdayofmonth, $wf->schdayofweek, $wf->schannualdates, $wf->nexttrigger_time, $wf->status, $wf->name));
 			} else {
 				$adb->pquery("insert into com_vtiger_workflows
 							(workflow_id, module_name, summary, test, execution_condition, defaultworkflow,filtersavedinnew,
 							schtypeid, schtime, schdayofmonth, schdayofweek, schannualdates, nexttrigger_time, status, workflowname) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-						array($workflowId, $wf->moduleName, $wf->description, ($wf->test?$wf->test:'[]'),  $wf->executionCondition, $wf->defaultworkflow, $wf->filtersavedinnew,
+						array($workflowId, $wf->moduleName, $wf->description, $wf->test,  $wf->executionCondition, $wf->defaultworkflow, $wf->filtersavedinnew,
 						$wf->schtypeid, $wf->schtime, $wf->schdayofmonth, $wf->schdayofweek, $wf->schannualdates, $wf->nexttrigger_time, $wf->status, $wf->name));
 			}
 		}
@@ -106,25 +105,13 @@ class VTWorkflowManager{
 		$result = $adb->pquery($query, $params);
 		return $adb->query_result($result, 0, 'count');
 	}
-        
-        /**
-         * Function to set max allowed scheduled workflow count as per global defaults
-         */
-        function setMaxAllowedScheduledWorkflows(){
-            global $max_scheduled_workflows;
-            if(!empty($max_scheduled_workflows)){
-                vglobal('max_scheduled_workflows', $max_scheduled_workflows);
-            }else{
-                vglobal('max_scheduled_workflows', 10);
-            }
-        }
 
 	/**
 	 * Function returns the maximum allowed scheduled workflows
 	 * @return int
 	 */
 	function getMaxAllowedScheduledWorkflows() {
-            return vglobal('max_scheduled_workflows');
+		return 10;
 	}
 
 	function getWorkflowsForModule($moduleName){
@@ -580,7 +567,7 @@ class Workflow{
 							break;
 						} else {
 							//current time greater than scheduled time, get the next weekday
-							if (php7_count($scheduledDaysOfWeek) == 1) { //if only one weekday selected, then get next week
+							if (count($scheduledDaysOfWeek) == 1) { //if only one weekday selected, then get next week
 								$nextTime = date('Y-m-d', strtotime('next ' . $weekDays[$weekDay])) . ' ' . $scheduledTime;
 							} else {
 								$nextWeekDay = $scheduledDaysOfWeek[$index + 1]; // its the last day of the week i.e. sunday
@@ -709,7 +696,7 @@ class Workflow{
 				$j = 1;
 				$currentDateTime = date('Y:m:d H:i:s', $currentTime);
 				do{
-					for($i = 0; $i < php7_count($annualDates); $i++) {
+					for($i = 0; $i < count($annualDates); $i++) {
 						$nextTriggerDay = $annualDates[$i];
 						$nextTime = date('Y:m:d H:i:s', strtotime($nextTriggerDay.' '.$scheduledTime.'+'.$j.' year'));
 						if($nextTime > $currentDateTime) {
